@@ -61,6 +61,7 @@
     "import-in-the-middle": "^1.14.2",
     "jdenticon": "^3.3.0",
     "jose": "^6.0.12",
+    "kafkajs": "^2.2.4",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.524.0",
     "motion": "^12.23.6",

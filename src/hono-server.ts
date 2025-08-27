@@ -4,6 +4,7 @@ import type { WebSocket } from 'ws'
 import { prisma } from '@/utils/prisma'
 import crypto from 'crypto'
 import { compactDecrypt } from 'jose'
+import { Kafka, Producer, Consumer } from 'kafkajs'
 
 async function decodeCookieHono(cookie: string): Promise<string | null> {
   try {
@@ -20,7 +21,26 @@ async function decodeCookieHono(cookie: string): Promise<string | null> {
   }
 }
 
-const app = new Hono()
+// Initialize Kafka only if environment variables are set
+let kafka: Kafka | null = null
+let producer: Producer | null = null
+let consumer: Consumer | null = null
+
+// Check if Kafka should be enabled
+const kafkaEnabled = process.env.KAFKA_BROKERS && process.env.KAFKA_CLIENT_ID
+
+if (kafkaEnabled) {
+  kafka = new Kafka({
+    clientId: process.env.KAFKA_CLIENT_ID!,
+    brokers: process.env.KAFKA_BROKERS!.split(',')
+  })
+  producer = kafka.producer()
+  consumer = kafka.consumer({ groupId: 'chat-consumers' })
+}
+
+// Topics
+const CHAT_TOPIC = 'chat-messages'
+const DELETE_CHAT_TOPIC = 'delete-chat-messages'
 
 // Store for WebSocket connections
 const connections = new Set<WebSocket>()
@@ -28,6 +48,75 @@ const connections = new Set<WebSocket>()
 const wsGroups = new Map<WebSocket, string>()
 // Map to store user info from session: WebSocket -> { id, name }
 const wsUsers = new Map<WebSocket, { id: string, name: string }>()
+
+// Initialize Kafka producer and consumer
+async function initKafka() {
+  if (!kafkaEnabled || !producer || !consumer) {
+    console.log('ℹ️ Kafka is niet ingeschakeld. Kafka is alleen voor productieomgevingen nodig, dus maak je geen zorgen :)')
+    return
+  }
+
+  try {
+    await producer.connect()
+    await consumer.connect()
+
+    await consumer.subscribe({ topic: CHAT_TOPIC })
+    await consumer.subscribe({ topic: DELETE_CHAT_TOPIC })
+
+    // Start consuming messages
+    await consumer.run({
+      eachMessage: async ({ topic, partition, message }) => {
+        try {
+          const messageData = JSON.parse(message.value?.toString() || '{}')
+
+          if (topic === CHAT_TOPIC) {
+            // Broadcast chat message to all connected clients in the group
+            const { groupId, chatMessage } = messageData
+            for (const client of connections) {
+              if (
+                client.readyState === 1 && // 1 = OPEN
+                wsGroups.get(client) === groupId
+              ) {
+                client.send(
+                  JSON.stringify({
+                    type: "chat-message",
+                    message: chatMessage,
+                  })
+                );
+              }
+            }
+          } else if (topic === DELETE_CHAT_TOPIC) {
+            // Broadcast delete message to all connected clients in the group
+            const { groupId, deleteData } = messageData
+            for (const client of connections) {
+              if (
+                client.readyState === 1 &&
+                wsGroups.get(client) === groupId
+              ) {
+                client.send(JSON.stringify({
+                  type: "chat-message-deleted",
+                  time: deleteData.time,
+                  creator: deleteData.creator,
+                  content: deleteData.content
+                }));
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error processing Kafka message:', error)
+        }
+      },
+    })
+    console.log('✅ Met succes met Kafka verbonden!')
+  } catch (error) {
+    console.error('❌ Failed to initialize Kafka:', error)
+  }
+}
+
+// Initialize Kafka on startup
+initKafka()
+
+const app = new Hono()
 
 // Create WebSocket upgrade handler
 const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app })
@@ -117,18 +206,53 @@ app.get('/ws', upgradeWebSocket((c) => {
               },
             },
           });
-          // Broadcast only to connections subscribed to this group
-          for (const client of connections) {
-            if (
-              client.readyState === 1 && // 1 = OPEN
-              wsGroups.get(client) === groupId
-            ) {
-              client.send(
-                JSON.stringify({
-                  type: "chat-message",
-                  message: chatMessage,
-                })
-              );
+
+          // Publish message to Kafka for broadcasting to all instances
+          if (producer) {
+            try {
+              await producer.send({
+                topic: CHAT_TOPIC,
+                messages: [
+                  {
+                    value: JSON.stringify({
+                      groupId,
+                      chatMessage,
+                      instanceId: process.env.INSTANCE_ID || 'unknown' // Optional: for debugging
+                    })
+                  }
+                ]
+              })
+            } catch (error) {
+              console.error('Failed to publish chat message to Kafka:', error)
+              // Fallback to local broadcasting if Kafka fails
+              for (const client of connections) {
+                if (
+                  client.readyState === 1 && // 1 = OPEN
+                  wsGroups.get(client) === groupId
+                ) {
+                  client.send(
+                    JSON.stringify({
+                      type: "chat-message",
+                      message: chatMessage,
+                    })
+                  );
+                }
+              }
+            }
+          } else {
+            // No Kafka - use local broadcasting only
+            for (const client of connections) {
+              if (
+                client.readyState === 1 && // 1 = OPEN
+                wsGroups.get(client) === groupId
+              ) {
+                client.send(
+                  JSON.stringify({
+                    type: "chat-message",
+                    message: chatMessage,
+                  })
+                );
+              }
             }
           }
         }
@@ -162,18 +286,57 @@ app.get('/ws', upgradeWebSocket((c) => {
               where: { groupId },
               data: { chatContent: filteredChatContent }
             });
-            // Broadcast deletion to all clients in the group
-            for (const client of connections) {
-              if (
-                client.readyState === 1 &&
-                wsGroups.get(client) === groupId
-              ) {
-                client.send(JSON.stringify({
-                  type: "chat-message-deleted",
-                  time: data.time,
-                  creator: data.creator,
-                  content: data.content
-                }));
+
+            // Publish delete message to Kafka for broadcasting to all instances
+            if (producer) {
+              try {
+                await producer.send({
+                  topic: DELETE_CHAT_TOPIC,
+                  messages: [
+                    {
+                      value: JSON.stringify({
+                        groupId,
+                        deleteData: {
+                          time: data.time,
+                          creator: data.creator,
+                          content: data.content
+                        },
+                        instanceId: process.env.INSTANCE_ID || 'unknown'
+                      })
+                    }
+                  ]
+                })
+              } catch (error) {
+                console.error('Failed to publish delete message to Kafka:', error)
+                // Fallback to local broadcasting if Kafka fails
+                for (const client of connections) {
+                  if (
+                    client.readyState === 1 &&
+                    wsGroups.get(client) === groupId
+                  ) {
+                    client.send(JSON.stringify({
+                      type: "chat-message-deleted",
+                      time: data.time,
+                      creator: data.creator,
+                      content: data.content
+                    }));
+                  }
+                }
+              }
+            } else {
+              // No Kafka - use local broadcasting only
+              for (const client of connections) {
+                if (
+                  client.readyState === 1 &&
+                  wsGroups.get(client) === groupId
+                ) {
+                  client.send(JSON.stringify({
+                    type: "chat-message-deleted",
+                    time: data.time,
+                    creator: data.creator,
+                    content: data.content
+                  }));
+                }
               }
             }
           }
@@ -199,12 +362,51 @@ app.get('/ws', upgradeWebSocket((c) => {
 
 // Health check endpoint
 app.get('/health', (c) => {
+  const kafkaStatus = kafkaEnabled ? {
+    enabled: true,
+    producer: producer ? 'connected' : 'disconnected',
+    consumer: consumer ? 'connected' : 'disconnected'
+  } : {
+    enabled: false,
+    reason: 'KAFKA_BROKERS and KAFKA_CLIENT_ID environment variables not set'
+  }
+
   return c.json({
     status: 'ok',
     server: 'hono',
     connections: connections.size,
+    kafka: kafkaStatus,
     timestamp: new Date().toISOString()
   })
+})
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('Shutting down gracefully...')
+  try {
+    if (producer) await producer.disconnect()
+    if (consumer) await consumer.disconnect()
+    if (producer || consumer) {
+      console.log('✅ Kafka connections closed')
+    }
+  } catch (error) {
+    console.error('Error closing Kafka connections:', error)
+  }
+  process.exit(0)
+})
+
+process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...')
+  try {
+    if (producer) await producer.disconnect()
+    if (consumer) await consumer.disconnect()
+    if (producer || consumer) {
+      console.log('✅ Kafka connections closed')
+    }
+  } catch (error) {
+    console.error('Error closing Kafka connections:', error)
+  }
+  process.exit(0)
 })
 
 export { app as honoApp, injectWebSocket }
