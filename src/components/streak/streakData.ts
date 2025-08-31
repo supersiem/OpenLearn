@@ -6,22 +6,20 @@ import { cookies } from 'next/headers'
 
 export async function getFreezes() {
     const session = await getUserFromSession((await cookies()).get("polarlearn.session-id")?.value as string)
-    const user = await prisma.user.findFirst({
-        where: {
-            id: session?.id
-        }
-    })
-    return user?.freezeCount
+    if (!session?.id) return 0;
+
+    // Use the optimized getAllStreakData function instead
+    const data = await getAllStreakData();
+    return data.freezes;
 }
 
 export async function getStreak() {
     const session = await getUserFromSession((await cookies()).get("polarlearn.session-id")?.value as string)
-    const user = await prisma.user.findFirst({
-        where: {
-            id: session?.id
-        }
-    })
-    return user?.streakCount
+    if (!session?.id) return 0;
+
+    // Use the optimized getAllStreakData function instead
+    const data = await getAllStreakData();
+    return data.streak;
 }
 
 export async function getWeekActivity() {

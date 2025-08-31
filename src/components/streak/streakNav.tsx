@@ -1,257 +1,27 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { Check, Flame, Snowflake, X } from "lucide-react"
-
-// Server actions removed - now using API endpoints
-
-// Helper function to fetch streak data from API
-async function fetchStreakData() {
-    const response = await fetch("/api/v1/streak/data");
-    const result = await response.json();
-
-    if (!response.ok || !result.success) {
-        throw new Error(result.error || "Failed to fetch streak data");
-    }
-
-    return result.data;
-}
-
-// Helper function to reset lost streak via API
-async function resetLostStreak() {
-    try {
-        const response = await fetch("/api/v1/streak/reset", {
-            method: "POST",
-        });
-        const result = await response.json();
-        return result;
-    } catch (error) {
-        console.error("Error resetting lost streak:", error);
-        return { success: false, message: "Network error" };
-    }
-}
-import { ColorRing } from "react-loader-spinner"
-
-// Create a cache to prevent redundant requests
-let dataCache = {
-    data: null as any,
-    timestamp: 0,
-    loading: false
-};
-
-// Function to reset the cache
-function resetCache() {
-    dataCache = {
-        data: null,
-        timestamp: 0,
-        loading: false
-    };
-}
+import { useStreak, useFreezes, useWeekActivity, useIsActiveStreak } from '@/store/streak/StreakProvider'
 
 export default function StreakNavbarThing() {
-    const [streakCnt, setStreakCnt] = useState(0)
-    const [freezeCnt, setFreezeCnt] = useState(0)
-    const [loading, setLoading] = useState(true)
-    const [weekActivity, setWeekActivity] = useState<Array<{ date: string, status: string }>>([])
-    const [activeStreak, setActiveStreak] = useState(false)
+    // Use the new streak store hooks - much simpler!
+    const streakCnt = useStreak();
+    const freezeCnt = useFreezes();
+    const weekActivity = useWeekActivity();
+    const activeStreak = useIsActiveStreak();
 
-    // Function to load fresh streak data
-    const refreshData = useCallback(async () => {
-        if (dataCache.loading) return;
-
-        setLoading(true);
-        resetCache();
-
-        try {
-            dataCache.loading = true;
-            const data = await fetchStreakData();
-
-            dataCache = {
-                data,
-                timestamp: Date.now(),
-                loading: false
-            };
-
-            setStreakCnt(data.streak);
-            setFreezeCnt(data.freezes);
-            setWeekActivity(data.weekActivity);
-
-            // Check if user has activity for today (done or frozen)
-            const today = new Date().toISOString().split('T')[0];
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-            const todayActivity = data.weekActivity.find((day: { date: string, status: string }) => day.date === today);
-            const yesterdayActivity = data.weekActivity.find((day: { date: string, status: string }) => day.date === yesterdayStr);
-
-            const hasTodayActivity = todayActivity?.status === 'done' || todayActivity?.status === 'frozen';
-            const hasYesterdayActivity = yesterdayActivity?.status === 'done' || yesterdayActivity?.status === 'frozen';
-
-            // Active streak only if practicing today OR practiced yesterday and have streak
-            const activeStreakStatus = hasTodayActivity || (hasYesterdayActivity && data.streak > 0);
-            setActiveStreak(activeStreakStatus);
-
-            setLoading(false);
-        } catch (error) {
-            console.error("Error refreshing streak data:", error);
-            dataCache.loading = false;
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        let isMounted = true;
-
-        // Listen for streak data updates
-        const handleStreakUpdate = () => {
-            if (isMounted) {
-                refreshData();
-            }
-        };
-
-        window.addEventListener('streak-data-updated', handleStreakUpdate);
-
-        const loadData = async () => {
-            try {
-                // Check if the streak should be reset due to missed days
-                await resetLostStreak();
-
-                // We no longer update streak automatically - this will happen when a list is completed
-                // await updateDailyStreak();
-
-                // Check if we have cached data that's less than 5 minutes old
-                const now = Date.now();
-                if (dataCache.data && now - dataCache.timestamp < 5 * 60 * 1000) {
-                    // Use cached data
-                    if (isMounted) {
-                        setStreakCnt(dataCache.data.streak);
-                        setFreezeCnt(dataCache.data.freezes);
-                        setWeekActivity(dataCache.data.weekActivity);
-
-                        // Check if user has activity for today (done or frozen)
-                        const today = new Date().toISOString().split('T')[0];
-                        const yesterday = new Date();
-                        yesterday.setDate(yesterday.getDate() - 1);
-                        const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-                        const todayActivity = dataCache.data.weekActivity.find((day: { date: string, status: string }) => day.date === today);
-                        const yesterdayActivity = dataCache.data.weekActivity.find((day: { date: string, status: string }) => day.date === yesterdayStr);
-
-                        const hasTodayActivity = todayActivity?.status === 'done' || todayActivity?.status === 'frozen';
-                        const hasYesterdayActivity = yesterdayActivity?.status === 'done' || yesterdayActivity?.status === 'frozen';
-
-                        // Active streak only if practicing today OR practiced yesterday and have streak
-                        const activeStreakStatus = hasTodayActivity || (hasYesterdayActivity && dataCache.data.streak > 0);
-                        setActiveStreak(activeStreakStatus);
-
-                        setLoading(false);
-                    }
-                    return;
-                }
-
-                // If another component is already loading the data, wait for it
-                if (dataCache.loading) {
-                    // Poll until data is available
-                    const checkInterval = setInterval(() => {
-                        if (dataCache.data && isMounted) {
-                            setStreakCnt(dataCache.data.streak);
-                            setFreezeCnt(dataCache.data.freezes);
-                            setWeekActivity(dataCache.data.weekActivity);
-
-                            // Check if user has activity for today (done or frozen)
-                            const today = new Date().toISOString().split('T')[0];
-                            const yesterday = new Date();
-                            yesterday.setDate(yesterday.getDate() - 1);
-                            const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-                            const todayActivity = dataCache.data.weekActivity.find((day: { date: string, status: string }) => day.date === today);
-                            const yesterdayActivity = dataCache.data.weekActivity.find((day: { date: string, status: string }) => day.date === yesterdayStr);
-
-                            const hasTodayActivity = todayActivity?.status === 'done' || todayActivity?.status === 'frozen';
-                            const hasYesterdayActivity = yesterdayActivity?.status === 'done' || yesterdayActivity?.status === 'frozen';
-
-                            // Active streak only if practicing today OR practiced yesterday and have streak
-                            const activeStreakStatus = hasTodayActivity || (hasYesterdayActivity && dataCache.data.streak > 0);
-                            setActiveStreak(activeStreakStatus);
-
-                            setLoading(false);
-                            clearInterval(checkInterval);
-                        }
-                    }, 100);
-
-                    // Cleanup interval if component unmounts
-                    return () => clearInterval(checkInterval);
-                }
-
-                // Mark as loading to prevent duplicate requests
-                dataCache.loading = true;
-
-                // Fetch new data
-                const data = await fetchStreakData();
-
-                // Cache the result
-                dataCache = {
-                    data,
-                    timestamp: now,
-                    loading: false
-                };
-
-                if (isMounted) {
-                    setStreakCnt(data.streak);
-                    setFreezeCnt(data.freezes);
-                    setWeekActivity(data.weekActivity);
-
-                    // Check if user has activity for today (done or frozen)
-                    const today = new Date().toISOString().split('T')[0];
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-                    const todayActivity = data.weekActivity.find((day: { date: string, status: string }) => day.date === today);
-                    const yesterdayActivity = data.weekActivity.find((day: { date: string, status: string }) => day.date === yesterdayStr);
-
-                    const hasTodayActivity = todayActivity?.status === 'done' || todayActivity?.status === 'frozen';
-                    const hasYesterdayActivity = yesterdayActivity?.status === 'done' || yesterdayActivity?.status === 'frozen';
-
-                    // Active streak only if practicing today OR practiced yesterday and have streak
-                    const activeStreakStatus = hasTodayActivity || (hasYesterdayActivity && data.streak > 0);
-                    setActiveStreak(activeStreakStatus);
-
-                    setLoading(false);
-                }
-            } catch (error) {
-                dataCache.loading = false;
-                console.error("Error loading streak data:", error);
-                if (isMounted) {
-                    setLoading(false);
-                }
-            }
-        };
-
-        loadData();
-
-        // Cleanup function
-        return () => {
-            isMounted = false;
-            window.removeEventListener('streak-data-updated', handleStreakUpdate);
-        };
-    }, [refreshData]);
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'done':
-                return <Check className="text-green-400" size={18} />
-            case 'frozen':
-                return <Snowflake className="text-blue-400" size={18} />
-            case 'none':
-            default:
-                return <X className="text-red-400" size={18} />
+    const getStatusIcon = (activity: { hasActivity: boolean; isFrozen: boolean }) => {
+        if (activity.hasActivity) {
+            return <Check className="text-green-400" size={20} />;
+        } else if (activity.isFrozen) {
+            return <Snowflake className="text-blue-400" size={20} />;
+        } else {
+            return <X className="text-red-400" size={20} />;
         }
     }
 
@@ -263,51 +33,20 @@ export default function StreakNavbarThing() {
     return (
         <Popover>
             <PopoverTrigger className="streak">
-                <div className="bg-neutral-800 text-white rounded-lg flex items-center justify-center min-w-40 min-h-10 hover:bg-neutral-700 transition-colors px-2">
+                <div className="navbar-btn rounded-lg flex items-center justify-center min-w-40 min-h-10 hover:bg-neutral-700 transition-colors px-2">
                     <Flame className={`mr-1 ${(streakCnt > 0 && activeStreak) ? "text-orange-400" : "text-white"}`} />
-                    {loading ? (
-                        <ColorRing
-                            visible={true}
-                            height="40"
-                            width="40"
-                            ariaLabel="color-ring-loading"
-                            wrapperClass="color-ring-wrapper"
-                            colors={['#f0f9ff', '#e0f2fe', '#bae6fd', '#7dd3fc', '#38bdf8']}
-                        />
-                    ) : streakCnt}
+                    {streakCnt}
                 </div>
             </PopoverTrigger>
-            <PopoverContent className={`w-80 bg-neutral-800 z-110 drop-shadow-2xl min-h-40 flex flex-col space-y-3 text-white justify-center`}>
+            <PopoverContent className={`w-80 navbar-popover z-110 drop-shadow-2xl min-h-40 flex flex-col space-y-3 justify-center`}>
                 <div className="flex flex-row space-x-3">
                     <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full transition-all gap-y-3 text-white border-neutral-700 border-1 py-3">
                         <Flame className={`${(streakCnt > 0 && activeStreak) ? "text-orange-400" : "text-white"}`} />
-                        {loading ? (
-                            <ColorRing
-                                visible={true}
-                                height="40"
-                                width="40"
-                                ariaLabel="color-ring-loading"
-                                wrapperClass="color-ring-wrapper"
-                                colors={['#f0f9ff', '#e0f2fe', '#bae6fd', '#7dd3fc', '#38bdf8']}
-                            />
-                        ) : (
-                            <>{streakCnt} {streakCnt === 1 ? "dag" : "dagen"} reeks</>
-                        )}
+                        <>{streakCnt} {streakCnt === 1 ? "dag" : "dagen"} reeks</>
                     </div>
                     <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full gap-y-3 text-white border-neutral-700 border-1 py-3 transition-all">
                         <Snowflake className={`${freezeCnt >= 1 ? "text-sky-400" : "text-white"}`} />
-                        {loading ? (
-                            <ColorRing
-                                visible={true}
-                                height="40"
-                                width="40"
-                                ariaLabel="color-ring-loading"
-                                wrapperClass="color-ring-wrapper"
-                                colors={['#f0f9ff', '#e0f2fe', '#bae6fd', '#7dd3fc', '#38bdf8']}
-                            />
-                        ) : (
-                            <>{freezeCnt} {freezeCnt === 1 ? "bevriezer" : "bevriezers"}</>
-                        )}
+                        <>{freezeCnt} {freezeCnt === 1 ? "bevriezer" : "bevriezers"}</>
                     </div>
                 </div>
                 <div className="flex flex-col space-y-2">
@@ -317,7 +56,7 @@ export default function StreakNavbarThing() {
                             <div key={index} className="flex flex-col items-center">
                                 <div className="text-xs mb-1">{formatDate(day.date)}</div>
                                 <div className="w-8 h-8 bg-neutral-700 rounded-full flex items-center justify-center hover:bg-neutral-600 hover:drop-shadow-2xl transition-all">
-                                    {getStatusIcon(day.status)}
+                                    {getStatusIcon(day)}
                                 </div>
                             </div>
                         ))}

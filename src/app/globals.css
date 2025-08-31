@@ -345,6 +345,54 @@
     color: var(--background) !important;
   }
 
+  /* Make .hover:text-white:hover darker in light mode */
+  /* Force tab text to black on hover in light mode, using high specificity */
+  :root .hover\:text-white:hover,
+  body:not(.dark) .hover\:text-white:hover {
+    color: #000 !important;
+  }
+  .dark .hover\:text-white:hover {
+    color: var(--foreground) !important;
+  }
+
+  /* Navbar button helper: in light mode use a slightly darker bg to contrast
+     with the (almost white) navbar; in dark mode preserve the existing dark bg. */
+  :root {
+    --navbar-button-bg: var(--neutral-700);
+    --navbar-button-fg: var(--neutral-950);
+    --navbar-button-bg-hover: var(--neutral-600);
+  }
+
+  .dark {
+    --navbar-button-bg: var(--neutral-800);
+    --navbar-button-fg: var(--neutral-50);
+    --navbar-button-bg-hover: var(--neutral-700);
+  }
+
+  .navbar-btn {
+    background-color: var(--navbar-button-bg) !important;
+    color: var(--navbar-button-fg) !important;
+  }
+
+  .navbar-btn:hover {
+    background-color: var(--navbar-button-bg-hover) !important;
+  }
+  .navbar-popover {
+    background-color: var(--neutral-800) !important;
+    color: var(--navbar-button-fg) !important;
+  }
+
+  /* Light-mode only: make text-gray-300 inside navbar popovers pure black for legibility.
+     Use html:not(.dark) to detect light mode when the dark class is placed on <html>. */
+  html:not(.dark) .navbar-popover .text-gray-300 {
+    color: #000 !important;
+  }
+
+  /* Explicit dark-mode override to ensure dark mode uses the intended muted color. */
+  .dark .navbar-popover .text-gray-300 {
+    color: var(--neutral-300) !important;
+  }
+
   /* Fix hover gradients and borders */
   .hover\:bg-gradient-to-r:hover {
     background: linear-gradient(

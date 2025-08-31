@@ -46,7 +46,7 @@ async function setupSessionTTLIndex() {
         }
       ]
     });
-    // console.log("TTL index for session expiration configured successfully");
+
   } catch (error) {
     console.error("Failed to set up TTL index for sessions:", error);
   }

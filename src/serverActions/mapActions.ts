@@ -302,55 +302,6 @@ export async function removeListFromMap(mapId: string, listId: string) {
   }
 }
 
-// Create a new map/folder
-export async function createMapAction({
-  name,
-  description,
-  isPublic = false
-}: {
-  name: string;
-  description?: string;
-  isPublic?: boolean;
-}) {
-  try {
-    const session = await getUserFromSession((await cookies()).get('polarlearn.session-id')?.value as string);
-
-    if (!session || !session.name) {
-      return { success: false, error: "Not authenticated" };
-    }
-
-    // Validate input
-    if (!name || name.trim().length === 0) {
-      return { success: false, error: "Map name is required" };
-    }
-
-    if (name.length > 100) {
-      return { success: false, error: "Map name is too long (max 100 characters)" };
-    }
-
-    // Generate unique ID
-    const mapId = uuidv4();
-
-    // Create the map
-    await prisma.map.create({
-      data: {
-        id: mapId,
-        name: name.trim(),
-        creator: session.name,
-        lists: [],
-        public: isPublic,
-        image: null
-      }
-    });
-
-    revalidatePath('/learn/maps');
-    return { success: true, mapId };
-  } catch (error) {
-    console.error("Error creating map:", error);
-    return { success: false, error: "Failed to create map" };
-  }
-}
-
 // Update map settings
 export async function updateMapSettings({
   mapId,

@@ -25,7 +25,7 @@ export function WSProvider({ children }: { children: React.ReactNode }) {
           const reconnect = () => {
             if (attempts < 3) {
               attempts++;
-              console.log(`Reconnecting... Attempt ${attempts}`);
+              // Reconnecting... Attempt ${attempts}
               setTimeout(() => {
                 const newSocket = createConnection();
                 setWs(newSocket);
@@ -38,11 +38,11 @@ export function WSProvider({ children }: { children: React.ReactNode }) {
         });
 
         socket.addEventListener("close", (event) => {
-          console.log("WebSocket connection closed", event.code, event.reason);
+          // WebSocket connection closed
           // Only attempt to reconnect if it wasn't a clean close
           if (event.code !== 1000 && attempts < 3) {
             attempts++;
-            console.log(`Connection closed, reconnecting... Attempt ${attempts}`);
+            // Connection closed, reconnecting... Attempt ${attempts}
             setTimeout(() => {
               const newSocket = createConnection();
               setWs(newSocket);

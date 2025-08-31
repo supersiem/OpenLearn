@@ -34,8 +34,8 @@ const Tab = memo(({
     <div
         data-tab-id={id}
         className={`p-3 text-sm md:text-lg cursor-pointer transition-colors duration-200 border-b-2 ${isActive
-            ? "text-white"
-            : "text-gray-400 border-transparent hover:text-white"
+            ? "text-foreground"
+            : "text-muted-foreground border-transparent hover:text-foreground"
             }`}
         onClick={() => onClick(id)}
     >

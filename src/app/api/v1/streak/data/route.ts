@@ -92,10 +92,20 @@ export async function GET(request: NextRequest) {
     // 1. User has a streak count > 0
     // 2. User has no activity today AND had no activity yesterday
     if (!hasActivityToday && !hadYesterdayActivity && finalStreakCount > 0) {
-      // User missed a day - reset streak
-      // We don't actually update the database here, just what we return
-      // Next time updateDailyStreak is called, it will properly reset
-      finalStreakCount = 0;
+      // User missed a day - reset streak in the database
+      try {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            streakCount: 0,
+          }
+        });
+        finalStreakCount = 0;
+      } catch (error) {
+        console.error("Error resetting streak in database:", error);
+        // Still return 0 even if database update fails
+        finalStreakCount = 0;
+      }
     }
 
     return NextResponse.json(

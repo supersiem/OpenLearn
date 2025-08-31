@@ -1,5 +1,6 @@
 "use client";
-
+// Niet aanraken, het werkt :3
+// veel liefs, je favoriete protogen - andrei1010
 import { useState, useCallback, useMemo, memo, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { AnimatePresence, motion } from "motion/react";
@@ -11,15 +12,25 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useRouter } from 'next/navigation';
+import { useStreakUpdate } from '@/hooks/useStreakUpdate';
+
+// Debug hook to track re-renders
+const useRenderTracker = (componentName: string) => {
+  const renderCount = useRef(0);
+  const lastRenderTime = useRef(Date.now());
+
+  useEffect(() => {
+    renderCount.current += 1;
+    const now = Date.now();
+    const timeSinceLastRender = now - lastRenderTime.current;
+    lastRenderTime.current = now;
+
+    if (timeSinceLastRender < 2000) { // Log frequent re-renders (less than 2 seconds apart)
+      console.log(`🔄 ${componentName} re-render #${renderCount.current} (${timeSinceLastRender}ms since last)`);
+    }
+  });
+};
 
 // Import Lottie dynamically to avoid SSR issues
 const Lottie = dynamic(() => import("lottie-react"), {
@@ -37,6 +48,20 @@ function verwijderSpecialeTekens(tekst: string): string {
     .trim()
     .toLowerCase();
 }
+
+// Constants for repeated styles and values
+const STYLES = {
+  questionCard: "p-4 bg-neutral-700 rounded-lg text-center mb-4 max-h-[120px] overflow-y-auto",
+  centeredText: "text-center text-white p-4",
+  overlay: "absolute z-50 bottom-0 left-0 right-0 flex items-center justify-center",
+} as const;
+
+const DELAYS = {
+  correctOverlay: 1000,
+  incorrectOverlay: 5000,
+  animationLoad: 10,
+  animationShow: 50,
+} as const;
 
 // Memoize the question display component
 const QuestionDisplay = memo(({ question }: { question: string }) => (
@@ -139,11 +164,11 @@ const StreakCelebration = memo(
       const loadAnimation = async () => {
         try {
           // Add a slight delay to ensure component is fully mounted
-          await new Promise((resolve) => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, DELAYS.animationLoad));
           const animationModule = await import("@/app/img/flame.json");
           setAnimation(animationModule.default);
           // Add a slight delay before showing to ensure smooth transition
-          setTimeout(() => setIsLoading(false), 50);
+          setTimeout(() => setIsLoading(false), DELAYS.animationShow);
         } catch (error) {
           console.error("Failed to load animation:", error);
           setIsLoading(false); // Show fallback on error
@@ -182,50 +207,6 @@ const StreakCelebration = memo(
     );
   }
 );
-
-// Update FreezeReward to be an inline component like StreakCelebration
-const FreezeReward = memo(({ streak }: { streak: number }) => {
-  return (
-    <div className="w-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500 rounded-xl p-6 my-4">
-      <div className="flex flex-col items-center">
-        <h2 className="text-2xl font-bold mb-2 text-white text-center">
-          Bevriezer verdiend!
-        </h2>
-
-        <div className="text-6xl font-bold text-blue-400 my-4 text-center">
-          🧊
-        </div>
-
-        <p className="text-center text-gray-300">
-          Je hebt 3 dagen achter elkaar geleerd. Je hebt een bevriezer verdiend!
-          Dit kan je gebruiken om je reeks te behouden als je een dag mist.
-        </p>
-      </div>
-    </div>
-  );
-});
-
-// Add another variant of the freeze component for when a freeze is used
-const FreezeUsed = memo(({ streak }: { streak: number }) => {
-  return (
-    <div className="w-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500 rounded-xl p-6 my-4">
-      <div className="flex flex-col items-center">
-        <h2 className="text-2xl font-bold mb-2 text-white text-center">
-          Bevriezer gebruikt!
-        </h2>
-
-        <div className="text-6xl font-bold text-indigo-400 my-4 text-center">
-          🧊❄️
-        </div>
-
-        <p className="text-center text-gray-300">
-          Je miste een dag, maar we hebben een bevriezer gebruikt om je reeks
-          van {streak} {streak === 1 ? "dag" : "dagen"} te redden!
-        </p>
-      </div>
-    </div>
-  );
-});
 
 // Memoize the multi-choice button component
 const MultiChoiceButton = memo(
@@ -329,13 +310,20 @@ const LearnTool = ({
   onProgressUpdate?: (completed: number, total: number) => void;
   onComplete?: () => void;
 }) => {
-  const router = useRouter();
+  // Debug re-render tracking
+  useRenderTracker('LearnTool');
 
-  // Seeded random number generator for deterministic results
-  const seededRandom = useCallback((seed: number) => {
+  const router = useRouter();
+  const { handleListCompletion } = useStreakUpdate();  // Seeded random number generator for deterministic results
+  // Simple utility functions (no need for useCallback with empty deps)
+  const seededRandom = (seed: number) => {
     let x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
-  }, []);
+  };
+
+  const getQuestionKey = (question: string, answer: string): string => {
+    return `${question}|${answer}`;
+  };
 
   // Create a deterministic shuffle based on list content
   const shuffleArray = useCallback(
@@ -428,52 +416,28 @@ const LearnTool = ({
     return shuffled;
   });
 
-  const [lijstDataOud, setLijstDataOud] = useState<any[]>(() => lijstData);
-  const [userInput, setUserInput] = useState("");
-  const [toonAntwoord, setToonAntwoord] = useState(false);
-  const [showCorrect, setShowCorrect] = useState(false);
-
-  // Initialize random number deterministically
-  const [randomNumber, setRandomNumber] = useState<number>(() => {
-    if (
-      !rawlistdata ||
-      !Array.isArray(rawlistdata) ||
-      rawlistdata.length === 0
-    ) {
-      return 1;
-    }
-    let seed = 0;
-    for (const item of rawlistdata.slice(0, 5)) {
-      const str =
-        (item.vraag || item["1"] || "") + (item.antwoord || item["2"] || "");
-      for (let i = 0; i < str.length; i++) {
-        seed = ((seed << 5) - seed + str.charCodeAt(i)) & 0xffffffff;
-      }
-    }
-    let x = Math.sin(seed) * 10000;
-    const random = x - Math.floor(x);
-    return Math.floor(random * 4) + 1;
+  // Consolidate UI overlay state into single object to reduce re-renders
+  const [overlays, setOverlays] = useState({
+    toonAntwoord: false,
+    showCorrect: false,
+    showGedachtenOverlay: false,
+    isAnswering: false,
   });
 
-  const [isAnswering, setIsAnswering] = useState(false);
-  const [showGedachtenOverlay, setShowGedachtenOverlay] = useState(false);
-  const [streakInfo, setStreakInfo] = useState<{
-    currentStreak: number;
-    isNewStreak: boolean;
-  }>({
-    currentStreak: 0,
-    isNewStreak: false,
+  // Consolidate learning progress state
+  const [learningState, setLearningState] = useState({
+    listCompleted: false,
+    streakUpdateTriggered: false,
+    currentLerenMethod: "multikeuze" as "gedachten" | "multikeuze" | "hints" | "toets",
   });
-  const [listCompleted, setListCompleted] = useState(false);
-  const [streakUpdated, setStreakUpdated] = useState(false);
-  const [streakStarted, setStreakStarted] = useState(false);
-  const [freezeAwarded, setFreezeAwarded] = useState(false);
-  const [freezeUsed, setFreezeUsed] = useState(false);
-  const [locked, setLocked] = useState(false);
 
-  // State for "leren" mode - tracks learning effectiveness for each word
-  const [lerenWordStats, setLerenWordStats] = useState<
-    Map<
+  // Consolidated stats and UI state
+  const [stats, setStats] = useState({
+    streakInfo: {
+      currentStreak: 0,
+      isNewStreak: false,
+    },
+    lerenWordStats: new Map<
       string,
       {
         attempts: number;
@@ -481,13 +445,86 @@ const LearnTool = ({
         lastMethod: "gedachten" | "multikeuze" | "hints" | "toets";
         methodsUsed: Set<string>;
       }
-    >
-  >(new Map());
-  const [currentLerenMethod, setCurrentLerenMethod] = useState<
-    "gedachten" | "multikeuze" | "hints" | "toets"
-  >("multikeuze");
-  const [lerenCompleted, setLerenCompleted] = useState<Set<string>>(new Set());
-  const [isBadgeDialogOpen, setIsBadgeDialogOpen] = useState(false);
+    >(),
+    lerenCompleted: new Set<string>(),
+  });
+
+  const [uiState, setUiState] = useState({
+    userInput: "",
+    randomNumber: (() => {
+      if (
+        !rawlistdata ||
+        !Array.isArray(rawlistdata) ||
+        rawlistdata.length === 0
+      ) {
+        return 1;
+      }
+      let seed = 0;
+      for (const item of rawlistdata.slice(0, 5)) {
+        const str =
+          (item.vraag || item["1"] || "") + (item.antwoord || item["2"] || "");
+        for (let i = 0; i < str.length; i++) {
+          seed = ((seed << 5) - seed + str.charCodeAt(i)) & 0xffffffff;
+        }
+      }
+      let x = Math.sin(seed) * 10000;
+      const random = x - Math.floor(x);
+      return Math.floor(random * 4) + 1;
+    })(),
+  });
+
+  // Helper functions to update consolidated state
+  const updateOverlay = (key: keyof typeof overlays, value: boolean) => {
+    setOverlays(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateLearningState = (key: keyof typeof learningState, value: any) => {
+    setLearningState(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateStats = (key: keyof typeof stats, value: any) => {
+    setStats(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateUiState = (key: keyof typeof uiState, value: any) => {
+    setUiState(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Destructure for easier access
+  const { toonAntwoord, showCorrect, showGedachtenOverlay, isAnswering } = overlays;
+  const { listCompleted, streakUpdateTriggered, currentLerenMethod } = learningState;
+  const { streakInfo, lerenWordStats, lerenCompleted } = stats;
+  const { userInput, randomNumber } = uiState;
+
+  // Aliases for backward compatibility during migration
+  const setToonAntwoord = (value: boolean) => updateOverlay('toonAntwoord', value);
+  const setShowCorrect = (value: boolean) => updateOverlay('showCorrect', value);
+  const setShowGedachtenOverlay = (value: boolean) => updateOverlay('showGedachtenOverlay', value);
+  const setIsAnswering = (value: boolean) => updateOverlay('isAnswering', value);
+  const setListCompleted = (value: boolean) => updateLearningState('listCompleted', value);
+  const setStreakUpdateTriggered = (value: boolean) => updateLearningState('streakUpdateTriggered', value);
+  const setCurrentLerenMethod = (value: "gedachten" | "multikeuze" | "hints" | "toets") => updateLearningState('currentLerenMethod', value);
+  const setStreakInfo = (value: any) => updateStats('streakInfo', value);
+  const setLerenWordStats = (value: Map<string, { attempts: number; correctCount: number; lastMethod: "gedachten" | "multikeuze" | "hints" | "toets"; methodsUsed: Set<string>; }> | ((prev: Map<string, { attempts: number; correctCount: number; lastMethod: "gedachten" | "multikeuze" | "hints" | "toets"; methodsUsed: Set<string>; }>) => Map<string, { attempts: number; correctCount: number; lastMethod: "gedachten" | "multikeuze" | "hints" | "toets"; methodsUsed: Set<string>; }>)) => {
+    if (typeof value === 'function') {
+      updateStats('lerenWordStats', value(stats.lerenWordStats));
+    } else {
+      updateStats('lerenWordStats', value);
+    }
+  };
+  const setLerenCompleted = (value: Set<string> | ((prev: Set<string>) => Set<string>)) => {
+    if (typeof value === 'function') {
+      updateStats('lerenCompleted', value(stats.lerenCompleted));
+    } else {
+      updateStats('lerenCompleted', value);
+    }
+  };
+  const setUserInput = (value: string) => updateUiState('userInput', value);
+  const setRandomNumber = (value: number) => updateUiState('randomNumber', value);
+
+
+  // Computed values for UI state
+  const locked = overlays.toonAntwoord || overlays.showCorrect || overlays.showGedachtenOverlay;
 
   // Generate deterministic random number for multiple choice
   const generateRandomNumber = useCallback(() => {
@@ -509,46 +546,26 @@ const LearnTool = ({
   const toetsInputRef = useRef<HTMLInputElement>(null);
   const hintsInputRef = useRef<HTMLInputElement>(null);
 
-  // Note: No longer needed with SSR-compatible initialization
-  const [currentQuestion, setCurrentQuestion] = useState<string>("");
+  // Track current question and reset input when it changes
+  const currentQuestion = lijstData.length > 0 ? lijstData[0]?.vraag || "" : "";
 
-  // Watch for changes in the current question and clear input when it changes
+  // Combined effect for input and UI state management
   useEffect(() => {
-    if (lijstData.length > 0 && lijstData[0]?.vraag !== currentQuestion) {
-      setCurrentQuestion(lijstData[0]?.vraag || "");
-      setUserInput("");
-    }
-  }, [lijstData, currentQuestion]);
+    // Reset input when question changes
+    setUserInput("");
 
-  // Sync the locked state with overlay visibility
-  useEffect(() => {
-    const anyOverlayVisible =
-      toonAntwoord || showCorrect || showGedachtenOverlay;
-    setLocked(anyOverlayVisible);
-  }, [toonAntwoord, showCorrect, showGedachtenOverlay]);
-
-  // Reset isAnswering when no overlays are visible (for multiple choice)
-  useEffect(() => {
-    const anyOverlayVisible =
-      toonAntwoord || showCorrect || showGedachtenOverlay;
+    // Reset isAnswering when no overlays are visible (for multiple choice)
     if (
-      !anyOverlayVisible &&
+      !locked &&
       isAnswering &&
       (mode === "multikeuze" ||
         (mode === "leren" && currentLerenMethod === "multikeuze"))
     ) {
       setIsAnswering(false);
     }
-  }, [
-    toonAntwoord,
-    showCorrect,
-    showGedachtenOverlay,
-    isAnswering,
-    mode,
-    currentLerenMethod,
-  ]);
+  }, [currentQuestion, locked, isAnswering, mode, currentLerenMethod]);
 
-  // Autofocus input when unlocked or when question changes
+  // Combined effect for input management and autofocus
   useEffect(() => {
     if (!locked && lijstData.length > 0) {
       // Small delay to ensure the component is fully rendered
@@ -570,13 +587,7 @@ const LearnTool = ({
 
       return () => clearTimeout(timer);
     }
-  }, [locked, mode, currentLerenMethod, lijstData.length, currentQuestion]); // Helper functions for "leren" mode
-  const getQuestionKey = useCallback(
-    (question: string, answer: string): string => {
-      return `${question}|${answer}`;
-    },
-    []
-  );
+  }, [locked, mode, currentLerenMethod, lijstData.length, currentQuestion]);
 
   const getWordStats = useCallback(
     (questionKey: string) => {
@@ -592,12 +603,10 @@ const LearnTool = ({
     [lerenWordStats]
   );
 
-  const isQuestionCompleteInLeren = useCallback(
-    (questionKey: string): boolean => {
-      return lerenCompleted.has(questionKey);
-    },
-    [lerenCompleted]
-  );
+  // Simple lookup function - no need for useCallback
+  const isQuestionCompleteInLeren = (questionKey: string): boolean => {
+    return lerenCompleted.has(questionKey);
+  };
 
   // Adaptive method selection based on performance
   const selectOptimalMethod = useCallback(
@@ -701,8 +710,8 @@ const LearnTool = ({
             let totalCorrectAnswers = 0;
 
             // Count correct answers from all word stats (including this update)
-            newMap.forEach((stats) => {
-              totalCorrectAnswers += stats.correctCount;
+            newMap.forEach((wordStats) => {
+              totalCorrectAnswers += wordStats.correctCount;
             });
 
             onProgressUpdate(totalCorrectAnswers, totalPossible);
@@ -716,15 +725,9 @@ const LearnTool = ({
   );
 
   // Update current method when the current question changes in "leren" mode
-  const currentQuestionKey = useMemo(() => {
-    if (mode === "leren" && lijstData.length > 0) {
-      const currentItem = lijstData[0];
-      return currentItem
-        ? getQuestionKey(currentItem.vraag, currentItem.antwoord)
-        : null;
-    }
-    return null;
-  }, [mode, lijstData, getQuestionKey]);
+  const currentQuestionKey = mode === "leren" && lijstData.length > 0 && lijstData[0]
+    ? getQuestionKey(lijstData[0].vraag, lijstData[0].antwoord)
+    : null;
 
   useEffect(() => {
     if (currentQuestionKey && mode === "leren") {
@@ -1035,50 +1038,37 @@ const LearnTool = ({
         })
         : initialMappedData.length > 0 && lijstData.length === 0;
 
-    // Only run when the list changes from not-completed to completed
-    if (isListComplete && !listCompleted) {
+    // Only run when the list changes from not-completed to completed AND we haven't triggered streak update yet
+    if (isListComplete && !streakUpdateTriggered) {
       setListCompleted(true);
+      setStreakUpdateTriggered(true);
 
       // Call the completion callback if provided
       if (onComplete) {
         onComplete();
       }
 
+      // Immediately show streak celebration (assume streak will be started)
+      setStreakInfo({
+        currentStreak: 1,
+        isNewStreak: true,
+      });
+
       const updateStreak = async () => {
         try {
-          const response = await fetch("/api/v1/streak/update", {
-            method: "POST",
-          });
-          const result = await response.json();
+          // Use the streak store hook (update in background)
+          const result = await handleListCompletion();
 
-          if (response.ok && result.success) {
+          // Update with actual result if different from assumption
+          if (result.success && result.currentStreak !== undefined) {
             setStreakInfo({
-              currentStreak: result.currentStreak || 0,
+              currentStreak: result.currentStreak,
               isNewStreak: result.isNewStreak === true,
             });
-
-            // Track if the streak was updated for potential UI changes
-            setStreakUpdated(result.streakUpdated === true);
-
-            // Track if a freeze was awarded or used
-            setFreezeAwarded(result.freezeAwarded === true);
-            setFreezeUsed(result.freezeUsed === true);
-
-            // Determine which screen to show first for any updated streak
-            if (result.streakUpdated) {
-              setStreakStarted(true);
-            }
-
-            // Trigger a custom event to notify streak components of the update
-            if (typeof window !== 'undefined') {
-              const event = new CustomEvent('streak-data-updated');
-              window.dispatchEvent(event);
-            }
-          } else {
-            console.error("Failed to update streak:", result);
           }
         } catch (error) {
           console.error("Error updating streak:", error);
+          // Keep the optimistic UI showing celebration even if update fails
         }
       };
 
@@ -1086,12 +1076,13 @@ const LearnTool = ({
     }
   }, [
     initialMappedData,
-    listCompleted,
+    streakUpdateTriggered,
     mode,
     getQuestionKey,
     isQuestionCompleteInLeren,
     lijstData.length,
     onComplete,
+    handleListCompletion,
   ]);
 
   // Detect when the session is completed and set the listCompleted flag
@@ -1106,26 +1097,45 @@ const LearnTool = ({
 
     if (isCompleted && !listCompleted) {
       setListCompleted(true);
-      // Also trigger streak update here to ensure request is sent
+    }
+
+    // Also trigger streak update here as a fallback if it hasn't been triggered yet
+    if (isCompleted && !streakUpdateTriggered) {
+      setStreakUpdateTriggered(true);
+
+      // Immediately show streak celebration (assume streak will be started)
+      setStreakInfo({
+        currentStreak: 1,
+        isNewStreak: true,
+      });
+
       (async () => {
         try {
-          await fetch('/api/v1/streak/update', { method: 'POST' });
+          const result = await handleListCompletion();
+
+          // Update with actual result if different from assumption
+          if (result.success && result.currentStreak !== undefined) {
+            setStreakInfo({
+              currentStreak: result.currentStreak,
+              isNewStreak: result.isNewStreak === true,
+            });
+          }
         } catch (e) {
           console.error('Error in second effect streak update:', e);
+          // Keep the optimistic UI showing celebration even if update fails
         }
       })();
     }
-  }, [mode, initialMappedData, lijstData.length, isQuestionCompleteInLeren, listCompleted]);
+  }, [mode, initialMappedData, lijstData.length, isQuestionCompleteInLeren, listCompleted, streakUpdateTriggered, handleListCompletion]);
 
-  // Call this when a question is processed (either right or wrong)
-  const updateProgress = useCallback(() => {
+  // Track progress whenever questions are answered
+  useEffect(() => {
     if (onProgressUpdate && initialMappedData.length > 0) {
       if (mode === "leren") {
         // For "leren" mode, count total correct answers across all words
         const totalPossible = initialMappedData.length * 3;
         let totalCorrectAnswers = 0;
 
-        // Count correct answers from all word stats
         lerenWordStats.forEach((stats) => {
           totalCorrectAnswers += stats.correctCount;
         });
@@ -1143,49 +1153,6 @@ const LearnTool = ({
     lijstData.length,
     onProgressUpdate,
     mode,
-    getQuestionKey,
-    isQuestionCompleteInLeren,
-    lerenCompleted,
-    lerenWordStats,
-  ]);
-
-  // Track progress whenever questions are answered
-  useEffect(() => {
-    if (onProgressUpdate && initialMappedData.length > 0) {
-      const total = initialMappedData.length;
-      let completed: number;
-
-      if (mode === "leren") {
-        // For "leren" mode, count total correct answers across all words
-        // Each word needs 3 methods, so total possible = words × 3
-        const totalPossible = initialMappedData.length * 3;
-        let totalCorrectAnswers = 0;
-
-        // Count correct answers from all word stats
-        lerenWordStats.forEach((stats, questionKey) => {
-          totalCorrectAnswers += stats.correctCount;
-        });
-
-        completed = totalCorrectAnswers;
-        const total = totalPossible;
-
-        onProgressUpdate(completed, total);
-        return;
-      } else {
-        // For other modes, use the standard calculation
-        completed = total - lijstData.length;
-      }
-
-      onProgressUpdate(completed, total);
-    }
-  }, [
-    lijstData.length,
-    initialMappedData.length,
-    onProgressUpdate,
-    lerenCompleted,
-    mode,
-    getQuestionKey,
-    isQuestionCompleteInLeren,
     lerenWordStats,
   ]);
 
@@ -1251,7 +1218,6 @@ const LearnTool = ({
         updateWordStats(questionKey, true, currentLerenMethod);
       }
 
-      updateProgress();
       // No timeout - let Enter key handle progression
     } else {
       setToonAntwoord(true);
@@ -1266,7 +1232,6 @@ const LearnTool = ({
         updateWordStats(questionKey, false, currentLerenMethod);
       }
 
-      updateProgress();
       // No timeout - let Enter key handle progression
     }
   }, [
@@ -1274,7 +1239,6 @@ const LearnTool = ({
     userInput,
     onCorrectAnswer,
     onWrongAnswer,
-    updateProgress,
     locked,
     mode,
     getQuestionKey,
@@ -1301,8 +1265,6 @@ const LearnTool = ({
           );
           updateWordStats(questionKey, true, currentLerenMethod);
         }
-
-        updateProgress();
 
         // Use setTimeout to ensure state changes don't interfere
         setTimeout(() => {
@@ -1350,8 +1312,6 @@ const LearnTool = ({
           updateWordStats(questionKey, false, currentLerenMethod);
         }
 
-        updateProgress();
-
         // Use setTimeout to ensure state changes don't interfere
         setTimeout(() => {
           // Move the question to the end
@@ -1364,7 +1324,6 @@ const LearnTool = ({
       shuffleArray,
       onCorrectAnswer,
       onWrongAnswer,
-      updateProgress,
       mode,
       getQuestionKey,
       updateWordStats,
@@ -1392,7 +1351,6 @@ const LearnTool = ({
           updateWordStats(questionKey, true, currentLerenMethod);
         }
 
-        updateProgress();
         // No timeout - let Enter key handle progression
       } else {
         setToonAntwoord(true);
@@ -1408,7 +1366,6 @@ const LearnTool = ({
           updateWordStats(questionKey, false, currentLerenMethod);
         }
 
-        updateProgress();
         // No timeout - let Enter key handle progression
       }
     },
@@ -1417,7 +1374,6 @@ const LearnTool = ({
       isAnswering,
       onCorrectAnswer,
       onWrongAnswer,
-      updateProgress,
       locked,
       mode,
       getQuestionKey,
@@ -1437,7 +1393,7 @@ const LearnTool = ({
         return correctAnswer;
       }
 
-      if (lijstDataOud.length < 2) {
+      if (initialMappedData.length < 2) {
         return "Optie";
       }
 
@@ -1454,16 +1410,16 @@ const LearnTool = ({
       do {
         if (attempts > 10) {
           const randomIndex = Math.floor(
-            seededRandom(seed + attempts) * lijstDataOud.length
+            seededRandom(seed + attempts) * initialMappedData.length
           );
-          return lijstDataOud[randomIndex]?.antwoord || "Optie";
+          return initialMappedData[randomIndex]?.antwoord || "Optie";
         }
 
         attempts++;
         const randomIndex = Math.floor(
-          seededRandom(seed + attempts) * lijstDataOud.length
+          seededRandom(seed + attempts) * initialMappedData.length
         );
-        randomAnswer = lijstDataOud[randomIndex]?.antwoord || "";
+        randomAnswer = initialMappedData[randomIndex]?.antwoord || "";
       } while (
         randomAnswer.toLowerCase() === correctAnswer.toLowerCase() ||
         randomAnswer === ""
@@ -1471,7 +1427,7 @@ const LearnTool = ({
 
       return randomAnswer;
     },
-    [randomNumber, lijstDataOud, seededRandom]
+    [randomNumber, initialMappedData, seededRandom]
   );
 
   // Scramble the questions after they have been generated
@@ -1481,7 +1437,6 @@ const LearnTool = ({
       // Additional scramble after initial data processing
       const scrambled = shuffleArray([...initialMappedData]);
       setLijstData(scrambled);
-      setLijstDataOud(scrambled);
     }
   }, [initialMappedData, lijstData.length, shuffleArray, listCompleted]);
 
@@ -1494,7 +1449,7 @@ const LearnTool = ({
         />
       )}
       {initialMappedData.length === 0 ? (
-        <div className="text-center text-white p-4">Lijst niet gevonden</div>
+        <div className={STYLES.centeredText}>Lijst niet gevonden</div>
       ) : (
         mode === "leren"
           ? initialMappedData.every((item) => {
@@ -1507,17 +1462,10 @@ const LearnTool = ({
           <div className="font-bold text-xl mb-2">Gefeliciteerd!</div>
           <div>Je hebt de lijst helemaal af!</div>
 
-          {/* Show freeze used message if a freeze was used */}
-          {freezeUsed && <FreezeUsed streak={streakInfo.currentStreak} />}
-
-          {/* Show freeze award if earned */}
-          {freezeAwarded && <FreezeReward streak={streakInfo.currentStreak} />}
-
-          {/* Show streak celebration directly in the completion screen if a streak started */}
-          {streakStarted && (
+          {/* Show streak celebration when list is completed (optimistic) */}
+          {listCompleted && (
             <StreakCelebration
               streak={streakInfo.currentStreak}
-              // Pass actual flag for whether this is a new streak
               isNewStreak={streakInfo.isNewStreak}
             />
           )}
@@ -1529,10 +1477,7 @@ const LearnTool = ({
                 // Generate new deterministic random number
                 setRandomNumber(generateRandomNumber());
                 setListCompleted(false);
-                setStreakUpdated(false);
-                setStreakStarted(false);
-                setFreezeAwarded(false);
-                setFreezeUsed(false);
+                setStreakUpdateTriggered(false);
                 // Reset "leren" mode state
                 setLerenWordStats(new Map());
                 setLerenCompleted(new Set());
@@ -1764,4 +1709,14 @@ const LearnTool = ({
   );
 };
 
-export default memo(LearnTool);
+export default memo(LearnTool, (prevProps, nextProps) => {
+  // Custom comparison to prevent unnecessary re-renders
+  return (
+    prevProps.mode === nextProps.mode &&
+    prevProps.rawlistdata === nextProps.rawlistdata && // Reference equality check
+    prevProps.onCorrectAnswer === nextProps.onCorrectAnswer &&
+    prevProps.onWrongAnswer === nextProps.onWrongAnswer &&
+    prevProps.onProgressUpdate === nextProps.onProgressUpdate &&
+    prevProps.onComplete === nextProps.onComplete
+  );
+});

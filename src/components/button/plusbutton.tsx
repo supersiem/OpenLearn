@@ -34,11 +34,11 @@ export default function PlusBtn() {
         <>
             <Popover>
                 <PopoverTrigger asChild>
-                    <button className="flex items-center justify-center min-w-10 min-h-10 rounded-full bg-neutral-800 hover:bg-neutral-700 transition-all text-white">
+                    <button className="flex items-center justify-center min-w-10 min-h-10 rounded-full navbar-btn hover:bg-neutral-700 transition-all">
                         <Plus />
                     </button>
                 </PopoverTrigger>
-                <PopoverContent className="text-white font-extrabold bg-neutral-800">
+                <PopoverContent className="text-white font-extrabold navbar-popover">
                     <Link
                         href="/learn/createlist"
                         className="flex flex-row rounded-lg hover:bg-neutral-700 p-2 items-center gap-2 transition-all"

@@ -35,7 +35,6 @@ export async function updateAdminSettings(formData: FormData) {
     try {
         const forumEnabled = formData.get('forumEnabled') === 'on'
         const registrationEnabled = formData.get('registrationEnabled') === 'on'
-        const oldSettings = await getAdminSettings()
 
         // Update or create forum_enabled setting
         await prisma.config.upsert({

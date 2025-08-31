@@ -190,7 +190,7 @@ export default function NotificationNav() {
     return (
         <Popover>
             <PopoverTrigger className="notification">
-                <div className="relative w-10 h-10 bg-neutral-800 hover:bg-neutral-700 text-white rounded-full flex items-center transition-all justify-center">
+                <div className="relative w-10 h-10 navbar-btn hover:bg-neutral-700 rounded-full flex items-center transition-all justify-center">
                     <Bell className="w-6 h-6" />
                     {unreadCount > 0 && (
                         <Badge
@@ -202,7 +202,7 @@ export default function NotificationNav() {
                     )}
                 </div>
             </PopoverTrigger>
-            <PopoverContent className="min-w-100 bg-neutral-800 z-110 drop-shadow-2xl min-h-40 flex flex-col space-y-3 text-white">
+            <PopoverContent className="min-w-100 z-110 drop-shadow-2xl min-h-40 flex flex-col space-y-3 navbar-popover">
                 <div className="flex flex-row items-center justify-center ">
                     <Bell className="w-6 h-6 mr-3" />
                     <h1 className="text-2xl font-extrabold pr-3">Meldingen</h1>
