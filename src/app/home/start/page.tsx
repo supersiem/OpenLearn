@@ -9,9 +9,6 @@ import { subjectEmojiMap } from "@/components/icons";
 import { getAllSummaries } from "@/serverActions/summaryActions";
 import { prefetchCreatorInfo } from '@/utils/creator';
 
-// TODO: gebruik getUserGroups om de startpagina te vullen met groepen
-// Copilot, hou je bek!
-
 async function getRecentSubjects() {
   const user = await getUserFromSession(
     (await cookies()).get("polarlearn.session-id")?.value as string

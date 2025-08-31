@@ -161,16 +161,15 @@ const MobileDropdown = memo(
         className={`inline-block hover:bg-gradient-to-r from-sky-400 to-sky-100 transition-transform rounded-lg w-full mb-3`}
       >
         <div
-          className={`rounded-lg border-4 border-neutral-700 duration-300 ${isOpen ? "hover:border-transparent" : ""
-            }`}
+          className={`rounded-lg border-4 border-neutral-700 duration-300 hover:border-transparent`}
           style={{
             height: isOpen ? `${48 + dropdownHeight}px` : "48px",
-            backgroundColor: isOpen ? "transparent" : "#262626",
+            backgroundColor: isOpen ? "transparent" : "var(--neutral-800)",
           }}
         >
           <button
             type="button"
-            className="w-full bg-neutral-800 text-white font-bold py-2 px-4 rounded-t-md flex justify-between items-center"
+            className={`w-full bg-neutral-800 text-white font-bold py-2 px-4 ${isOpen ? 'rounded-t-sm' : 'rounded-sm'} flex justify-between items-center`}
             onClick={onToggle}
           >
             <span>{text}</span>
@@ -184,12 +183,11 @@ const MobileDropdown = memo(
 
           <div
             ref={dropdownRef}
-            className={`overflow-hidden transition-all duration-300 ${isOpen ? "opacity-100" : "opacity-0"
+            className={`overflow-hidden transition-all duration-300 ${isOpen ? "opacity-100 rounded-b-md" : "opacity-0"
               } shadow-lg`}
             style={{
               height: isOpen ? `${dropdownHeight}px` : "0px",
-              backgroundColor: "#262626",
-              margin: "0 auto",
+              backgroundColor: "var(--neutral-800)",
               transition: "height 0.3s ease, opacity 0.3s ease",
             }}
           >
@@ -197,7 +195,7 @@ const MobileDropdown = memo(
               <Link
                 key={index}
                 href={path as string}
-                className="block px-4 py-2 text-white hover:bg-sky-500 transition-colors duration-200"
+                className={`block px-4 py-2 text-white hover:bg-sky-500 transition-colors duration-200 ${index === dropdownMatrix.length - 1 ? 'rounded-b-lg' : ''}`}
               >
                 {display}
               </Link>
@@ -301,7 +299,7 @@ const MobileMenu = memo(
             isOpen={accountOpen}
             onToggle={() => setAccountOpen(!accountOpen)}
           />
-              <PlusBtnMb />
+          <PlusBtnMb />
         </div>
       </div>
     );

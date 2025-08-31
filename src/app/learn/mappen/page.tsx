@@ -68,9 +68,6 @@ export default async function MappenPage() {
                       <span className="text-lg whitespace-normal break-words max-w-[40ch] flex flex-row">
                         {map.name}
                         <div className="flex gap-2 mt-1 pl-2">
-                          <Badge className="bg-amber-600/20 text-amber-500 border border-amber-600/50 text-xs">
-                            Eigenaar
-                          </Badge>
                           {map.public && (
                             <Badge className="bg-green-600/20 text-green-500 border border-green-600/50 text-xs">
                               Openbaar

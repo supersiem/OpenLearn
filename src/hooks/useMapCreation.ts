@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { createMapAction } from "@/serverActions/mapActions";
 
 // Define form validation schema with Zod
 const mapFormSchema = z.object({
@@ -46,23 +45,39 @@ export function useMapCreation() {
 
   const onSubmit = useCallback(async (values: MapFormValues) => {
     setIsSubmitting(true);
+
     try {
-      const result = await createMapAction({
-        name: values.name,
-        isPublic: values.isPublic
+      const response = await fetch("/api/v1/map/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: values.name,
+          isPublic: values.isPublic,
+        }),
       });
 
-      if (result.success && result.mapId) {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Network error" }));
+        throw new Error(errorData.error || "Failed to create map");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success("Map met succes gemaakt!");
         setDialogOpen(false);
         form.reset();
-        toast.success("Map succesvol aangemaakt!");
-        router.push(`/learn/map/${result.mapId}`);
+        router.push(`/map/${result.mapId}`);
       } else {
-        toast.error(result.error || "Er is een fout opgetreden bij het aanmaken van de map.");
+        toast.error(result.error || "Map maken is mislukt met onbekende fout", {
+          position: "top-right",
+        });
       }
     } catch (error) {
-      console.error("Error creating map:", error);
-      toast.error("Er is een fout opgetreden bij het aanmaken van de map.");
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -48,7 +48,7 @@ export default function Page() {
                 if (result.lastSaved) {
                     setLastSaved(new Date(result.lastSaved));
                 }
-                // console.log("Autosaved:", result.message);
+
             } else if (result.error) {
                 // console.error("Autosave error:", result.error);
                 // Optionally show a non-intrusive error to the user

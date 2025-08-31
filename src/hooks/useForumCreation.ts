@@ -6,18 +6,22 @@ import * as z from "zod";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { formSchema } from "@/app/home/forum/formSchema";
-import { getUserFromSession } from "@/utils/auth/auth";
+import { useUserDataStore } from "@/store/user/UserDataProvider";
+import { useStore } from "zustand";
 
 export type ForumFormValues = z.infer<typeof formSchema>;
 
 export function useForumCreation() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [banned, setBanned] = useState(false);
     const [banreason, setBanreason] = useState<string | null>(null);
     const [banEnd, setBanEnd] = useState<Date | null>(null);
     const router = useRouter();
+
+    // Get user data from Zustand store (SSR'd data)
+    const store = useUserDataStore();
+    const isAdmin = useStore(store, (state) => state.isAdmin);
 
     // Initialize form with react-hook-form and zod validation
     const form = useForm<ForumFormValues>({
@@ -40,25 +44,6 @@ export function useForumCreation() {
             form.setValue("subject", "");
         }
     }, [selectedCategory, form]);
-
-    // Fetch user session and check if admin/banned
-    useEffect(() => {
-        const checkUserStatus = async () => {
-            try {
-                const user = await getUserFromSession();
-                setIsAdmin(user?.role === "admin");
-                // You might need to add ban status checking here based on your user model
-                // setBanned(user?.banned || false);
-                // setBanreason(user?.banreason);
-                // setBanEnd(user?.banEnd);
-            } catch (error) {
-                console.error("Error checking user status:", error);
-                setIsAdmin(false);
-            }
-        };
-
-        checkUserStatus();
-    }, []);
 
     const handleOpenDialog = useCallback(() => {
         if (banned) {

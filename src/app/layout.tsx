@@ -22,6 +22,9 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { ReactScan } from "@/components/ReactScan";
 import { decodeCookie } from "@/utils/auth/session";
 import { prisma } from "@/utils/prisma";
+import { getImpersonationData } from "@/utils/auth/getImpersonationData";
+import { StreakProvider } from "@/store/streak/StreakProvider";
+import { getStreakData } from "@/serverActions/getStreakData";
 
 const steps = [
   {
@@ -264,7 +267,7 @@ export default async function RootLayout({
   const footerContent = await Footer();
 
   // Server-side user data hydration
-  let userData = { id: '', name: '', isAdmin: false };
+  let userData: { id: string; name: string; isAdmin: boolean; impersonation: any } = { id: '', name: '', isAdmin: false, impersonation: null };
   try {
     const cookie = (await cookies()).get('polarlearn.session-id')?.value;
     if (cookie) {
@@ -282,14 +285,24 @@ export default async function RootLayout({
               id: user.id,
               name: user.name || '',
               isAdmin: user.role === 'admin',
+              impersonation: null,
             };
           }
         }
       }
     }
+
+    // Check for impersonation data during SSR
+    const impersonationData = await getImpersonationData();
+    if (impersonationData) {
+      userData.impersonation = impersonationData;
+    }
   } catch (e) {
     // fallback: keep userData as default
   }
+
+  // Server-side streak data hydration
+  const streakData = await getStreakData();
 
   return (
     <html
@@ -353,31 +366,35 @@ export default async function RootLayout({
                   <NextStep steps={steps} cardComponent={DarkCard}>
                     <TourNavigator />
                     <ToastProvider>
-                      <WSProvider>
-                        <>
-                          <ImpersonationCheck />
-                          <ImpersonationStyles />
-                          <TopNavBar isAdmin={userData.isAdmin} />
-                          {children}
-                        </>
-                        {footerContent}
-                        <AnalyticsProvider />
-                      </WSProvider>
+                      <StreakProvider streakData={streakData}>
+                        <WSProvider>
+                          <>
+                            <ImpersonationCheck />
+                            <ImpersonationStyles />
+                            <TopNavBar isAdmin={userData.isAdmin} />
+                            {children}
+                          </>
+                          {footerContent}
+                          <AnalyticsProvider />
+                        </WSProvider>
+                      </StreakProvider>
                     </ToastProvider>
                   </NextStep>
                 </NextStepProvider>
               ) : (
                 <ToastProvider>
-                  <WSProvider>
-                    <>
-                      <ImpersonationCheck />
-                      <ImpersonationStyles />
-                      <TopNavBar isAdmin={userData.isAdmin} />
-                      {children}
-                    </>
-                    {footerContent}
-                    <AnalyticsProvider />
-                  </WSProvider>
+                  <StreakProvider streakData={streakData}>
+                    <WSProvider>
+                      <>
+                        <ImpersonationCheck />
+                        <ImpersonationStyles />
+                        <TopNavBar isAdmin={userData.isAdmin} />
+                        {children}
+                      </>
+                      {footerContent}
+                      <AnalyticsProvider />
+                    </WSProvider>
+                  </StreakProvider>
                 </ToastProvider>
               )}
             </ThemeProvider>

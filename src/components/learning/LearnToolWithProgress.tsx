@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import LearnTool from './learnTool';
 import LearnToolHeader from '../navbar/learntToolHeader';
+import { useStreakUpdate } from '@/hooks/useStreakUpdate';
 
 interface LearnToolWithProgressProps {
     mode: "toets" | "gedachten" | "hints" | "learn" | "multikeuze" | "leren";
@@ -12,7 +13,7 @@ interface LearnToolWithProgressProps {
     onComplete?: () => void;
 }
 
-export default function LearnToolWithProgress({
+export default memo(function LearnToolWithProgress({
     mode,
     rawlistdata,
     listId,
@@ -36,6 +37,15 @@ export default function LearnToolWithProgress({
         setProgress(progressPercentage);
     }, []);
 
+    // Handle completion - always provide a callback to LearnTool
+    const handleCompletion = useCallback(() => {
+        // Call the external onComplete callback if provided
+        if (onComplete) {
+            onComplete();
+        }
+        // If no external callback, that's fine - LearnTool will handle streak updates internally
+    }, [onComplete]);
+
     return (
         <div className="min-h-screen flex flex-col">
             <LearnToolHeader
@@ -54,9 +64,9 @@ export default function LearnToolWithProgress({
                     onCorrectAnswer={handleCorrectAnswer}
                     onWrongAnswer={handleWrongAnswer}
                     onProgressUpdate={handleProgressUpdate}
-                    onComplete={onComplete}
+                    onComplete={handleCompletion}
                 />
             </div>
         </div>
     );
-}
+});
