@@ -11,7 +11,6 @@ const webhook = new Webhook(process.env.DISCORD_WEBHOOK || '');
 export async function middleware(request: NextRequest, response: NextResponse) {
   let cspHeader = "";
   if (process.env.DISABLE_CSP) {
-    // Set an empty CSP header when disabled
     cspHeader = "";
   } else {
     cspHeader = `

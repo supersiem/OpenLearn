@@ -15,22 +15,6 @@ import dynamic from "next/dynamic";
 import { useRouter } from 'next/navigation';
 import { useStreakUpdate } from '@/hooks/useStreakUpdate';
 
-// Debug hook to track re-renders
-const useRenderTracker = (componentName: string) => {
-  const renderCount = useRef(0);
-  const lastRenderTime = useRef(Date.now());
-
-  useEffect(() => {
-    renderCount.current += 1;
-    const now = Date.now();
-    const timeSinceLastRender = now - lastRenderTime.current;
-    lastRenderTime.current = now;
-
-    if (timeSinceLastRender < 2000) { // Log frequent re-renders (less than 2 seconds apart)
-      console.log(`🔄 ${componentName} re-render #${renderCount.current} (${timeSinceLastRender}ms since last)`);
-    }
-  });
-};
 
 // Import Lottie dynamically to avoid SSR issues
 const Lottie = dynamic(() => import("lottie-react"), {
@@ -40,7 +24,6 @@ const Lottie = dynamic(() => import("lottie-react"), {
 import check from "@/app/img/check.svg";
 import wrong from "@/app/img/wrong.svg";
 import Button1 from "@/components/button/Button1";
-import { Badge } from "../ui/badge";
 
 function verwijderSpecialeTekens(tekst: string): string {
   return tekst
@@ -310,9 +293,6 @@ const LearnTool = ({
   onProgressUpdate?: (completed: number, total: number) => void;
   onComplete?: () => void;
 }) => {
-  // Debug re-render tracking
-  useRenderTracker('LearnTool');
-
   const router = useRouter();
   const { handleListCompletion } = useStreakUpdate();  // Seeded random number generator for deterministic results
   // Simple utility functions (no need for useCallback with empty deps)
