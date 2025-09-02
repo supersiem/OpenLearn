@@ -96,7 +96,6 @@ const AnswerOverlay = memo(
   )
 );
 
-// Add a new GedachtenOverlay component
 const GedachtenOverlay = memo(
   ({
     answer,
