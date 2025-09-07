@@ -64,7 +64,7 @@ const SettingsButton = memo(() => (
         <DialogContent>
             <DialogTitle>Leerinstellingen</DialogTitle>
             <div className="p-4">
-                <p>Learning settings content can go here.</p>
+                <p>moet nog afgemaakt worden</p>
             </div>
         </DialogContent>
     </Dialog>

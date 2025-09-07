@@ -1,163 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { TopNavBar } from "@/components/navbar/TopNavBar";
 import Footer from "@/components/footer/Footer";
 import { Geist } from "next/font/google";
-import ToastProvider from "@/components/toast/toast";
-import { WSProvider } from "../components/ws-provider";
 import Head from "next/head";
 import SessionWrapper from "@/components/SessionWrapper";
-import ImpersonationCheck from "@/components/ImpersonationCheck";
-import ImpersonationStyles from "@/components/ImpersonationStyles";
 import React from "react";
-import { UserDataProvider } from "../store/user/UserDataProvider";
 import { cookies } from "next/headers";
-import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
-import { NextStepProvider, NextStep } from "nextstepjs";
-import DarkCard from "@/components/DarkCard";
 import { getTourState } from "@/serverActions/getTourState";
-import TourInitializer from "@/components/TourInitializer";
-import TourNavigator from "@/components/TourNavigator";
-import { ThemeProvider } from "@/components/ThemeProvider";
 import { decodeCookie } from "@/utils/auth/session";
 import { prisma } from "@/utils/prisma";
 import { getImpersonationData } from "@/utils/auth/getImpersonationData";
-import { StreakProvider } from "@/store/streak/StreakProvider";
 import { getStreakData } from "@/serverActions/getStreakData";
-
-const steps = [
-  {
-    tour: "mainTour",
-    steps: [
-      {
-        icon: "📖",
-        title: "Welkom bij PolarLearn!",
-        content:
-          "Welkom bij PolarLearn! Ontdek alle functionaliteiten en voordelen van PolarLearn in deze korte rondleiding.",
-        selector: "", // empty selector triggers centered dialog
-        showControls: true,
-        showSkip: true,
-      },
-      {
-        icon: "🧭",
-        title: "Dit is de navigatiebalk",
-        content:
-          "Hiermee kan je snel naar verschillende delen van de website navigeren, zoals leertools, instellingen en meer.",
-        selector: "#navbar",
-        side: "right" as const,
-        showControls: true,
-        showSkip: true,
-      },
-      {
-        icon: "📃",
-        title: "Leren keuzelijst",
-        content:
-          "Beweeg je muis over de keuzelijst om naar een pagina van keuze te gaan. ",
-        selector: ".lerendropdown",
-        side: "bottom" as const,
-        showControls: true,
-        showSkip: true,
-      },
-      {
-        icon: "🔍",
-        title: "Zoekbalk",
-        content:
-          "Dit is de zoekbalk. Hier kan je lijsten, samenvattingen, forumvragen en groepen vinden. Typ gewoon in wat je zoekt en dan krijg je resultaten.",
-        selector: ".searchbar",
-        side: "bottom" as const,
-        showControls: true,
-        showSkip: true,
-      },
-      {
-        icon: "🔥",
-        title: "Reeks",
-        content:
-          "Hier kan je je reeks bekijken, oefen dagelijks om je reeks te behouden. Je krijgt ook een bevriezer als je drie dagen achter elkaar oefent.",
-        selector: ".streak",
-        side: "bottom" as const,
-        showControls: true,
-        showSkip: true,
-      },
-      {
-        icon: "🔔",
-        title: "Berichten",
-        content:
-          "Hier kan je je berichten bekijken en beheren. Tot nu toe krijg je berichten voor als iemand je forumpost leuk vind, er op heeft geantwoord of als een administrator je vraag/antwoord heeft verwijderd.",
-        selector: ".notification",
-        side: "bottom" as const,
-        showControls: true,
-        showSkip: true,
-      },
-      {
-        icon: "⚙️",
-        title: "Account keuzelijst",
-        content: "In deze keuzelijst kan je uitloggen, en je account beheren.",
-        selector: ".accountdropdown",
-        side: "bottom" as const,
-        showControls: true,
-        showSkip: true,
-      },
-      {
-        icon: "💬",
-        title: "Forum",
-        content:
-          "Klik hier om naar het forum te gaan en discussies te bekijken.",
-        selector: ".forumbutton",
-        side: "bottom" as const,
-        showControls: false,
-        showSkip: true,
-      },
-      {
-        icon: "💬",
-        title: "Forum",
-        content:
-          "Hier kan je vragen stellen, antwoorden geven en discussies voeren. Tegenover StudyGo, mag je hier ook chatten, zonder dat een of andere tutor dat verwijdert!",
-        selector: "#pixel-area", // target the absolute pixel region
-        side: "bottom" as const,
-        showControls: true,
-        showSkip: false,
-      },
-      {
-        icon: "🏠",
-        title: "Ga terug naar Start",
-        content: "Klik hier om terug te keren naar de startpagina.",
-        selector: ".startbutton",
-        side: "bottom" as const,
-        showControls: false,
-        showSkip: true,
-        clickThroughOverlay: true,
-      },
-      {
-        icon: "📃",
-        title: "Overzicht Lijsten",
-        content: (
-          <div className="w-full flex flex-col">
-            <p>Hier komen je recent bekeken/geoefende lijsten te staan.</p>
-            <p>Zo komt het eruit te zien:</p>
-            <img
-              src="https://cdn.polarlearn.nl/polarlearn/listpreview.png"
-              alt="Overzicht lijsten"
-              className="mt-4 w-60 h-auto rounded-lg"
-            />
-          </div>
-        ),
-        selector: "",
-        side: "bottom" as const,
-        showControls: true,
-        showSkip: true,
-      },
-      {
-        icon: "🎉",
-        title: "Klaar!",
-        content:
-          "Je bent klaar met de rondleiding! Je kunt nu beginnen met het gebruiken van PolarLearn.",
-        selector: "",
-        showControls: true,
-        showSkip: true,
-      },
-    ],
-  },
-];
+import Providers from "@/components/providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -352,52 +206,14 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: art }}
         />
         <SessionWrapper>
-          <UserDataProvider userData={userData}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem={false}
-              storageKey="polarlearn.theme"
-            >
-              {!finishedTour ? (
-                <NextStepProvider>
-                  <TourInitializer tourName="mainTour" />
-                  <NextStep steps={steps} cardComponent={DarkCard}>
-                    <TourNavigator />
-                    <ToastProvider>
-                      <StreakProvider streakData={streakData}>
-                        <WSProvider>
-                          <>
-                            <ImpersonationCheck />
-                            <ImpersonationStyles />
-                            <TopNavBar isAdmin={userData.isAdmin} />
-                            {children}
-                          </>
-                          {footerContent}
-                          <AnalyticsProvider />
-                        </WSProvider>
-                      </StreakProvider>
-                    </ToastProvider>
-                  </NextStep>
-                </NextStepProvider>
-              ) : (
-                <ToastProvider>
-                  <StreakProvider streakData={streakData}>
-                    <WSProvider>
-                      <>
-                        <ImpersonationCheck />
-                        <ImpersonationStyles />
-                        <TopNavBar isAdmin={userData.isAdmin} />
-                        {children}
-                      </>
-                      {footerContent}
-                      <AnalyticsProvider />
-                    </WSProvider>
-                  </StreakProvider>
-                </ToastProvider>
-              )}
-            </ThemeProvider>
-          </UserDataProvider>
+          <Providers
+            userData={userData}
+            streakData={streakData}
+            finishedTour={finishedTour}
+            footerContent={footerContent}
+          >
+            {children}
+          </Providers>
         </SessionWrapper>
       </body>
     </html>

@@ -406,7 +406,7 @@ export const TopNavBar = memo(function TopNavBar({
     const showOnSubjects =
       pathname.startsWith("/learn/subject") || pathname === "/learn/subjects";
     const hideOnCreateList = pathname === "/home/createlist";
-    const showOnHomeRoutes = pathname === "/" || pathname.startsWith("/home");
+    const showOnHomeRoutes = pathname === "/" || pathname.startsWith("/home") || pathname.startsWith("/admin");
     const isSearchRoute = pathname.startsWith("/home/search");
 
     const showOnGroups =
@@ -428,6 +428,7 @@ export const TopNavBar = memo(function TopNavBar({
         !isSearchExpanded &&
         (pathname.startsWith("/home") ||
           showOnViewList ||
+          pathname.startsWith("/admin") ||
           showOnSubjects ||
           showOnGroups) &&
         !isSearchRoute,
@@ -529,7 +530,6 @@ export const TopNavBar = memo(function TopNavBar({
 
       <div className="h-16" />
       <style>{`
-        /* Ensure smooth transition when impersonation banner appears/disappears */
         nav.fixed {
           transition: top 0.3s ease;
         }

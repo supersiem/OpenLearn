@@ -10,7 +10,7 @@ import CreatorLink from "@/components/links/CreatorLink";
 import { addToRecentLists } from "@/utils/actions/updateRecentLists";
 import { addToRecentSubjects } from "@/utils/actions/updateRecentSubjects";
 import { Metadata } from "next";
-import { getUserNameById, getUserIdByName } from '@/serverActions/getUserName';
+import { getUserNameById } from '@/serverActions/getUserName';
 import { isUUID } from '@/utils/uuid';
 
 import Image from "next/image";

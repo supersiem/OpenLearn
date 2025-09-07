@@ -253,4 +253,4 @@ echo "  sudo pkill mongod"
 echo "🟩 Of als je systemd gebruikt:"
 echo "  sudo systemctl stop mongod"
 echo
-echo "Veel succes! 🚀"
+echo "Veel succes en bedankt voor het bijdragen! 🚀"
