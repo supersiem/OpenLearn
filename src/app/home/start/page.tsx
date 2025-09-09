@@ -13,8 +13,10 @@ async function getRecentSubjects() {
   const user = await getUserFromSession(
     (await cookies()).get("polarlearn.session-id")?.value as string
   );
+  if (!user?.id) return [];
+
   const account = await prisma.user.findUnique({
-    where: { id: user?.id },
+    where: { id: user.id },
   });
   return (account?.list_data as any)?.recent_subjects || [];
 }
@@ -23,7 +25,7 @@ async function getRecentLists() {
   const user = await getUserFromSession(
     (await cookies()).get("polarlearn.session-id")?.value as string
   );
-  if (!user) return [];
+  if (!user?.id) return [];
 
   const account = await prisma.user.findUnique({
     where: { id: user.id },
@@ -115,7 +117,7 @@ async function getUserGroups() {
   const user = await getUserFromSession(
     (await cookies()).get("polarlearn.session-id")?.value as string
   );
-  if (!user) return [];
+  if (!user?.id) return [];
 
   const userData = await prisma.user.findUnique({
     where: { id: user.id },
