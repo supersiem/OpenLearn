@@ -151,7 +151,7 @@ app.get('/ws', upgradeWebSocket((c) => {
           }
         })
         let user = null
-        if (session && session.id) {
+        if (session && session.userId) {
           user = await prisma.user.findUnique({ where: { id: session.userId } })
         }
         if (user) {

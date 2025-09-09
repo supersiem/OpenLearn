@@ -129,7 +129,7 @@ export default async function RootLayout({
         const session = await prisma.session.findFirst({
           where: { sessionID: sessionId as string }
         });
-        if (session) {
+        if (session && session.userId) {
           const user = await prisma.user.findUnique({
             where: { id: session.userId }
           });
