@@ -23,7 +23,7 @@ const steps = [
         icon: "📖",
         title: "Welkom bij PolarLearn!",
         content:
-          "Welkom bij PolarLearn! Ontdek alle functionaliteiten en voordelen van PolarLearn in deze korte rondleiding.",
+          (<div className="flex flex-col gap-2"><p>Welkom bij PolarLearn! Ontdek alle functionaliteiten en voordelen van PolarLearn in deze korte rondleiding.</p> <p>⚠️ Waarschuwing! PolarLearn is nog in de pre-v1 fase, dus er kunnen nog zeker nog bugs en niet-afgemaakte functies zijn! Meld een bug op onze discord of GitHub. Bedankt!</p></div>),
         selector: "", // empty selector triggers centered dialog
         showControls: true,
         showSkip: true,
