@@ -281,7 +281,7 @@ export default async function Page({
                   userId={postcreator?.id}
                   displayName={postcreator?.name}
                 />
-                {postcreator.role === "admin" && (
+                {postcreator?.role === "admin" && (
                   <Badge className="bg-red-500 text-white ml-1 rounded-md">
                     <ShieldUser />
                     Administrator

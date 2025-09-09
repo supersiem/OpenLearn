@@ -123,7 +123,7 @@ export default async function Page({
   const isCreator = groupData?.creator === currentUserId || groupData?.creator === currentUserName;
   const isAdmin = Array.isArray(groupData?.admins) ?
     groupData.admins.includes(currentUserId) : false;
-  const isPlatformAdmin = currentUser.role === 'admin';
+  const isPlatformAdmin = currentUser?.role === 'admin';
 
   // Check membership based on either ID or name to handle different storage formats
   const isMember = members.includes(currentUserId) ||

@@ -64,7 +64,7 @@ export async function createPostServer(
     }
 
     // Check if user is allowed to use the announcement category
-    if (validatedData.category === "announcement" && user.role !== "admin") {
+    if (validatedData.category === "announcement" && user?.role !== "admin") {
       return {
         success: false,
         error: "Je hebt geen toestemming om aankondigingen te maken.",

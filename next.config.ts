@@ -13,9 +13,9 @@ const nextConfig: NextConfig = {
     reactCompiler: process.env.NODE_ENV === 'production', // Only enable in production
     // Optimize bundling
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    // Enable server source maps for better error debugging
+    serverSourceMaps: true,
   },
-  // Disable source maps in development for faster builds
-  productionBrowserSourceMaps: process.env.NODE_ENV === 'production',
 };
 
 // Only apply Sentry config in production
@@ -42,8 +42,6 @@ const config = process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_
     // Automatically tree-shake Sentry logger statements to reduce bundle size
     disableLogger: true,
 
-    // Enables automatic instrumentation of Vercel Cron Monitors.
-    automaticVercelMonitors: true,
   })
   : nextConfig;
 

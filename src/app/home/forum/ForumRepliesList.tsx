@@ -163,7 +163,7 @@ export default function ForumRepliesList({
                                             userId={replyCreator?.id}
                                             displayName={replyCreator?.name}
                                         />
-                                        {replyCreator.role === "admin" && (
+                                        {replyCreator?.role === "admin" && (
                                             <Badge className="bg-red-500 text-white ml-1 rounded-md">
                                                 <ShieldUser />
                                                 Administrator
