@@ -84,6 +84,7 @@
     "remark-gfm": "^4.0.1",
     "require-in-the-middle": "^7.5.2",
     "sharp": "^0.34.3",
+    "source-map-support": "^0.5.21",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "tsconfig-paths": "^4.2.0",

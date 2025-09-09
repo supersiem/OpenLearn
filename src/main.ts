@@ -9,7 +9,7 @@
 
 // POLARLEARN SERVER
 // Dit bestand start PolarLearn zelf, wijzig niet tenzij je ECHT weet wat je doet!!!
-
+import 'source-map-support/register';
 import { createServer } from "http";
 import { parse } from "url";
 import next from "next";
