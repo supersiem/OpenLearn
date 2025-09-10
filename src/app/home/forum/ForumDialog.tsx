@@ -16,26 +16,13 @@ import ReactMarkdown from 'react-markdown';
 import Tabs, { TabItem } from "@/components/Tabs";
 import { SelectCategoryCombobox } from "./selectCategoryCombobox";
 import { useUserDataStore } from "@/store/user/UserDataProvider";
+import MarkdownRenderer from "@/components/md";
 
 // Memoized markdown preview component
 const MarkdownPreview = memo(({ content }: { content: string }) => (
   <div className="bg-neutral-800 border border-neutral-700 h-40 overflow-y-auto p-3 rounded-md prose prose-invert max-w-none whitespace-pre-line">
     {content ? (
-      <ReactMarkdown components={{
-        h1: ({ node, ...props }) => <h1 className="text-4xl font-bold my-4" {...props} />,
-        h2: ({ node, ...props }) => <h2 className="text-3xl font-bold my-3" {...props} />,
-        h3: ({ node, ...props }) => <h3 className="text-2xl font-semibold my-2" {...props} />,
-        img: ({ src, alt, ...props }) => (
-          <img
-            src={src}
-            alt={alt || ""}
-            style={{ maxWidth: "100%", maxHeight: "400px", height: "auto" }}
-            {...props}
-          />
-        ),
-      }}>
-        {content}
-      </ReactMarkdown>
+      <MarkdownRenderer content={content} />
     ) : (
       <p className="text-gray-400">Voorbeeldweergave verschijnt hier...</p>
     )}
