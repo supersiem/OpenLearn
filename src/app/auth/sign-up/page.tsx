@@ -22,8 +22,13 @@ export default async function SignUpPage() {
     }
   });
 
-  const isRegistrationEnabled = registrationConfig?.value === "true";
 
+  let isRegistrationEnabled = registrationConfig?.value === "true";
+
+
+  if (!registrationConfig) {
+    isRegistrationEnabled = true
+  }
   const signUpPage = (
     <>
       <ToastProvider>
