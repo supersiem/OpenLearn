@@ -19,6 +19,7 @@ interface GroupHeaderTabsProps {
     isAdmin: boolean;
     sessionRole?: string;
     groupId: string;
+    hasPendingRequest?: boolean;
 }
 
 export default function GroupHeaderTabs({
@@ -32,7 +33,8 @@ export default function GroupHeaderTabs({
     isCreator,
     isAdmin,
     sessionRole,
-    groupId
+    groupId,
+    hasPendingRequest
 }: GroupHeaderTabsProps) {
     const pathname = usePathname() || "";
     const segments = pathname.split('/');
@@ -41,7 +43,7 @@ export default function GroupHeaderTabs({
     // Determine URL tab
     const urlTab = tabs.some(tab => tab.id === segment) ? segment : 'lists';
     // Only hide header on restricted pages for non-members without override
-    const canBypassApproval = isCreator || isAdmin || sessionRole === 'admin';
+    const canBypassApproval = isCreator || isAdmin; // Removed sessionRole === 'admin'
     const isRestricted = !!requiresApproval && !isMember && !canBypassApproval;
 
     return (
@@ -60,7 +62,7 @@ export default function GroupHeaderTabs({
                     <h1 className="text-4xl font-extrabold">{groupName}</h1>
                     <div className="flex-grow" />
                     {/* Join/Leave buttons */}
-                    {!isMember && <JoinGroupButton groupId={groupId} requiresApproval={!!requiresApproval && !canBypassApproval} />}
+                    {!isMember && <JoinGroupButton groupId={groupId} requiresApproval={!!requiresApproval && !canBypassApproval} hasPendingRequest={hasPendingRequest} />}
                     {isMember && !isCreator && <LeaveGroupButton groupId={groupId} />}
                 </div>
                 <p className="mt-2">{groupDescription}</p>

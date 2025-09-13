@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { notificationId, read = true } = body;
+    const { notificationId, read, toggle = false } = body;
 
     if (!notificationId) {
       return NextResponse.json(
@@ -70,8 +70,13 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Update the notification's read status
-    currentNotifications[notificationId].read = read;
+    // Toggle mode: flip the current read status
+    if (toggle) {
+      currentNotifications[notificationId].read = !currentNotifications[notificationId].read;
+    } else {
+      // Legacy mode: set specific read status
+      currentNotifications[notificationId].read = read !== undefined ? read : true;
+    }
 
     // Update user's notification data
     await prisma.user.update({
@@ -82,7 +87,10 @@ export async function PUT(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { success: true },
+      {
+        success: true,
+        newReadStatus: currentNotifications[notificationId].read
+      },
       { status: 200 }
     );
   } catch (error) {

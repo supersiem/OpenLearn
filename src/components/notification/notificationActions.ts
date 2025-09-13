@@ -17,6 +17,13 @@ interface NotificationData {
     [key: string]: NotificationItem;
 }
 
+// Define return type for notification actions
+interface NotificationActionResult {
+    success: boolean;
+    message: string;
+    newReadStatus?: boolean;
+}
+
 // Helper function to safely convert JSON to NotificationData
 function safelyParseNotificationData(data: any): NotificationData {
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
@@ -211,8 +218,8 @@ export async function deleteNotification(notificationKey: string) {
     }
 }
 
-// Add a function to mark a single notification as read
-export async function markNotificationAsRead(notificationKey: string) {
+// Add a function to toggle a single notification's read status
+export async function markNotificationAsRead(notificationKey: string): Promise<NotificationActionResult> {
     try {
         const cookieStore = await cookies();
         const sessionId = cookieStore.get("polarlearn.session-id")?.value;
@@ -229,18 +236,15 @@ export async function markNotificationAsRead(notificationKey: string) {
         // Get current notifications
         const notificationData = safelyParseNotificationData(user.notificationData);
 
-        // Check if notification exists and is not already read
+        // Check if notification exists
         if (!notificationData[notificationKey]) {
             return { success: false, message: "Notificatie niet gevonden" };
         }
 
-        if (notificationData[notificationKey].read) {
-            return { success: true, message: "Notificatie was al gelezen" };
-        }
-
-        // Create a copy and mark as read
+        // Create a copy and toggle the read status
         const updatedNotifications = { ...notificationData };
-        updatedNotifications[notificationKey].read = true;
+        const currentReadStatus = updatedNotifications[notificationKey].read;
+        updatedNotifications[notificationKey].read = !currentReadStatus;
 
         // Update in database
         await prisma.user.update({
@@ -250,9 +254,13 @@ export async function markNotificationAsRead(notificationKey: string) {
             }
         });
 
-        return { success: true, message: "Notificatie gemarkeerd als gelezen" };
+        const message = !currentReadStatus
+            ? "Notificatie gemarkeerd als gelezen"
+            : "Notificatie gemarkeerd als ongelezen";
+
+        return { success: true, message, newReadStatus: !currentReadStatus };
     } catch (error) {
-        console.error("Error marking notification as read:", error);
+        console.error("Error toggling notification read status:", error);
         return { success: false, message: "Er ging iets mis" };
     }
 }

@@ -7,7 +7,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Button1 from "../button/Button1";
 import { useEffect, useState } from "react";
-import { markNotificationsAsRead, markNotificationAsRead } from "./notificationActions";
 import React from "react";
 import * as LucideIcons from "lucide-react";
 import { LucideProps } from "lucide-react";
@@ -88,9 +87,16 @@ export default function NotificationNav() {
         if (!notifications) return;
 
         try {
-            const result = await markNotificationsAsRead();
+            const response = await fetch("/api/v1/notifications/mark-all-read", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-            if (result.success) {
+            const result = await response.json();
+
+            if (response.ok && result.success) {
                 // Update local state
                 const updatedNotifications = { ...notifications };
                 Object.keys(updatedNotifications).forEach(key => {
@@ -102,7 +108,7 @@ export default function NotificationNav() {
                 setNotifications(updatedNotifications);
                 setReadAll(true);
             } else {
-                console.error("Failed to mark notifications as read:", result.message);
+                console.error("Failed to mark notifications as read:", result.error || result.message);
             }
         } catch (error) {
             console.error("Error marking notifications as read:", error);
@@ -131,27 +137,38 @@ export default function NotificationNav() {
         }
     };
 
-    // New function to mark a notification as read
+    // New function to toggle a notification's read status
     const markAsRead = async (key: string) => {
-        if (!notifications || notifications[key].read) return;
+        if (!notifications) return;
 
         try {
-            const result = await markNotificationAsRead(key);
+            const response = await fetch(`/api/v1/notifications/${key}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    notificationId: key,
+                    toggle: true
+                }),
+            });
 
-            if (result.success) {
+            const result = await response.json();
+
+            if (response.ok && result.success) {
                 const updatedNotifications = { ...notifications };
-                updatedNotifications[key].read = true;
+                updatedNotifications[key].read = result.newReadStatus ?? !notifications[key].read;
 
                 setNotifications(updatedNotifications);
 
                 // Check if all notifications are now read
                 const allRead = Object.values(updatedNotifications).every(notif => notif.read);
-                if (allRead) {
-                    setReadAll(true);
-                }
+                setReadAll(allRead);
+            } else {
+                console.error("Failed to toggle notification read status:", result.error || result.message);
             }
         } catch (error) {
-            console.error("Error marking notification as read:", error);
+            console.error("Error toggling notification read status:", error);
         }
     };
 
@@ -194,7 +211,7 @@ export default function NotificationNav() {
                     <Bell className="w-6 h-6" />
                     {unreadCount > 0 && (
                         <Badge
-                            variant="destructive"
+                            style={{ backgroundColor: "#ef4444" }}
                             className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center rounded-full"
                         >
                             {unreadCount > 99 ? '99+' : unreadCount}
@@ -205,7 +222,7 @@ export default function NotificationNav() {
             <PopoverContent className="min-w-100 z-110 drop-shadow-2xl min-h-40 flex flex-col space-y-3 navbar-popover">
                 <div className="flex flex-row items-center justify-center ">
                     <Bell className="w-6 h-6 mr-3" />
-                    <h1 className="text-2xl font-extrabold pr-3">Meldingen</h1>
+                    <h1 className="text-2xl font-extrabold pr-3">Berichten</h1>
                     <Button1
                         text={`${readAll ? "Alles gelezen" : "Alles lezen"}`}
                         icon={readAll ? <Check /> : <BellDot />}
@@ -215,7 +232,7 @@ export default function NotificationNav() {
                 </div>
                 <hr className="border-neutral-700" />
                 {loading ? (
-                    <div className="text-center py-2">Notifications laden...</div>
+                    <div className="text-center py-2">Berichten laden...</div>
                 ) : error ? (
                     <div className="text-center py-2 text-red-400">{error}</div>
                 ) : (
@@ -237,14 +254,14 @@ export default function NotificationNav() {
                                         <button
                                             onClick={(e) => deleteNotification(key, e)}
                                             className="text-neutral-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            aria-label="Delete notification"
+                                            aria-label="Bericht verwijderen"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
                                 ))
                         ) : (
-                            <div className="text-center py-2 text-neutral-500">Je hebt geen meldingen..</div>
+                            <div className="text-center py-2 text-neutral-500">Je hebt geen berichten..</div>
                         )}
                     </div>
                 )}

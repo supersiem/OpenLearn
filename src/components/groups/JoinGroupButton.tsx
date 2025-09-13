@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Button1 from "@/components/button/Button1";
-import { UserPlus, Clock, Loader2 } from "lucide-react";
-import { joinGroup } from "@/serverActions/groupActions";
+import { UserPlus, Clock, Loader2, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
@@ -34,7 +33,14 @@ export default function JoinGroupButton({
 
         setIsLoading(true);
         try {
-            const result = await joinGroup(groupId);
+            const response = await fetch(`/api/v1/groups/${groupId}/join`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const result = await response.json();
 
             if (result.success) {
                 toast.success(result.message);
@@ -53,14 +59,49 @@ export default function JoinGroupButton({
         }
     };
 
+    const handleCancelRequest = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`/api/v1/groups/${groupId}/join`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                toast.success(result.message);
+                setIsPending(false);
+                router.refresh();
+            } else {
+                toast.error(result.error || "Er is een fout opgetreden");
+            }
+        } catch (error) {
+            console.error("Error canceling request:", error);
+            toast.error("Er is een fout opgetreden");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     if (isPending) {
         return (
-            <Button1
-                onClick={() => { }}
-                disabled={true}
-                text="Verzoek in behandeling"
-                icon={<Clock className="h-5 w-5" />}
-            />
+            <div className="flex space-x-2">
+                <Button1
+                    onClick={() => { }}
+                    disabled={true}
+                    text="Wacht op goedkeuring"
+                    icon={<Clock className="h-5 w-5 text-yellow-400" />}
+                />
+                <Button1
+                    onClick={handleCancelRequest}
+                    disabled={isLoading}
+                    text={isLoading ? "Bezig..." : "Verzoek intrekken"}
+                    icon={isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-5 w-5" />}
+                />
+            </div>
         );
     }
 

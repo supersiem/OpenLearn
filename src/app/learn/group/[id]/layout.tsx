@@ -24,6 +24,18 @@ export default async function GroupLayout({ children, params }: GroupLayoutProps
     const isMember = members.includes(currentUser?.id || '') || members.includes(currentUser?.name || '') || isCreator;
 
     const isPlatformAdmin = session?.role === 'admin';
+
+    // Check if user has a pending approval request
+    let hasPendingRequest = false;
+    if (currentUser && groupData?.toBeApproved) {
+        const pendingApprovals = groupData.toBeApproved;
+        if (Array.isArray(pendingApprovals)) {
+            hasPendingRequest = pendingApprovals.includes(currentUser.id);
+        } else if (typeof pendingApprovals === 'object') {
+            hasPendingRequest = Object.keys(pendingApprovals).includes(currentUser.id);
+        }
+    }
+
     const tabs: TabItem[] = [
         { id: 'lists', label: 'Lijsten', content: <></> },
         { id: 'members', label: 'Leden', content: <></> },
@@ -47,6 +59,7 @@ export default async function GroupLayout({ children, params }: GroupLayoutProps
                 isAdmin={isAdmin}
                 sessionRole={session?.role ?? undefined}
                 groupId={id}
+                hasPendingRequest={hasPendingRequest}
             />
 
             {/* content section */}
