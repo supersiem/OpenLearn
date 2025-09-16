@@ -6,7 +6,18 @@ import { Textarea } from "@/components/ui/textarea"
 import Button1 from "@/components/button/Button1"
 import { toast } from "react-toastify"
 import { useRouter } from "next/navigation"
-import { sendNotificationToUser } from "@/utils/notifications/sendNotification"
+import Tabs from "@/components/Tabs"
+import MarkdownRenderer from "@/components/md"
+
+const MarkdownPreview = memo(({ content }: { content: string }) => (
+  <div className="bg-neutral-800 border border-neutral-700 h-40 overflow-y-auto p-3 rounded-md prose prose-invert max-w-none whitespace-pre-line">
+    {content ? (
+      <MarkdownRenderer content={content} />
+    ) : (
+      <p className="text-gray-400">Voorbeeldweergave verschijnt hier...</p>
+    )}
+  </div>
+));
 
 
 interface ForumReplyProps {
@@ -77,13 +88,33 @@ function ForumReply({ postId, userId, buttonText = "Beantwoorden" }: ForumReplyP
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Textarea
-              placeholder="Typ je antwoord hier..."
-              value={content}
-              onChange={handleContentChange}
-              className="min-h-[150px] border-neutral-600 resize-none"
-              required
-            />
+            <Tabs tabs={[
+              {
+                id: "write",
+                label: "Schrijven",
+                content: (
+                  <div>
+                    <Textarea
+                      placeholder="Typ je antwoord hier... Markdown wordt ondersteund."
+                      value={content}
+                      onChange={handleContentChange}
+                      className="min-h-[150px] resize-none bg-neutral-800 border-neutral-700 text-xl p-3"
+                      required
+                    />
+                    <div className="text-sm mt-2 text-gray-400">
+                      <p>Markdown tips:</p>
+                      <p>**vetgedrukt**, *schuingedrukt*, [link](https://url.com)</p>
+                      <p># Grote kop, ## Kleinere kop, ### Nog kleinere kop</p>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                id: "preview",
+                label: "Voorbeeld",
+                content: <MarkdownPreview content={content} />,
+              },
+            ]} defaultActiveTab="write" />
 
             <div className="flex justify-end space-x-2">
               <Button1
