@@ -8,9 +8,6 @@ const nextConfig: NextConfig = {
     appVersion: version,
   },
   experimental: {
-    nodeMiddleware: true,
-    ppr: 'incremental',
-    reactCompiler: process.env.NODE_ENV === 'production', // Only enable in production
     // Optimize bundling
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
     // Enable server source maps for better error debugging

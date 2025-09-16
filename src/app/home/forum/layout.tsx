@@ -7,11 +7,12 @@ import { prisma } from "@/utils/prisma";
 
 interface ForumLayoutProps {
     children: ReactNode;
-    params: { tab?: string[] };
+    params: Promise<{ tab?: string[] }>;
 }
 
 export default async function ForumLayout({ children, params }: ForumLayoutProps) {
-    const defaultTab = params.tab && params.tab.length > 0 ? params.tab[0] : "questions";
+    const resolvedParams = await params;
+    const defaultTab = resolvedParams.tab && resolvedParams.tab.length > 0 ? resolvedParams.tab[0] : "questions";
     const session = await getUserFromSession(
         (await cookies()).get("polarlearn.session-id")!.value
     );

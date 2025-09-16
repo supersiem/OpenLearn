@@ -73,7 +73,7 @@ async function ensureTTLIndexes() {
             ]
           });
           console.log(`✅ | Created TTL index for ${name}.${field}`);
-        } 
+        }
       } catch (error) {
         console.error(`❌ | Failed to create TTL index for ${name}.${field}:`, error);
       }
@@ -95,9 +95,24 @@ async function ensureTTLIndexes() {
     xfwd: true,
   });
 
+  // Add error handling for proxy
+  proxy.on('error', (err, req, res) => {
+    console.error('Proxy error:', err);
+    if (res && 'writeHead' in res && !res.headersSent) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Proxy error' }));
+    }
+  });
+
   // Start Next.js server with WebSocket forwarding
   const nextServer = createServer((req, res) => {
     const parsedUrl = parse(req.url!, true);
+
+    // Add error handling for the HTTP server
+    res.on('error', (err) => {
+      console.error('Response error:', err);
+    });
+
     if (req.url?.startsWith("/api/v1/ws")) {
       req.url = req.url.replace(/^\/api(\/v1)?\/ws/, "/ws");
       proxy.web(req, res, { target: `http://0.0.0.0:${honoPort}` });

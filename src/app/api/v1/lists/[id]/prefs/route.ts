@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getUserFromSession(
@@ -16,8 +16,18 @@ export async function PATCH(
       return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 401 })
     }
 
-    const listId = params.id
-    const body = await request.json()
+    const { id: listId } = await params
+
+    let body;
+    try {
+      body = await request.json()
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Ongeldige JSON' },
+        { status: 400 }
+      )
+    }
+
     const { flipQuestionLang } = body
 
     // Get current user data

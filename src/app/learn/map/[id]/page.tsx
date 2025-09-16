@@ -14,8 +14,8 @@ import { Metadata } from "next";
 // UUID validation regex pattern
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export default async function Page({ params }: { params: { id: Promise<string> } }) {
-  const id = await params.id;
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const map = await prisma.map.findUnique({ where: { id } });
 
   if (!map) {

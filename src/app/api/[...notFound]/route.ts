@@ -15,6 +15,3 @@ export const DELETE = (req: NextRequest) => createNotFoundResponse(req)
 export const PATCH = (req: NextRequest) => createNotFoundResponse(req)
 export const OPTIONS = (req: NextRequest) => createNotFoundResponse(req)
 export const HEAD = (req: NextRequest) => createNotFoundResponse(req)
-export function SOCKET(req: NextRequest) {
-    return new NextResponse('idioot', { status: 404 })
-}
