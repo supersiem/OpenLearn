@@ -16,7 +16,6 @@ function ThemeSync() {
     const storedTheme = localStorage.getItem("polarlearn.theme")
 
     if (!storedTheme) {
-      // Fetch theme from server if not in localStorage
       fetch("/api/v1/settings/theme")
         .then(res => res.json())
         .then(data => {
@@ -25,7 +24,7 @@ function ThemeSync() {
           }
         })
         .catch(err => {
-          // Could not fetch theme from server, using default
+          setTheme("dark")
         })
     }
   }, [setTheme])
@@ -39,8 +38,6 @@ function ThemeSync() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ theme }),
-      }).catch(err => {
-        // Could not sync theme to server
       })
     }
   }, [theme])

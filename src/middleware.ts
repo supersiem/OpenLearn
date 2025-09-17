@@ -6,8 +6,6 @@ import { getTourState } from "./serverActions/getTourState";
 import { getUserFromSession } from "./utils/auth/auth";
 import { Embed, Webhook } from "@vermaysha/discord-webhook";
 
-const webhook = new Webhook(process.env.DISCORD_WEBHOOK || "");
-
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
@@ -84,9 +82,11 @@ export async function middleware(request: NextRequest) {
       .setColor("#0099ff")
       .setTimestamp();
 
-    webhook.setUsername("Iemand zit gaar te doen");
-    webhook.addEmbed(embed);
-    webhook.setContent(`@here
+    // Create a fresh webhook instance to prevent embed stacking
+    const freshWebhook = new Webhook(process.env.DISCORD_WEBHOOK || "");
+    freshWebhook.setUsername("Iemand zit gaar te doen");
+    freshWebhook.addEmbed(embed);
+    freshWebhook.setContent(`@here
 \`\`\`
 [ Automatische scanrapport ]
 Tijd: ${new Date().toLocaleString()}
