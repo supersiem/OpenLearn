@@ -86,7 +86,7 @@ export default function ActivatePage() {
           {activationStatus === "success" && (
             <div className="space-y-4">
               <div className="bg-green-500 rounded-full p-3 w-16 h-16 flex items-center justify-center mx-auto">
-                <Check/>
+                <Check />
               </div>
               <h2 className="text-xl font-semibold text-white">
                 Account Geactiveerd!

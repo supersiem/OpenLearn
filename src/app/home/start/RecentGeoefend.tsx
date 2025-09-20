@@ -133,17 +133,6 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
   return (
     <div className="recent-practiced">
       <div className="space-y-4 relative">
-        <div
-          id="pixel-area-start"
-          style={{
-            position: 'absolute',
-            top: '0px',
-            left: '16px',
-            width: 'calc(100% - 32px)',
-            height: '154px',
-          }}
-        />
-
         {/* Multi-selection controls */}
         {selectableItems.length >= 2 && (
           <div className="px-3 pt-1 pb-4 flex flex-row gap-4">

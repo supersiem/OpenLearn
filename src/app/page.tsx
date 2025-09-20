@@ -40,7 +40,7 @@ import SecondMarketingComponent from '@/components/marketing/2';
 export default function Home() {
     return (
         <div className='p-0 m-0'>
-            
+
             <div className="hidden md:flex flex-col">
                 <div className="hidden md:flex flex-col">
                     <div className="relative flex">

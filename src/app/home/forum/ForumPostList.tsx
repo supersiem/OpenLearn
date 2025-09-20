@@ -89,19 +89,7 @@ export default function ForumPostList({
 
   return (
     <>
-      {/* Invisible box to highlight a specific pixel region */}
-      <div
-        id="pixel-area"
-        style={{
-          position: 'absolute',
-          left: "60px",
-          top: "270px",
-          width: "1090px",
-          height: "400px",
-          pointerEvents: 'none',
-        }}
-      />
-      <div id="step4" className="rounded-md overflow-hidden">
+      <div className="rounded-md overflow-hidden">
         <InfiniteScroll
           dataLength={sortedPosts.length}
           next={loadMorePosts}

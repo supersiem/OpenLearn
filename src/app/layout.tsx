@@ -6,7 +6,6 @@ import Head from "next/head";
 import SessionWrapper from "@/components/SessionWrapper";
 import React from "react";
 import { cookies } from "next/headers";
-import { getTourState } from "@/serverActions/getTourState";
 import { decodeCookie } from "@/utils/auth/session";
 import { prisma } from "@/utils/prisma";
 import { getImpersonationData } from "@/utils/auth/getImpersonationData";
@@ -94,7 +93,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { finishedTour } = await getTourState();
   const art = `                                          
                                                __ 
      _____     _         __                   |  |
@@ -252,7 +250,6 @@ export default async function RootLayout({
           <Providers
             userData={userData}
             streakData={streakData}
-            finishedTour={finishedTour}
             footerContent={footerContent}
             sysMsgData={sysMsgData}
           >
