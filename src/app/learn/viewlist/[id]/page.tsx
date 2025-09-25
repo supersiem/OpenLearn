@@ -34,7 +34,6 @@ interface PageParams {
 interface WordPair {
     "1": string;  // term
     "2": string;  // definition
-    id: number;
 }
 
 // Helper function to validate if an object is a WordPair
@@ -43,8 +42,7 @@ function isWordPair(obj: any): obj is WordPair {
         obj !== null &&
         typeof obj === 'object' &&
         typeof obj["1"] === 'string' &&
-        typeof obj["2"] === 'string' &&
-        typeof obj.id === 'number'
+        typeof obj["2"] === 'string'
     );
 }
 

@@ -581,7 +581,6 @@ export default function CreateListTool({
     try {
       // Make sure we have minimal required data
       const formattedPairs = pairs.map((pair) => ({
-        id: pair.id,
         "1": pair["1"] || "",
         "2": pair["2"] || "",
       }));
@@ -693,7 +692,6 @@ export default function CreateListTool({
     }
 
     const formattedPairs = pairs.map((pair) => ({
-      id: pair.id,
       "1": pair["1"] || "",
       "2": pair["2"] || "",
     }));
