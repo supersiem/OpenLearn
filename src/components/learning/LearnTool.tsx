@@ -1,9 +1,65 @@
 "use client";
+
+function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showProgress }: {
+  show: boolean;
+  userInput: string;
+  correctAnswer: string;
+  onMark: (correct: boolean) => void;
+  progress: number;
+  showProgress: boolean;
+}) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <>
+          <motion.div
+            className="absolute inset-0 bg-yellow-500 opacity-35 rounded-lg pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.35 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          />
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center text-white z-20 flex-col"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+            style={{ pointerEvents: 'auto' }}
+          >
+            <CircleAlert size={50}  />
+            <h1 className="text-2xl font-bold mt-2">Je hebt een typfout gemaakt!</h1>
+            <div className="mt-4 text-lg">
+              <span className="block">Ingevuld: <span className="font-mono bg-neutral-900/60 px-2 py-1 rounded">{userInput}</span></span>
+              <span className="block mt-1">Verwacht: <span className="font-mono bg-neutral-900/60 px-2 py-1 rounded">{correctAnswer}</span></span>
+            </div>
+            <div className="flex gap-4 mt-6">
+              <Button1 text="Goed rekenen" onClick={() => onMark(true)} />
+              <Button1 text="Fout rekenen" onClick={() => onMark(false)} />
+            </div>
+          </motion.div>
+          {showProgress && (
+            <motion.div
+              className="absolute bottom-4 left-4 right-4 pointer-events-none z-10"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <Progress value={progress} className="h-2" />
+            </motion.div>
+          )}
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
 import React, { useState, useEffect } from 'react';
 import { useListStore } from './listStore';
 import Button1 from '@/components/button/Button1';
 import { Input } from '../ui/input';
-import { CircleCheck, CircleX } from 'lucide-react';
+import { detectTypfout } from './typfout';
+import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
 import { Progress } from '../ui/progress';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -171,6 +227,8 @@ export default function LearnTool() {
   const [userInput, setUserInput] = useState('');
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [isTypfout, setIsTypfout] = useState(false);
+  const [showTypfout, setShowTypfout] = useState(false);
   const [progress, setProgress] = useState(100);
   const [isTimerActive, setIsTimerActive] = useState(false);
   // For multiple choice: options are provided server-side on the currentWord as `options`.
@@ -204,13 +262,41 @@ export default function LearnTool() {
     };
   }, [isTimerActive, showResult, isCorrect]);
 
+  // Global handler: when an overlay is visible (result screens), allow Enter to advance
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter') return;
+
+      // if an input or textarea is focused, don't hijack Enter (let onKeyPress handle it)
+      const active = document.activeElement as HTMLElement | null;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+
+      // if typfout overlay is visible, we don't advance here (user should choose Good/Wrong)
+      if (showTypfout) return;
+
+      if (showResult) {
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showResult, showTypfout]);
+
   const handleSubmit = () => {
     if (!currentWord || !userInput.trim()) return;
-
+    const answer = currentWord["2"] || '';
     const correct = checkAnswer(userInput);
+    const typfout = !correct && detectTypfout(userInput, answer);
     setIsCorrect(correct);
+    setIsTypfout(typfout);
+    if (typfout) {
+      setShowTypfout(true);
+      setShowResult(false);
+      setIsTimerActive(false);
+      return;
+    }
     setShowResult(true);
-
     if (correct) {
       answerCorrect();
       setProgress(100);
@@ -220,6 +306,21 @@ export default function LearnTool() {
       setProgress(100);
       setIsTimerActive(true);
     }
+  };
+  // Handler voor typfout popup
+  const handleTypfoutMark = (wasCorrect: boolean) => {
+    setIsCorrect(wasCorrect);
+    // reset typfout flag so the normal correct/incorrect overlays show
+    setIsTypfout(false);
+    setShowTypfout(false);
+    setShowResult(true);
+    setIsTimerActive(true);
+    if (wasCorrect) {
+      answerCorrect();
+    } else {
+      answerWrong(userInput);
+    }
+    setProgress(100);
   };
 
   // Handler for mind mode 'Controleer' button
@@ -441,10 +542,18 @@ export default function LearnTool() {
             showProgress={isTimerActive}
           />
           <IncorrectScreen
-            show={showResult && !isCorrect}
+            show={showResult && !isCorrect && !isTypfout}
             correctAnswer={currentWord?.["2"] || ""}
             progress={progress}
             showProgress={isTimerActive}
+          />
+          <TypfoutScreen
+            show={showTypfout}
+            userInput={userInput}
+            correctAnswer={currentWord?.["2"] || ''}
+            onMark={handleTypfoutMark}
+            progress={progress}
+            showProgress={false}
           />
         </>
       )}
