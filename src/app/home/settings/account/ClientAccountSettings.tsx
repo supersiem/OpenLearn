@@ -18,8 +18,6 @@ import {
   EyeOff,
   AlertTriangle,
   Trash,
-  AlertCircle,
-  CircleCheck,
   Upload,
   X,
   User,
@@ -157,9 +155,9 @@ export default function ClientAccountSettings({ initialData }: Props) {
     const file = event.target.files?.[0];
     if (file) {
       // Validate file type
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
       if (!allowedTypes.includes(file.type)) {
-        toast.error("Alleen JPEG, PNG en WebP bestanden zijn toegestaan.");
+        toast.error("Alleen JPEG, PNG, WebP en GIF bestanden zijn toegestaan.");
         return;
       }
 
@@ -384,7 +382,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
                   : "Geen profielfoto"}
               </p>
               <p className="text-xs text-neutral-400">
-                JPEG, PNG of WebP. Max 5MB.
+                JPEG, PNG, WebP of GIF. Max 5MB.
               </p>
             </div>
           </div>
@@ -419,7 +417,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
               </div>
               <div className="flex space-x-2 mt-4">
                 <Button1
-                  text={profilePictureLoading ? "Uploaden..." : "Uploaden"}
+                  text={profilePictureLoading ? "Uploaden... Dit kan even duren..." : "Uploaden"}
                   onClick={handleProfilePictureUpload}
                   disabled={profilePictureLoading}
                   icon={
@@ -443,7 +441,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
           <div className="flex space-x-2">
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp,image/gif"
               onChange={handleFileSelect}
               className="sr-only"
               disabled={profilePictureLoading}
