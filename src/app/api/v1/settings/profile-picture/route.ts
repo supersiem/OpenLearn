@@ -6,7 +6,7 @@ import { PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, DeleteObje
 import sharp from 'sharp'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     // Validate file type
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { success: false, message: 'Alleen JPEG, PNG en WebP bestanden zijn toegestaan.' },
+        { success: false, message: 'Alleen JPEG, PNG, WebP en GIF bestanden zijn toegestaan.' },
         { status: 400 }
       )
     }
@@ -54,12 +54,30 @@ export async function POST(request: NextRequest) {
     // Compress image ONLY if it's over the size limit
     if (buffer.length > MAX_FILE_SIZE) {
       try {
-        buffer = await sharp(buffer)
-          .resize({ width: 1024, withoutEnlargement: true })
-          .webp({ quality: 80 })
-          .toBuffer();
-        fileType = 'image/webp';
-        fileExtension = 'webp';
+        if (file.type === 'image/gif') {
+          // For GIFs, try to compress as GIF first, fallback to WebP if needed
+          buffer = await sharp(buffer)
+            .resize({ width: 1024, withoutEnlargement: true })
+            .gif()
+            .toBuffer();
+          // If still too large after GIF compression, convert to WebP
+          if (buffer.length > MAX_FILE_SIZE) {
+            buffer = await sharp(buffer)
+              .resize({ width: 800, withoutEnlargement: true })
+              .webp({ quality: 80 })
+              .toBuffer();
+            fileType = 'image/webp';
+            fileExtension = 'webp';
+          }
+        } else {
+          // For other formats, use WebP compression
+          buffer = await sharp(buffer)
+            .resize({ width: 1024, withoutEnlargement: true })
+            .webp({ quality: 80 })
+            .toBuffer();
+          fileType = 'image/webp';
+          fileExtension = 'webp';
+        }
       } catch (compressionError) {
         console.error('Error compressing image:', compressionError);
         return NextResponse.json(

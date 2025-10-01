@@ -30,9 +30,9 @@ export default function GroupPictureManager({
     const file = event.target.files?.[0];
     if (file) {
       // Validate file type
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
       if (!allowedTypes.includes(file.type)) {
-        toast.error("Alleen JPEG, PNG en WebP bestanden zijn toegestaan.");
+        toast.error("Alleen JPEG, PNG, WebP en GIF bestanden zijn toegestaan.");
         return;
       }
 
@@ -148,7 +148,7 @@ export default function GroupPictureManager({
               {imageUrl ? "Huidige groepsfoto" : "Geen groepsfoto ingesteld"}
             </p>
             <p className="text-xs text-neutral-500">
-              Ondersteunde formaten: JPEG, PNG, WebP (max 5MB)
+              Ondersteunde formaten: JPEG, PNG, WebP, GIF (max 5MB)
             </p>
           </div>
         </div>
@@ -195,7 +195,7 @@ export default function GroupPictureManager({
         <div className="flex space-x-2">
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,image/gif"
             onChange={handleFileSelect}
             className="sr-only"
             disabled={isUploading}
