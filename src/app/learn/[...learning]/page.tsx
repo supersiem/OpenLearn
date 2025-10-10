@@ -124,8 +124,60 @@ export default async function LearningPages({ params }: { params: Promise<{ lear
     published: listData.published
   };
 
+  let learnListQueue: { word: string; mode: string; answer: string; mcOpts?: string[] }[] = [];
+
+  for (let i = 0; i < list.data.length; i++) {
+    // Server-side: build unique multiple-choice options and always include the correct answer
+    const correctAnswer = list.data[i]["2"];
+    const desiredCount = Math.min(4, list.data.length);
+    const optsSet = new Set<string>();
+    optsSet.add(correctAnswer);
+    // Fill the set with random other answers until we have the desired count
+    let attempts = 0;
+    while (optsSet.size < desiredCount && attempts < 50) {
+      const r = Math.floor(Math.random() * list.data.length);
+      optsSet.add(list.data[r]["2"]);
+      attempts++;
+    }
+    const mcOpts = Array.from(optsSet);
+    // Shuffle
+    for (let k = mcOpts.length - 1; k > 0; k--) {
+      const j = Math.floor(Math.random() * (k + 1));
+      const tmp = mcOpts[k];
+      mcOpts[k] = mcOpts[j];
+      mcOpts[j] = tmp;
+    }
+
+    learnListQueue.push({
+      word: list.data[i]["1"],
+      mode: "test",
+      answer: correctAnswer
+    })
+    learnListQueue.push({
+      word: list.data[i]["1"],
+      mode: "hints",
+      answer: correctAnswer
+    })
+    learnListQueue.push({
+      word: list.data[i]["1"],
+      mode: "mc",
+      answer: correctAnswer,
+      mcOpts: mcOpts
+    })
+
+    // Also attach options to the list item so the server-rendered currentWord has options
+    list.data[i].options = mcOpts;
+  }
+  // Shuffle the learnListQueue using Fisher-Yates to ensure random order
+  for (let i = learnListQueue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = learnListQueue[i];
+    learnListQueue[i] = learnListQueue[j];
+    learnListQueue[j] = tmp;
+  }
+
   return (
-    <ListStoreProvider initialData={{ list, method, flipQuestionLang }}>
+    <ListStoreProvider initialData={{ list, method, flipQuestionLang, learnListQueue }}>
       <div className="min-h-screen flex flex-col">
         <HeaderLearnTool />
         <div className="flex-1 flex items-center justify-center p-4">

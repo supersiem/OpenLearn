@@ -231,6 +231,8 @@ export default function LearnTool() {
     checkAnswer,
     answerCorrect,
     answerWrong,
+    learnListQueue,
+    dequeueLearnItem,
   } = useListStore();
 
   const [userInput, setUserInput] = useState('');
@@ -241,10 +243,14 @@ export default function LearnTool() {
   const [streakUpdate, setStreakUpdate] = useState<{ success?: boolean; streakUpdated?: boolean; currentStreak?: number } | null>(null);
   const [progress, setProgress] = useState(100);
   const [isTimerActive, setIsTimerActive] = useState(false);
-  // For multiple choice: options are provided server-side on the currentWord as `options`.
-  const mcOptions = (currentMethod === 'multichoice' && currentWord && Array.isArray((currentWord as any).options))
-    ? (currentWord as any).options as string[]
-    : [];
+  // Determine effective mode: if we're in learnlist and have a queue, use the first queue item's mode
+  const queueFirst = (learnListQueue && learnListQueue.length > 0) ? learnListQueue[0] : null;
+  // Determine a canonical mode to drive the UI. The queue uses short names like 'mc'.
+  const modeSource = (currentMethod === 'learnlist' && queueFirst) ? queueFirst.mode : currentMethod;
+  const effectiveMode = modeSource === 'mc' ? 'multichoice' : modeSource;
+
+  // For multiple choice: options should be provided server-side on the currentWord as `options`.
+  const mcOptions = Array.isArray((currentWord as any)?.options) ? (currentWord as any).options as string[] : [];
   // Mind mode state: show blue review overlay
   const [showBlueReview, setShowBlueReview] = useState(false);
 
@@ -365,7 +371,12 @@ export default function LearnTool() {
     setShowResult(false);
     setIsTimerActive(false);
     setProgress(100);
-    setRandomCurrentWord();
+    // Advance using learnListQueue when available
+    if (learnListQueue && learnListQueue.length > 0) {
+      dequeueLearnItem();
+    } else {
+      setRandomCurrentWord();
+    }
   };
 
   // For multiple choice, handle clicking an option
@@ -385,7 +396,6 @@ export default function LearnTool() {
       setIsTimerActive(true);
     }
   };
-
   const handleNext = () => {
     setUserInput('');
     setShowResult(false);
@@ -393,7 +403,13 @@ export default function LearnTool() {
     setProgress(100);
     // hide blue review overlay when moving to the next word
     setShowBlueReview(false);
-    setRandomCurrentWord();
+    // no local MC options to clear (server-provided options are used)
+    // If a learnListQueue is present, dequeue the next item; otherwise pick random
+    if (learnListQueue && learnListQueue.length > 0) {
+      dequeueLearnItem();
+    } else {
+      setRandomCurrentWord();
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -404,7 +420,6 @@ export default function LearnTool() {
     }
   };
   const displayWord = currentWord;
-
 
   if ((!currentList || !currentList.data?.length) && !showResult) {
 
@@ -431,7 +446,7 @@ export default function LearnTool() {
     <div className="bg-neutral-800 rounded-lg p-8 w-full max-w-md mx-auto text-white relative">
       <div className="space-y-6">
         {/* Render based on current method */}
-        {currentMethod === 'test' ? (
+        {effectiveMode === 'test' ? (
           <>
             <div className="text-center">
               <div className="text-2xl font-bold mb-4">
@@ -464,7 +479,7 @@ export default function LearnTool() {
               </div>
             </div>
           </>
-        ) : currentMethod === 'hints' ? (
+        ) : effectiveMode === 'hints' ? (
           <>
             <div className="text-center">
               <div className="text-2xl font-bold mb-4">
@@ -485,6 +500,9 @@ export default function LearnTool() {
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                // pressing Enter while focused in hints input should submit
+                // (works for both normal hints and learnlist-driven hints)
                 placeholder="Typ je antwoord..."
                 className="w-full bg-neutral-700 text-white h-13 rounded-lg text-center text-lg"
               />
@@ -504,7 +522,7 @@ export default function LearnTool() {
               </div>
             </div>
           </>
-        ) : currentMethod === 'multichoice' ? (
+        ) : effectiveMode === 'multichoice' ? (
           <>
             <div className="text-center">
               <div className="text-2xl font-bold mb-4">
@@ -514,7 +532,7 @@ export default function LearnTool() {
             <hr className="border-neutral-600" />
             <div className="space-y-4">
               <div className="flex flex-col gap-3">
-                {mcOptions.map((option) => (
+                {mcOptions.map((option: string) => (
                   <Button1
                     key={option}
                     text={option}
@@ -525,7 +543,7 @@ export default function LearnTool() {
               </div>
             </div>
           </>
-        ) : currentMethod === 'mind' ? (
+        ) : effectiveMode === 'mind' ? (
           <>
             <div className="text-center">
               <div className="text-2xl font-bold mb-4">
@@ -548,19 +566,20 @@ export default function LearnTool() {
             </div>
             <div className="bg-blue-600/20 border border-blue-500/30 rounded-lg p-4">
               <p className="text-blue-300 font-medium">
-                {currentMethod === 'learnlist' && 'LearnList Modus'}
-                {!['learnlist', 'multichoice', 'mind'].includes(currentMethod || '') && `${currentMethod} Modus`}
+                {currentMethod === 'learnlist' && queueFirst ? `LearnList — ${queueFirst.mode === 'mc' ? 'multichoice' : queueFirst.mode}` : `Mode: ${effectiveMode}`}
               </p>
-              <p className="text-sm text-neutral-400 mt-2">
-                Deze modus wordt binnenkort geïmplementeerd
-              </p>
+              {['test', 'hints', 'multichoice', 'mind'].includes(effectiveMode || '') ? (
+                <p className="text-sm text-neutral-400 mt-2">Gebruik de {effectiveMode} interface om te oefenen.</p>
+              ) : (
+                <p className="text-sm text-neutral-400 mt-2">Deze modus wordt binnenkort geïmplementeerd</p>
+              )}
             </div>
           </div>
         )}
       </div>
 
       {/* Overlay screens - show for test, hints, and multichoice modes */}
-      {(currentMethod === 'test' || currentMethod === 'hints' || currentMethod === 'multichoice') && (
+      {(effectiveMode === 'test' || effectiveMode === 'hints' || effectiveMode === 'multichoice') && (
         <>
           <CorrectScreen
             show={showResult && isCorrect}

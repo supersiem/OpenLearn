@@ -7,6 +7,7 @@ export interface ListItem {
   "1": string; // source term (e.g., "sum")
   "2": string; // target term (e.g., "zijn")
   id?: number; // optional id from database
+  options?: string[];
 }
 
 export interface List {
@@ -38,6 +39,7 @@ export interface ListStoreState {
   currentMethod: string | null; // Current learning method (learnlist, hints, test, etc.)
   originalWordCount: number; // Total words at start (for progress calculation)
   flipQuestionLang: boolean; // Whether question/answer languages are flipped
+  learnListQueue: { word: string; mode: string; answer: string; mcOpts?: string[] }[] | null;
   score: { correct: number; wrong: number };
   lastAnswer: { isCorrect: boolean; userAnswer: string; correctAnswer: string } | null;
   answerLog: AnswerLogEntry[];
@@ -54,20 +56,52 @@ export interface ListStoreState {
   clearLog: () => void;
   getCorrectWords: () => AnswerLogEntry[];
   getWrongWords: () => AnswerLogEntry[];
+  // Learnlist queue management
+  setLearnListQueue: (queue: { word: string; mode: string; answer: string; mcOpts?: string[] }[] | null) => void;
+  dequeueLearnItem: () => void;
+  // Learnlist queue management
+
 }
 
 // Store factory for SSR hydration
-export const createListStore = (initData?: { list?: List; method?: string; flipQuestionLang?: boolean, learnListQueue?: { word: string, mode: string } }) =>
+export const createListStore = (initData?: { list?: List; method?: string; flipQuestionLang?: boolean, learnListQueue?: { word: string, mode: string, answer: string, mcOpts?: string[] }[] }) =>
   createStore<ListStoreState>((set, get) => ({
     currentList: initData?.list || null,
     currentWord: initData?.list?.data?.[0] || null, // Set first word immediately for SSR
     currentMethod: initData?.method || null,
     originalWordCount: initData?.list?.data?.length || 0, // Track original count for progress
     flipQuestionLang: initData?.flipQuestionLang || false,
+    learnListQueue: initData?.learnListQueue || null,
     score: { correct: 0, wrong: 0 },
     lastAnswer: null,
-    learnListQueue: {},
     answerLog: [],
+    setLearnListQueue: (queue: { word: string; mode: string; answer: string; mcOpts?: string[] }[] | null) => set({ learnListQueue: queue }),
+    dequeueLearnItem: () => {
+      set((state: ListStoreState) => {
+        const q = state.learnListQueue ? [...state.learnListQueue] : [];
+        if (!q || q.length === 0) return state;
+        const next = q.shift()!;
+
+        // try to find matching ListItem in currentList
+        let matched = state.currentList?.data?.find(item => item["1"] === next.word && item["2"] === next.answer) || null;
+
+        // If the queue item provided mcOpts, attach them to the matched item or to the synthetic currentWord
+        if (next.mcOpts && next.mcOpts.length > 0) {
+          if (matched) {
+            matched = { ...matched, options: next.mcOpts };
+          }
+        }
+
+        const newCurrentWord = matched || { "1": next.word, "2": next.answer, ...(next.mcOpts ? { options: next.mcOpts } : {}) };
+
+        return {
+          ...state,
+          learnListQueue: q,
+          currentMethod: next.mode,
+          currentWord: newCurrentWord
+        } as unknown as ListStoreState;
+      });
+    },
     shuffleList: () => {
       set((state: ListStoreState) => ({
         ...state,
