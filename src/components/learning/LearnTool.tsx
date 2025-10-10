@@ -1,6 +1,6 @@
 "use client";
 import { updateDailyStreak } from '../streak/updateStreak';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useListStore } from './listStore';
 import Button1 from '@/components/button/Button1';
 import { Input } from '../ui/input';
@@ -8,6 +8,8 @@ import { detectTypfout } from './typfout';
 import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
 import { Progress } from '../ui/progress';
 import { motion, AnimatePresence } from 'motion/react';
+import { saveLearnSession } from '@/utils/saveLearnSession';
+import type { ListStoreState } from './listStore';
 
 function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showProgress }: {
   show: boolean;
@@ -223,6 +225,7 @@ function generateHint(answer: string): string {
 }
 
 export default function LearnTool() {
+  const storeState = useListStore();
   const {
     currentList,
     currentWord,
@@ -233,7 +236,7 @@ export default function LearnTool() {
     answerWrong,
     learnListQueue,
     dequeueLearnItem,
-  } = useListStore();
+  } = storeState;
 
   const [userInput, setUserInput] = useState('');
   const [showResult, setShowResult] = useState(false);
@@ -253,6 +256,40 @@ export default function LearnTool() {
   const mcOptions = Array.isArray((currentWord as any)?.options) ? (currentWord as any).options as string[] : [];
   // Mind mode state: show blue review overlay
   const [showBlueReview, setShowBlueReview] = useState(false);
+
+  // Helper function to save the session
+  const saveSession = async (isPaused = true, isCompleted = false) => {
+    if (!currentList?.list_id) {
+      return;
+    }
+
+    try {
+      await saveLearnSession(currentList.list_id, storeState as ListStoreState, isPaused, isCompleted);
+    } catch (error) {
+      console.error('[LearnTool] Failed to save session:', error);
+    }
+  };
+
+  // Helper function to delete the session
+  const deleteSession = async () => {
+    if (!currentList?.list_id) {
+      return;
+    }
+
+    try {
+      const mode = storeState.mainMode || storeState.currentMethod || 'test';
+
+      const response = await fetch(`/api/v1/lists/${currentList.list_id}/session?mode=${mode}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        console.error('[LearnTool] Failed to delete session:', response.status);
+      }
+    } catch (error) {
+      console.error('[LearnTool] Failed to delete session:', error);
+    }
+  };
 
   // Timer for overlay visibility (both correct and incorrect)
   useEffect(() => {
@@ -282,11 +319,39 @@ export default function LearnTool() {
   useEffect(() => {
     async function fetchStreakUpdate() {
       const result = await updateDailyStreak();
-      console.log('Streak update result:', JSON.stringify(result));
       setStreakUpdate(result);
     }
     fetchStreakUpdate();
   }, []);
+
+  // Auto-save session when queue changes (after dequeue) or when moving to next word
+  const prevQueueLengthRef = useRef<number | null>(null);
+  const prevWordIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const currentQueueLength = learnListQueue?.length ?? 0;
+    const currentWordId = currentWord?.id ?? null;
+
+    // Skip initial mount
+    if (prevQueueLengthRef.current === null && prevWordIdRef.current === null) {
+      prevQueueLengthRef.current = currentQueueLength;
+      prevWordIdRef.current = currentWordId;
+      return;
+    }
+
+    // If queue length decreased (item was dequeued), save the session
+    if (learnListQueue && currentQueueLength < (prevQueueLengthRef.current ?? 0)) {
+      saveSession(true, false);
+    }
+    // Or if word changed in non-queue mode (regular test/hints/mc modes)
+    else if (!learnListQueue && currentWordId !== prevWordIdRef.current && prevWordIdRef.current !== null) {
+      saveSession(true, false);
+    }
+
+    prevQueueLengthRef.current = currentQueueLength;
+    prevWordIdRef.current = currentWordId;
+  }, [learnListQueue?.length, currentWord?.id]);
+
 
   // Global handler: when an overlay is visible (result screens), allow Enter to advance
   useEffect(() => {
@@ -332,6 +397,8 @@ export default function LearnTool() {
       setProgress(100);
       setIsTimerActive(true);
     }
+
+    // Session will be auto-saved after dequeue in handleNext
   };
   // Handler voor typfout popup
   const handleTypfoutMark = (wasCorrect: boolean) => {
@@ -347,6 +414,8 @@ export default function LearnTool() {
       answerWrong(userInput);
     }
     setProgress(100);
+
+    // Session will be auto-saved after dequeue in handleNext
   };
 
   // Handler for mind mode 'Controleer' button
@@ -365,7 +434,7 @@ export default function LearnTool() {
       answerWrong('');
     }
 
-    // Reset UI state and move to the next word immediately
+    // Reset UI state and move to the next word immediately (session will be auto-saved after dequeue)
     setShowBlueReview(false);
     setUserInput('');
     setShowResult(false);
@@ -395,6 +464,8 @@ export default function LearnTool() {
       setProgress(100);
       setIsTimerActive(true);
     }
+
+    // Session will be auto-saved after dequeue in handleNext
   };
   const handleNext = () => {
     setUserInput('');
@@ -421,12 +492,17 @@ export default function LearnTool() {
   };
   const displayWord = currentWord;
 
-  console.log(learnListQueue)
-
   // Check completion: if using learnListQueue, check if queue is empty; otherwise check currentList.data
   const isCompleted = learnListQueue
     ? learnListQueue.length === 0
     : (!currentList || !currentList.data?.length);
+
+  // Delete session when list is finished
+  useEffect(() => {
+    if (isCompleted && !showResult) {
+      deleteSession();
+    }
+  }, [isCompleted, showResult]);
 
   if (isCompleted && !showResult) {
 
@@ -444,6 +520,7 @@ export default function LearnTool() {
       </div>
     );
   }
+
 
   return (
     <div className="bg-neutral-800 rounded-lg p-8 w-full max-w-md mx-auto text-white relative">

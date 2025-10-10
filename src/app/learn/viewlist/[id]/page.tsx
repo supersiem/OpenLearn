@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { getUserFromSession } from "@/utils/auth/auth";
 import { Badge } from "@/components/ui/badge";
 import UserListButtons from "@/components/learning/UserListButtons";
+import SessionButtons from "@/components/learning/SessionButtons";
 import CreatorLink from "@/components/CreatorLink";
 import { addToRecentLists } from "@/utils/actions/updateRecentLists";
 import { addToRecentSubjects } from "@/utils/actions/updateRecentSubjects";
@@ -174,6 +175,30 @@ const ViewListPage: NextPage<any, PageParams> = async ({ params }: PageParams) =
         listData?.creator === currentUser?.id ||
         currentUser?.role === "admin");
     const isUnpublished = listData?.published === false;
+
+    // Check for existing learn sessions for this user and list
+    let existingSessions: { mode: string; lastActiveAt: Date }[] = [];
+    if (currentUser && listData) {
+        try {
+            const sessions = await prisma.learnSession.findMany({
+                where: {
+                    userId: currentUser.id,
+                    listId: id,
+                    isCompleted: false
+                },
+                select: {
+                    mode: true,
+                    lastActiveAt: true
+                },
+                orderBy: {
+                    lastActiveAt: 'desc'
+                }
+            });
+            existingSessions = sessions;
+        } catch (error) {
+            console.error("Error fetching learn sessions:", error);
+        }
+    }
 
     // Prefetch creator info to avoid CSR waterfall
     let creatorName = listData?.creator || "";
@@ -356,13 +381,17 @@ const ViewListPage: NextPage<any, PageParams> = async ({ params }: PageParams) =
                         />
                     </div>
 
-                    <div className="relative h-12">
-                        <Dropdown
-                            text="Oefenen"
-                            dropdownMatrix={practiceOptions}
-                            width={180}
-                            zIndex={10}
-                        />
+                    <div className="relative min-h-12">
+                        {existingSessions.length > 0 ? (
+                            <SessionButtons listId={id} sessions={existingSessions} />
+                        ) : (
+                            <Dropdown
+                                text="Oefenen"
+                                dropdownMatrix={practiceOptions}
+                                width={180}
+                                zIndex={10}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
