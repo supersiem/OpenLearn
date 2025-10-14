@@ -221,7 +221,6 @@ export default async function ViewListLayout({ children, params }: ViewListLayou
       <div className="pl-4">
         <Tabs tabs={tabs} defaultActiveTab={defaultTab} baseRoute={`/learn/viewlist/${id}`} withRoutes={true} renderContent={false} />
       </div>
-      {/* Content area */}
       <div className="my-4">
         {children}
       </div>

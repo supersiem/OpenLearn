@@ -120,8 +120,7 @@ export default async function ViewListTabPage({ params }: PageParams) {
   if (selectedTab === 'resultaten') {
     return (
       <div className="mt-4 px-4">
-        {/* Resultaten content will go here */}
-        <Image src={construction} alt="under construction!" width={500} height={100} />
+        
       </div>
     );
   }
