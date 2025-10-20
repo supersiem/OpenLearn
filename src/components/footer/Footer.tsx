@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { getUserFromSession } from "@/utils/auth/auth";
 import Image from "next/image";
 import pl500 from "@/app/img/pl-500.svg";
-import kofi from "@/app/img/kofi_symbol.webp";
+import HCB from "@/app/img/HCB-logo.svg";
 import Link from "next/link";
 
 export default async function Footer() {
@@ -96,15 +96,15 @@ export default async function Footer() {
             </a>
             <a
               className="flex items-center text-xl text-neutral-500 hover:text-white transition"
-              href="https://ko-fi.com/polarnl"
+              href="https://hcb.hackclub.com/donations/start/polarlearn"
               target="_blank"
               rel="noopener noreferrer"
-              title="Doneren via Ko-Fi"
-              aria-label="Ko-Fi"
+              title="Geef geld"
+              aria-label="HCB"
             >
-              <Image src={kofi} width={30} height={30} alt={"kofi"} />
+              <Image src={HCB} width={30} height={30} alt={"HCB logo"} />
               <div className="w-2" />
-              Ko-Fi
+              Doneren
             </a>
           </div>
         </div>
