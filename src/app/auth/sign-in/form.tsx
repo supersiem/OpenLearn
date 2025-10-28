@@ -271,7 +271,6 @@ export default function SignInForm({ googleEnabled = true, githubEnabled = true,
 
                 clearRedirectCookie();
 
-                // Refresh server data to update providers with new init data, then redirect
                 router.refresh();
                 setTimeout(() => {
                   router.push(gotoPath);

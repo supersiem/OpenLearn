@@ -1,6 +1,3 @@
-import { faCodeCommit } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import pkg from "@/../package.json";
 import { cookies } from "next/headers";
 import { getUserFromSession } from "@/utils/auth/auth";
@@ -8,6 +5,7 @@ import Image from "next/image";
 import pl500 from "@/app/img/pl-500.svg";
 import HCB from "@/app/img/HCB-logo.svg";
 import Link from "next/link";
+import { GitCommitHorizontal } from "lucide-react";
 
 export default async function Footer() {
   const user = await getUserFromSession(
@@ -25,10 +23,7 @@ export default async function Footer() {
         <div className="mt-2 flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-8 w-full">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center space-x-2">
-              <FontAwesomeIcon
-                icon={faCodeCommit as IconProp}
-                className="size-5"
-              />
+              <GitCommitHorizontal />
               <p>{process.env.NEXT_PUBLIC_GITINF}</p>
             </div>
             <p>PolarLearn versie: {pkg.version}</p>

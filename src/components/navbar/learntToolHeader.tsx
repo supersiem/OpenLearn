@@ -229,14 +229,16 @@ const MethodDropdown = memo(({
 }) => {
     const getMethodDisplayText = () => {
         switch (currentMethod) {
-            case "toets":
+            case "test":
                 return "Toets";
             case "hints":
                 return "Hints";
-            case "gedachten":
+            case "mind":
                 return "In gedachten";
-            case "multikeuze":
+            case "multichoice":
                 return "Meerkeuze";
+            case "learnlist":
+                return "Leren";
             default:
                 return "Leren";
         }
@@ -265,7 +267,7 @@ const HeaderLearnTool = memo(({
     onFlipQuestionLangChange,
 }: LearnToolHeaderProps) => {
     // Get stats and list info from the store
-    const { score, currentList, currentMethod, originalWordCount, learnListQueue, originalQueueLength } = useListStore();
+    const { score, currentList, currentMethod, mainMode, originalWordCount, learnListQueue, originalQueueLength } = useListStore();
     const correctAnswers = score.correct;
     const wrongAnswers = score.wrong;
 
@@ -348,15 +350,15 @@ const HeaderLearnTool = memo(({
             `/learn/mind/${listId}`,
         ],
         [
-            <div key="multikeuze" className="flex items-center">
+            <div key="meerkeuze" className="flex items-center">
                 <Image
                     src={livequiz}
-                    alt="Multikeuze plaatje"
+                    alt="meerkeuze plaatje"
                     width={20}
                     height={20}
                     className="mr-2"
                 />
-                <span className="font-medium">Multikeuze</span>
+                <span className="font-medium">Meerkeuze</span>
             </div>,
             `/learn/multichoice/${listId}`,
         ],
@@ -372,7 +374,7 @@ const HeaderLearnTool = memo(({
                 </div>
 
                 {/* Method dropdown */}
-                <MethodDropdown currentMethod={currentMethod || "learnlist"} learningMethods={learningMethods} />
+                <MethodDropdown currentMethod={mainMode || currentMethod || "learnlist"} learningMethods={learningMethods} />
 
                 {/* Progress bar */}
                 <ProgressBar progress={progress} />

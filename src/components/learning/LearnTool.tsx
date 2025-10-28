@@ -231,6 +231,7 @@ export default function LearnTool() {
     currentList,
     currentWord,
     currentMethod,
+    mainMode,
     setRandomCurrentWord,
     checkAnswer,
     answerCorrect,
@@ -484,8 +485,8 @@ export default function LearnTool() {
   };
   const displayWord = currentWord;
 
-  // Check completion: if using learnListQueue, check if queue is empty; otherwise check currentList.data
-  const isCompleted = learnListQueue
+  // Check completion: if using learnlist mode, check if queue is empty; otherwise check currentList.data
+  const isCompleted = (mainMode === 'learnlist' && learnListQueue)
     ? learnListQueue.length === 0
     : (!currentList || !currentList.data?.length);
 
