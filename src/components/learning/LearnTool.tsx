@@ -42,7 +42,6 @@ function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showP
             style={{ pointerEvents: 'auto' }}
           >
             <CircleAlert size={50} />
-            <CircleAlert size={50} />
             <h1 className="text-2xl font-bold mt-2">Je hebt een typfout gemaakt!</h1>
             <div className="mt-4 text-lg">
               <span className="block">Ingevuld: <span className="font-mono bg-neutral-900/60 px-2 py-1 rounded">{userInput}</span></span>
@@ -172,8 +171,6 @@ function BlueReview({ show, answer, onMark }: {
   show: boolean;
   answer: string;
   onMark: (correct: boolean) => void;
-  progress?: number;
-  showProgress?: boolean;
 }) {
   return (
     <AnimatePresence>
@@ -245,7 +242,6 @@ export default function LearnTool() {
   const [userInput, setUserInput] = useState('');
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [isTypfout, setIsTypfout] = useState(false);
   const [showTypfout, setShowTypfout] = useState(false);
   const [streakUpdate, setStreakUpdate] = useState<{ success?: boolean; streakUpdated?: boolean; currentStreak?: number; isNewStreak?: boolean } | null>(null);
   const [progress, setProgress] = useState(100);
@@ -336,18 +332,16 @@ export default function LearnTool() {
       return;
     }
 
-    // If queue length decreased (item was dequeued), save the session
-    if (learnListQueue && currentQueueLength < (prevQueueLengthRef.current ?? 0)) {
+    if (mainMode === 'learnlist' && learnListQueue && currentQueueLength < (prevQueueLengthRef.current ?? 0)) {
       saveSession(true, false);
     }
-    // Or if word changed in non-queue mode (regular test/hints/mc modes)
-    else if (!learnListQueue && currentWordId !== prevWordIdRef.current && prevWordIdRef.current !== null) {
+    else if (mainMode !== 'learnlist' && currentWordId !== prevWordIdRef.current && prevWordIdRef.current !== null) {
       saveSession(true, false);
     }
 
     prevQueueLengthRef.current = currentQueueLength;
     prevWordIdRef.current = currentWordId;
-  }, [learnListQueue?.length, currentWord?.id]);
+  }, [learnListQueue?.length, currentWord?.id, mainMode]);
 
 
   // Global handler: when an overlay is visible (result screens), allow Enter to advance
@@ -377,7 +371,6 @@ export default function LearnTool() {
     const correct = checkAnswer(userInput);
     const typfout = !correct && detectTypfout(userInput, answer);
     setIsCorrect(correct);
-    setIsTypfout(typfout);
     if (typfout) {
       setShowTypfout(true);
       setShowResult(false);
@@ -385,34 +378,26 @@ export default function LearnTool() {
       return;
     }
     setShowResult(true);
+    setProgress(100);
+    setIsTimerActive(true);
     if (correct) {
       answerCorrect();
-      setProgress(100);
-      setIsTimerActive(true);
     } else {
       answerWrong(userInput);
-      setProgress(100);
-      setIsTimerActive(true);
     }
-
-    // Session will be auto-saved after dequeue in handleNext
   };
   // Handler voor typfout popup
   const handleTypfoutMark = (wasCorrect: boolean) => {
     setIsCorrect(wasCorrect);
-    // reset typfout flag so the normal correct/incorrect overlays show
-    setIsTypfout(false);
     setShowTypfout(false);
     setShowResult(true);
     setIsTimerActive(true);
+    setProgress(100);
     if (wasCorrect) {
       answerCorrect();
     } else {
       answerWrong(userInput);
     }
-    setProgress(100);
-
-    // Session will be auto-saved after dequeue in handleNext
   };
 
   // Handler for mind mode 'Controleer' button
@@ -422,22 +407,20 @@ export default function LearnTool() {
   };
 
   const handleMindMark = (wasCorrect: boolean) => {
-    // Record the user's self-mark and immediately advance to next word
     setIsCorrect(wasCorrect);
     if (wasCorrect) {
       answerCorrect();
     } else {
-      // mark wrong; pass empty input (user didn't type an answer)
       answerWrong('');
     }
 
-    // Reset UI state and move to the next word immediately (session will be auto-saved after dequeue)
+    // Reset UI state and move to next word
     setShowBlueReview(false);
     setUserInput('');
     setShowResult(false);
     setIsTimerActive(false);
     setProgress(100);
-    // Advance using learnListQueue when available
+
     if (learnListQueue && learnListQueue.length > 0) {
       dequeueLearnItem();
     } else {
@@ -452,14 +435,12 @@ export default function LearnTool() {
     const correct = checkAnswer(option);
     setIsCorrect(correct);
     setShowResult(true);
+    setProgress(100);
+    setIsTimerActive(true);
     if (correct) {
       answerCorrect();
-      setProgress(100);
-      setIsTimerActive(true);
     } else {
       answerWrong(option);
-      setProgress(100);
-      setIsTimerActive(true);
     }
   };
   const handleNext = () => {
@@ -478,15 +459,6 @@ export default function LearnTool() {
       setRandomCurrentWord();
     }
   };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !showResult) {
-      handleSubmit();
-    } else if (e.key === 'Enter' && showResult) {
-      handleNext();
-    }
-  };
-  const displayWord = currentWord;
 
   const isCompleted = (mainMode === 'learnlist' && learnListQueue)
     ? learnListQueue.length === 0
@@ -518,6 +490,16 @@ export default function LearnTool() {
       deleteSession();
     }
   }, [isCompleted, showResult]);
+
+  // Save session when component unmounts (user navigates away)
+  useEffect(() => {
+    return () => {
+      // Only save if we're not at the completion state
+      if (currentList?.list_id && !isCompleted) {
+        saveSession(true, false);
+      }
+    };
+  }, [currentList?.list_id, isCompleted]);
 
   if (isCompleted && !showResult) {
 
@@ -575,12 +557,11 @@ export default function LearnTool() {
           className="bg-neutral-800 rounded-lg p-8 text-white relative"
         >
           <div className="space-y-6">
-            {/* Render based on current method */}
             {effectiveMode === 'test' ? (
               <>
                 <div className="text-center">
                   <div className="text-2xl font-bold mb-4">
-                    {displayWord?.["1"]}
+                    {currentWord?.["1"]}
                   </div>
                 </div>
                 <hr className="border-neutral-600" />
@@ -589,7 +570,16 @@ export default function LearnTool() {
                     type="text"
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (!showResult) {
+                          handleSubmit();
+                        } else {
+                          handleNext();
+                        }
+                      }
+                    }}
                     placeholder="Typ je antwoord..."
                     className="w-full bg-neutral-700 text-white h-13 rounded-lg text-center text-lg"
                   />
@@ -613,7 +603,7 @@ export default function LearnTool() {
               <>
                 <div className="text-center">
                   <div className="text-2xl font-bold mb-4">
-                    {displayWord?.["1"]}
+                    {currentWord?.["1"]}
                   </div>
                 </div>
                 <hr className="border-neutral-600" />
@@ -630,7 +620,16 @@ export default function LearnTool() {
                     type="text"
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (!showResult) {
+                          handleSubmit();
+                        } else {
+                          handleNext();
+                        }
+                      }
+                    }}
                     placeholder="Typ je antwoord..."
                     className="w-full bg-neutral-700 text-white h-13 rounded-lg text-center text-lg"
                   />
@@ -654,7 +653,7 @@ export default function LearnTool() {
               <>
                 <div className="text-center">
                   <div className="text-2xl font-bold mb-4">
-                    {displayWord?.["1"]}
+                    {currentWord?.["1"]}
                   </div>
                 </div>
                 <hr className="border-neutral-600" />
@@ -675,7 +674,7 @@ export default function LearnTool() {
               <>
                 <div className="text-center">
                   <div className="text-2xl font-bold mb-4">
-                    {displayWord?.["1"]}
+                    {currentWord?.["1"]}
                   </div>
                 </div>
                 <hr className="border-neutral-600 mb-4" />
@@ -686,11 +685,11 @@ export default function LearnTool() {
             ) : (
               <div className="text-center">
                 <div className="text-2xl font-bold mb-4">
-                  {displayWord?.["1"]}
+                  {currentWord?.["1"]}
                 </div>
                 <hr className="border-neutral-600 mb-4" />
                 <div className="text-lg text-neutral-300 mb-4">
-                  {displayWord?.["2"]}
+                  {currentWord?.["2"]}
                 </div>
                 <div className="bg-blue-600/20 border border-blue-500/30 rounded-lg p-4">
                   <p className="text-blue-300 font-medium">
@@ -715,7 +714,7 @@ export default function LearnTool() {
                 showProgress={isTimerActive}
               />
               <IncorrectScreen
-                show={showResult && !isCorrect && !isTypfout}
+                show={showResult && !isCorrect && !showTypfout}
                 correctAnswer={currentWord?.["2"] || ""}
                 progress={progress}
                 showProgress={isTimerActive}
@@ -731,13 +730,11 @@ export default function LearnTool() {
               />
             </>
           )}
-          {currentMethod === 'mind' && (
+          {effectiveMode === 'mind' && (
             <BlueReview
               show={showBlueReview}
-              answer={displayWord?.["2"] || ''}
+              answer={currentWord?.["2"] || ''}
               onMark={handleMindMark}
-              progress={progress}
-              showProgress={isTimerActive}
             />
           )}
         </motion.div>
