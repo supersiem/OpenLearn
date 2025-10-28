@@ -250,6 +250,7 @@ export default function LearnTool() {
   const [streakUpdate, setStreakUpdate] = useState<{ success?: boolean; streakUpdated?: boolean; currentStreak?: number; isNewStreak?: boolean } | null>(null);
   const [progress, setProgress] = useState(100);
   const [isTimerActive, setIsTimerActive] = useState(false);
+  const [cardKey, setCardKey] = useState(0); // Key to trigger card animation
   // Determine effective mode: if we're in learnlist and have a queue, use the first queue item's mode
   const queueFirst = (learnListQueue && learnListQueue.length > 0) ? learnListQueue[0] : null;
   // Determine a canonical mode to drive the UI. The queue uses short names like 'mc'.
@@ -468,6 +469,9 @@ export default function LearnTool() {
     setProgress(100);
     setShowBlueReview(false);
 
+    // Trigger card animation
+    setCardKey(prev => prev + 1);
+
     if (learnListQueue && learnListQueue.length > 0) {
       dequeueLearnItem();
     } else {
@@ -544,7 +548,7 @@ export default function LearnTool() {
             />
             <Button1
               text="Terug naar home"
-              onClick={() => { 
+              onClick={() => {
                 router.push('/home/start')
               }}
             />
@@ -556,173 +560,188 @@ export default function LearnTool() {
 
 
   return (
-    <div className="bg-neutral-800 rounded-lg p-8 w-full max-w-md mx-auto text-white relative">
-      <div className="space-y-6">
-        {/* Render based on current method */}
-        {effectiveMode === 'test' ? (
-          <>
-            <div className="text-center">
-              <div className="text-2xl font-bold mb-4">
-                {displayWord?.["1"]}
-              </div>
-            </div>
-            <hr className="border-neutral-600" />
-            <div className="space-y-4">
-              <Input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Typ je antwoord..."
-                className="w-full bg-neutral-700 text-white h-13 rounded-lg text-center text-lg"
-              />
+    <div className="w-full max-w-md mx-auto relative overflow-hidden">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.div
+          key={cardKey}
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '-100%' }}
+          transition={{
+            type: 'spring',
+            stiffness: 400,
+            damping: 35
+          }}
+          className="bg-neutral-800 rounded-lg p-8 text-white relative"
+        >
+          <div className="space-y-6">
+            {/* Render based on current method */}
+            {effectiveMode === 'test' ? (
+              <>
+                <div className="text-center">
+                  <div className="text-2xl font-bold mb-4">
+                    {displayWord?.["1"]}
+                  </div>
+                </div>
+                <hr className="border-neutral-600" />
+                <div className="space-y-4">
+                  <Input
+                    type="text"
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Typ je antwoord..."
+                    className="w-full bg-neutral-700 text-white h-13 rounded-lg text-center text-lg"
+                  />
 
-              <div className="text-center">
-                {!showResult ? (
-                  <Button1
-                    text="Controleer"
-                    onClick={handleSubmit}
-                  />
-                ) : (
-                  <Button1
-                    text="Volgende"
-                    onClick={handleNext}
-                  />
-                )}
-              </div>
-            </div>
-          </>
-        ) : effectiveMode === 'hints' ? (
-          <>
-            <div className="text-center">
-              <div className="text-2xl font-bold mb-4">
-                {displayWord?.["1"]}
-              </div>
-            </div>
-            <hr className="border-neutral-600" />
-            <div className="space-y-4">
-              {/* Hint display */}
-              <div className="text-center">
-                <p className="text-sm text-neutral-400 mb-2">Hint:</p>
-                <p className="text-lg font-mono text-blue-300 bg-blue-900/20 px-3 py-2 rounded border border-blue-500/30">
-                  {generateHint(currentWord?.["2"] || "")}
-                </p>
-              </div>
+                  <div className="text-center">
+                    {!showResult ? (
+                      <Button1
+                        text="Controleer"
+                        onClick={handleSubmit}
+                      />
+                    ) : (
+                      <Button1
+                        text="Volgende"
+                        onClick={handleNext}
+                      />
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : effectiveMode === 'hints' ? (
+              <>
+                <div className="text-center">
+                  <div className="text-2xl font-bold mb-4">
+                    {displayWord?.["1"]}
+                  </div>
+                </div>
+                <hr className="border-neutral-600" />
+                <div className="space-y-4">
+                  {/* Hint display */}
+                  <div className="text-center">
+                    <p className="text-sm text-neutral-400 mb-2">Hint:</p>
+                    <p className="text-lg font-mono text-blue-300 bg-blue-900/20 px-3 py-2 rounded border border-blue-500/30">
+                      {generateHint(currentWord?.["2"] || "")}
+                    </p>
+                  </div>
 
-              <Input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Typ je antwoord..."
-                className="w-full bg-neutral-700 text-white h-13 rounded-lg text-center text-lg"
-              />
+                  <Input
+                    type="text"
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Typ je antwoord..."
+                    className="w-full bg-neutral-700 text-white h-13 rounded-lg text-center text-lg"
+                  />
 
+                  <div className="text-center">
+                    {!showResult ? (
+                      <Button1
+                        text="Controleer"
+                        onClick={handleSubmit}
+                      />
+                    ) : (
+                      <Button1
+                        text="Volgende"
+                        onClick={handleNext}
+                      />
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : effectiveMode === 'multichoice' ? (
+              <>
+                <div className="text-center">
+                  <div className="text-2xl font-bold mb-4">
+                    {displayWord?.["1"]}
+                  </div>
+                </div>
+                <hr className="border-neutral-600" />
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-3">
+                    {mcOptions.map((option: string) => (
+                      <Button1
+                        key={option}
+                        text={option}
+                        onClick={() => handleMcClick(option)}
+                        disabled={showResult}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : effectiveMode === 'mind' ? (
+              <>
+                <div className="text-center">
+                  <div className="text-2xl font-bold mb-4">
+                    {displayWord?.["1"]}
+                  </div>
+                </div>
+                <hr className="border-neutral-600 mb-4" />
+                <div className="text-center">
+                  <Button1 text="Controleer" onClick={handleMindCheck} />
+                </div>
+              </>
+            ) : (
               <div className="text-center">
-                {!showResult ? (
-                  <Button1
-                    text="Controleer"
-                    onClick={handleSubmit}
-                  />
-                ) : (
-                  <Button1
-                    text="Volgende"
-                    onClick={handleNext}
-                  />
-                )}
+                <div className="text-2xl font-bold mb-4">
+                  {displayWord?.["1"]}
+                </div>
+                <hr className="border-neutral-600 mb-4" />
+                <div className="text-lg text-neutral-300 mb-4">
+                  {displayWord?.["2"]}
+                </div>
+                <div className="bg-blue-600/20 border border-blue-500/30 rounded-lg p-4">
+                  <p className="text-blue-300 font-medium">
+                    {currentMethod === 'learnlist' && queueFirst ? `LearnList — ${queueFirst.mode === 'mc' ? 'multichoice' : queueFirst.mode}` : `Mode: ${effectiveMode}`}
+                  </p>
+                  {['test', 'hints', 'multichoice', 'mind'].includes(effectiveMode || '') ? (
+                    <p className="text-sm text-neutral-400 mt-2">Gebruik de {effectiveMode} interface om te oefenen.</p>
+                  ) : (
+                    <p className="text-sm text-neutral-400 mt-2">Deze modus wordt binnenkort geïmplementeerd</p>
+                  )}
+                </div>
               </div>
-            </div>
-          </>
-        ) : effectiveMode === 'multichoice' ? (
-          <>
-            <div className="text-center">
-              <div className="text-2xl font-bold mb-4">
-                {displayWord?.["1"]}
-              </div>
-            </div>
-            <hr className="border-neutral-600" />
-            <div className="space-y-4">
-              <div className="flex flex-col gap-3">
-                {mcOptions.map((option: string) => (
-                  <Button1
-                    key={option}
-                    text={option}
-                    onClick={() => handleMcClick(option)}
-                    disabled={showResult}
-                  />
-                ))}
-              </div>
-            </div>
-          </>
-        ) : effectiveMode === 'mind' ? (
-          <>
-            <div className="text-center">
-              <div className="text-2xl font-bold mb-4">
-                {displayWord?.["1"]}
-              </div>
-            </div>
-            <hr className="border-neutral-600 mb-4" />
-            <div className="text-center">
-              <Button1 text="Controleer" onClick={handleMindCheck} />
-            </div>
-          </>
-        ) : (
-          <div className="text-center">
-            <div className="text-2xl font-bold mb-4">
-              {displayWord?.["1"]}
-            </div>
-            <hr className="border-neutral-600 mb-4" />
-            <div className="text-lg text-neutral-300 mb-4">
-              {displayWord?.["2"]}
-            </div>
-            <div className="bg-blue-600/20 border border-blue-500/30 rounded-lg p-4">
-              <p className="text-blue-300 font-medium">
-                {currentMethod === 'learnlist' && queueFirst ? `LearnList — ${queueFirst.mode === 'mc' ? 'multichoice' : queueFirst.mode}` : `Mode: ${effectiveMode}`}
-              </p>
-              {['test', 'hints', 'multichoice', 'mind'].includes(effectiveMode || '') ? (
-                <p className="text-sm text-neutral-400 mt-2">Gebruik de {effectiveMode} interface om te oefenen.</p>
-              ) : (
-                <p className="text-sm text-neutral-400 mt-2">Deze modus wordt binnenkort geïmplementeerd</p>
-              )}
-            </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Overlay screens - show for test, hints, and multichoice modes */}
-      {(effectiveMode === 'test' || effectiveMode === 'hints' || effectiveMode === 'multichoice') && (
-        <>
-          <CorrectScreen
-            show={showResult && isCorrect}
-            progress={progress}
-            showProgress={isTimerActive}
-          />
-          <IncorrectScreen
-            show={showResult && !isCorrect && !isTypfout}
-            correctAnswer={currentWord?.["2"] || ""}
-            progress={progress}
-            showProgress={isTimerActive}
-            setIsCorrect={handleTypfoutMark}
-          />
-          <TypfoutScreen
-            show={showTypfout}
-            userInput={userInput}
-            correctAnswer={currentWord?.["2"] || ''}
-            onMark={handleTypfoutMark}
-            progress={progress}
-            showProgress={false}
-          />
-        </>
-      )}
-      {currentMethod === 'mind' && (
-        <BlueReview
-          show={showBlueReview}
-          answer={displayWord?.["2"] || ''}
-          onMark={handleMindMark}
-          progress={progress}
-          showProgress={isTimerActive}
-        />
-      )}
+          {/* Overlay screens - show for test, hints, and multichoice modes */}
+          {(effectiveMode === 'test' || effectiveMode === 'hints' || effectiveMode === 'multichoice') && (
+            <>
+              <CorrectScreen
+                show={showResult && isCorrect}
+                progress={progress}
+                showProgress={isTimerActive}
+              />
+              <IncorrectScreen
+                show={showResult && !isCorrect && !isTypfout}
+                correctAnswer={currentWord?.["2"] || ""}
+                progress={progress}
+                showProgress={isTimerActive}
+                setIsCorrect={handleTypfoutMark}
+              />
+              <TypfoutScreen
+                show={showTypfout}
+                userInput={userInput}
+                correctAnswer={currentWord?.["2"] || ''}
+                onMark={handleTypfoutMark}
+                progress={progress}
+                showProgress={false}
+              />
+            </>
+          )}
+          {currentMethod === 'mind' && (
+            <BlueReview
+              show={showBlueReview}
+              answer={displayWord?.["2"] || ''}
+              onMark={handleMindMark}
+              progress={progress}
+              showProgress={isTimerActive}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
