@@ -1,6 +1,7 @@
 "use client";
 import Celebration from '@/components/streak/Celebration';
 import { useStreakUpdate } from '@/hooks/useStreakUpdate';
+import { useStreak } from '@/store/streak/StreakProvider';
 import React, { useState, useEffect, useRef } from 'react';
 import { useListStore } from './listStore';
 import Button1 from '@/components/button/Button1';
@@ -11,6 +12,7 @@ import { Progress } from '../ui/progress';
 import { motion, AnimatePresence } from 'motion/react';
 import { saveLearnSession } from '@/utils/saveLearnSession';
 import type { ListStoreState } from './listStore';
+import { useRouter } from 'next/navigation';
 
 function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showProgress }: {
   show: boolean;
@@ -253,6 +255,7 @@ export default function LearnTool() {
   // Determine a canonical mode to drive the UI. The queue uses short names like 'mc'.
   const modeSource = (currentMethod === 'learnlist' && queueFirst) ? queueFirst.mode : currentMethod;
   const effectiveMode = modeSource === 'mc' ? 'multichoice' : modeSource;
+  const router = useRouter()
 
   // For multiple choice: options should be provided server-side on the currentWord as `options`.
   const mcOptions = Array.isArray((currentWord as any)?.options) ? (currentWord as any).options as string[] : [];
@@ -457,18 +460,14 @@ export default function LearnTool() {
       setProgress(100);
       setIsTimerActive(true);
     }
-
-    // Session will be auto-saved after dequeue in handleNext
   };
   const handleNext = () => {
     setUserInput('');
     setShowResult(false);
     setIsTimerActive(false);
     setProgress(100);
-    // hide blue review overlay when moving to the next word
     setShowBlueReview(false);
-    // no local MC options to clear (server-provided options are used)
-    // If a learnListQueue is present, dequeue the next item; otherwise pick random
+
     if (learnListQueue && learnListQueue.length > 0) {
       dequeueLearnItem();
     } else {
@@ -485,13 +484,15 @@ export default function LearnTool() {
   };
   const displayWord = currentWord;
 
-  // Check completion: if using learnlist mode, check if queue is empty; otherwise check currentList.data
   const isCompleted = (mainMode === 'learnlist' && learnListQueue)
     ? learnListQueue.length === 0
     : (!currentList || !currentList.data?.length);
 
   const { handleListCompletion } = useStreakUpdate();
   const completedTriggeredRef = useRef(false);
+  const [showCelebration, setShowCelebration] = useState(true);
+  const currentStreakCount = useStreak(); // Get streak from store instead of API response
+
   useEffect(() => {
     if (!isCompleted || showResult) return;
     if (completedTriggeredRef.current) return;
@@ -522,13 +523,32 @@ export default function LearnTool() {
           <h2 className="text-2xl font-bold mb-2">Einde van de lijst!</h2>
           {streakUpdate?.success && streakUpdate?.streakUpdated ? (
             <>
-              <p className="text-lg text-neutral-300">
-                Je huidige reeks is nu <strong>{streakUpdate.currentStreak}</strong> dagen!
-              </p>
-              {streakUpdate?.isNewStreak ? <Celebration /> : null}
+              {streakUpdate?.isNewStreak !== undefined && showCelebration ? (
+                <Celebration
+                  streakCount={currentStreakCount}
+                  showMessage={true}
+                  loop={false}
+                  isNewStreak={streakUpdate.isNewStreak}
+                  onDismiss={() => setShowCelebration(false)}
+                />
+              ) : null}
             </>
           ) : null}
           <p className="text-lg text-neutral-300">Je hebt alle woorden geoefend. Goed gedaan!</p>
+          <div className='pt-4 flex flex-row gap-4'>
+            <Button1
+              text="Opnieuw oefenen"
+              onClick={() => {
+                window.location.reload()
+              }}
+            />
+            <Button1
+              text="Terug naar home"
+              onClick={() => { 
+                router.push('/home/start')
+              }}
+            />
+          </div>
         </>
       </div>
     );
@@ -594,8 +614,6 @@ export default function LearnTool() {
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                // pressing Enter while focused in hints input should submit
-                // (works for both normal hints and learnlist-driven hints)
                 placeholder="Typ je antwoord..."
                 className="w-full bg-neutral-700 text-white h-13 rounded-lg text-center text-lg"
               />
