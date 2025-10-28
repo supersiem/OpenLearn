@@ -69,7 +69,8 @@ export const createListStore = (initData?: { list?: List; method?: string; flipQ
   createStore<ListStoreState>((set, get) => ({
     currentList: initData?.list || null,
     currentWord: initData?.list?.data?.[0] || null, // Set first word immediately for SSR
-    currentMethod: initData?.method || null,
+  // If an initial learnListQueue is provided, treat the overall method as 'learnlist'
+  currentMethod: initData?.learnListQueue && initData?.learnListQueue.length > 0 ? 'learnlist' : initData?.method || null,
     originalWordCount: initData?.list?.data?.length || 0, // Track original count for progress
     originalQueueLength: initData?.learnListQueue?.length || 0, // Track original queue length for learnlist progress
     flipQuestionLang: initData?.flipQuestionLang || false,
@@ -77,7 +78,13 @@ export const createListStore = (initData?: { list?: List; method?: string; flipQ
     score: { correct: 0, wrong: 0 },
     lastAnswer: null,
     answerLog: [],
-    setLearnListQueue: (queue: { word: string; mode: string; answer: string; mcOpts?: string[] }[] | null) => set({ learnListQueue: queue }),
+    setLearnListQueue: (queue: { word: string; mode: string; answer: string; mcOpts?: string[] }[] | null) =>
+      set((state: ListStoreState) => ({
+        ...state,
+        learnListQueue: queue,
+        // When a learnListQueue is set, the overall method should be 'learnlist'
+        currentMethod: queue && queue.length > 0 ? 'learnlist' : state.currentMethod,
+      })),
     dequeueLearnItem: () => {
       set((state: ListStoreState) => {
         const q = state.learnListQueue ? [...state.learnListQueue] : [];
@@ -99,7 +106,9 @@ export const createListStore = (initData?: { list?: List; method?: string; flipQ
         return {
           ...state,
           learnListQueue: q,
-          currentMethod: next.mode,
+          // DO NOT overwrite the global currentMethod here. The overall method should stay 'learnlist'
+          // so UI controls (like the dropdown) reflect the learn mode. Individual queue items specify
+          // their own mode which the consumer (e.g. LearnTool) can read from the queue's first item.
           currentWord: newCurrentWord
         } as unknown as ListStoreState;
       });
