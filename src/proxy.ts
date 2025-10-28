@@ -4,7 +4,7 @@ import { Embed, Webhook } from "@vermaysha/discord-webhook";
 import { decodeCookie } from "@/utils/auth/session";
 import { prisma } from "@/utils/prisma";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Skip static files, API routes, and prefetch
@@ -175,6 +175,5 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
 }
 
 export const config = {
-  runtime: "nodejs",
-  matcher: ["/:path*"],
+  matcher: ["/:path*"]
 };
