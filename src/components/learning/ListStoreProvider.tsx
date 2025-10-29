@@ -11,6 +11,7 @@ export function ListStoreProvider({
     list?: List;
     method?: string;
     flipQuestionLang?: boolean;
+    sessionId?: string;
     learnListQueue?: { word: string; mode: string; answer: string; mcOpts?: string[] }[];
     score?: { correct: number; wrong: number };
     answerLog?: AnswerLogEntry[];

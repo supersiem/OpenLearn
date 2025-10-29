@@ -107,6 +107,8 @@ export default async function ViewListTabPage({ params }: PageParams) {
               toLanguageIcon={toLanguageIcon}
               isLanguageSubject={isLanguageSubject}
               listId={id}
+              subject={subject}
+              listName={listData?.name}
             />
           </div>
         ) : (

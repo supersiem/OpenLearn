@@ -185,6 +185,7 @@ model learnSession {
   // Session state
   currentWordIndex Int? // Index of current word being studied
   remainingWords   Json? // Array of remaining words to study
+  originalWords    Json? // Original full word list (never changes)
   learnListQueue   Json? // Queue for learnlist mode with modes and options
 
   // Progress tracking
@@ -200,7 +201,7 @@ model learnSession {
   lastWord   Json? // Current word being studied
   lastAnswer Json? // Last answer details
 
-  grade       Float? // Overall grade or score
+  grade Float? // Overall grade or score
 
   // Metadata
   isPaused    Boolean @default(false)

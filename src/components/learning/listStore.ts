@@ -41,6 +41,7 @@ export interface ListStoreState {
   originalWordCount: number;
   originalQueueLength: number;
   flipQuestionLang: boolean;
+  sessionId: string | null;  // For custom sessions
   learnListQueue: { word: string; mode: string; answer: string; mcOpts?: string[] }[] | null;
   score: { correct: number; wrong: number };
   lastAnswer: { isCorrect: boolean; userAnswer: string; correctAnswer: string } | null;
@@ -50,6 +51,7 @@ export interface ListStoreState {
   setList: (list: List) => void;
   setMethod: (method: string) => void;
   setFlipQuestionLang: (flip: boolean) => void;
+  setSessionId: (sessionId: string | null) => void;
   setRandomCurrentWord: () => void;
   clearCurrentWord: () => void;
   checkAnswer: (userAnswer: string) => boolean;
@@ -71,6 +73,7 @@ export const createListStore = (initData?: {
   list?: List;
   method?: string;
   flipQuestionLang?: boolean;
+  sessionId?: string;
   learnListQueue?: { word: string, mode: string, answer: string, mcOpts?: string[] }[];
   score?: { correct: number; wrong: number };
   answerLog?: AnswerLogEntry[];
@@ -120,11 +123,13 @@ export const createListStore = (initData?: {
       originalWordCount: initData?.originalWordCount ?? initData?.list?.data?.length ?? 0, // Track original count for progress
       originalQueueLength: initData?.originalQueueLength ?? initData?.learnListQueue?.length ?? 0, // Track original queue length for learnlist progress
       flipQuestionLang: initData?.flipQuestionLang || false,
+      sessionId: initData?.sessionId || null,  // For custom sessions
       learnListQueue: initData?.learnListQueue || null,
       score: initData?.score || { correct: 0, wrong: 0 },
       lastAnswer: null,
       answerLog: initData?.answerLog || [],
       incorrectAnswerLog: initData?.incorrectAnswerLog || [],
+      setSessionId: (sessionId: string | null) => set({ sessionId }),
       setLearnListQueue: (queue: { word: string; mode: string; answer: string; mcOpts?: string[] }[] | null) => set({ learnListQueue: queue }),
       dequeueLearnItem: () => {
         set((state: ListStoreState) => {

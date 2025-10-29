@@ -267,7 +267,7 @@ const HeaderLearnTool = memo(({
     onFlipQuestionLangChange,
 }: LearnToolHeaderProps) => {
     // Get stats and list info from the store
-    const { score, currentList, currentMethod, mainMode, originalWordCount, learnListQueue, originalQueueLength } = useListStore();
+    const { score, currentList, currentMethod, mainMode, originalWordCount, learnListQueue, originalQueueLength, sessionId } = useListStore();
     const correctAnswers = score.correct;
     const wrongAnswers = score.wrong;
 
@@ -289,11 +289,16 @@ const HeaderLearnTool = memo(({
         return Math.min((wordsCompleted / originalWordCount) * 100, 100);
     })();
 
+    // Check if this is a custom session (has sessionId)
+    const isCustomSession = !!sessionId;
+
     // Check if this is a combined list (multiple lists selected)
     const isCombinedList = listId.startsWith('combined-');
 
     // Determine the back button URL
-    const backButtonUrl = isCombinedList ? '/home/start' : `/learn/viewlist/${listId}`;
+    // For custom sessions or combined lists, go to home
+    // Otherwise, go to the list view page
+    const backButtonUrl = (isCustomSession || isCombinedList) ? '/home/start' : `/learn/viewlist/${listId}`;
 
     // Memoize the learning methods to prevent unnecessary re-renders
     const learningMethods = useMemo((): [React.ReactNode, string][] => [

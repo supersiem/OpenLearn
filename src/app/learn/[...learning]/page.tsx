@@ -28,7 +28,7 @@ interface List {
 }
 
 export default async function LearningPages({ params }: { params: Promise<{ learning: string[] }> }) {
-  const [method, listId] = (await params).learning;
+  const [method, listIdOrSessionId] = (await params).learning;
 
   // Validate the learning method
   const validMethods = ['learnlist', 'multichoice', 'hints', 'test', 'mind'];
@@ -36,22 +36,37 @@ export default async function LearningPages({ params }: { params: Promise<{ lear
     redirect('/home/start');
   }
 
-  if (!listId) {
+  if (!listIdOrSessionId) {
     redirect('/home/start');
   }
 
-  // Fetch the list data from the database
-  const listData = await prisma.practice.findFirst({
-    where: {
-      list_id: listId
-    },
-  });
+  // Check if this is a custom session (starts with 'session-')
+  const isCustomSession = listIdOrSessionId.startsWith('session-');
+  let sessionId: string | null = null;
+  let listId: string;
 
-  if (!listData) {
-    redirect('/home/start');
+  if (isCustomSession) {
+    // For custom sessions, the format is: session-{uuid}
+    sessionId = listIdOrSessionId.replace('session-', '');
+    listId = 'custom-session'; // Placeholder, will be replaced by actual session data
+  } else {
+    listId = listIdOrSessionId;
   }
 
-  // Get user session and check for existing learn session
+  // Fetch the list data from the database (skip for custom sessions as data is in the session)
+  let listData: any = null;
+
+  if (!isCustomSession) {
+    listData = await prisma.practice.findFirst({
+      where: {
+        list_id: listId
+      },
+    });
+
+    if (!listData) {
+      redirect('/home/start');
+    }
+  }  // Get user session and check for existing learn session
   let flipQuestionLang = false;
   let existingSession = null;
 
@@ -61,26 +76,46 @@ export default async function LearningPages({ params }: { params: Promise<{ lear
     );
 
     if (user) {
-      const userData = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { list_data: true }
-      });
+      if (!isCustomSession) {
+        // Only load user preferences for regular lists
+        const userData = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { list_data: true }
+        });
 
-      const listPrefs = (userData?.list_data as any)?.prefs?.[listId];
-      flipQuestionLang = Boolean(listPrefs?.flipQuestionLang);
+        const listPrefs = (userData?.list_data as any)?.prefs?.[listId];
+        flipQuestionLang = Boolean(listPrefs?.flipQuestionLang);
 
-      // Check for existing active learn session for this list and user
-      existingSession = await prisma.learnSession.findFirst({
-        where: {
-          userId: user.id,
-          listId: listId,
-          mode: method,
-          isCompleted: false  // Only check if not completed, ignore isPaused
-        },
-        orderBy: {
-          lastActiveAt: 'desc'
+        // Check for existing active learn session for this list and user
+        existingSession = await prisma.learnSession.findFirst({
+          where: {
+            userId: user.id,
+            listId: listId,
+            mode: method,
+            isCompleted: false  // Only check if not completed, ignore isPaused
+          },
+          orderBy: {
+            lastActiveAt: 'desc'
+          }
+        });
+      } else {
+        // For custom sessions, load the session by sessionId only (don't filter by listId)
+        existingSession = await prisma.learnSession.findFirst({
+          where: {
+            userId: user.id,
+            sessionId: sessionId!,
+            isCompleted: false
+          }
+        });
+
+        if (!existingSession) {
+          // Custom session not found, redirect to home
+          redirect('/home/start');
         }
-      });
+
+        // Update listId to match the session's listId for display purposes
+        listId = existingSession.listId;
+      }
     }
   } catch (error) {
     console.warn('Could not load user preferences or session:', error);
@@ -88,13 +123,26 @@ export default async function LearningPages({ params }: { params: Promise<{ lear
   }
 
   // Get the list data directly - Prisma handles JSON parsing
-  let parsedData: ListItem[] = Array.isArray(listData.data)
-    ? (listData.data as any[]).filter((item: any) =>
-      item && typeof item === 'object' &&
-      typeof item["1"] === 'string' &&
-      typeof item["2"] === 'string'
-    )
-    : [];
+  let parsedData: ListItem[] = [];
+
+  if (!isCustomSession && listData) {
+    parsedData = Array.isArray(listData.data)
+      ? (listData.data as any[]).filter((item: any) =>
+        item && typeof item === 'object' &&
+        typeof item["1"] === 'string' &&
+        typeof item["2"] === 'string'
+      )
+      : [];
+  } else if (isCustomSession && existingSession) {
+    // For custom sessions, get the data from the session's remainingWords
+    parsedData = Array.isArray(existingSession.remainingWords)
+      ? (existingSession.remainingWords as any[]).filter((item: any) =>
+        item && typeof item === 'object' &&
+        typeof item["1"] === 'string' &&
+        typeof item["2"] === 'string'
+      )
+      : [];
+  }
 
   // Session restoration data
   let restoredScore: { correct: number; wrong: number } | undefined;
@@ -150,15 +198,26 @@ export default async function LearningPages({ params }: { params: Promise<{ lear
       return { ...item, options };
     })
     : shuffledData;
-  const list: List = {
-    list_id: listData.list_id,
-    name: listData.name,
-    mode: listData.mode || 'list',
-    subject: listData.subject,
-    lang_from: listData.lang_from || 'NL',
-    lang_to: listData.lang_to || 'NL',
+
+  const list: List = isCustomSession && existingSession ? {
+    list_id: existingSession.listId, // Use the custom name from the session
+    name: existingSession.listId, // Display the custom name
+    mode: existingSession.mode,
+    subject: existingSession.subject || 'CUSTOM',
+    lang_from: existingSession.lang_from || 'NL',
+    lang_to: existingSession.lang_to || 'NL',
     data: itemsWithOptions,
-    creator: listData.creator,
+    creator: 'user',
+    published: false
+  } : {
+    list_id: listData!.list_id,
+    name: listData!.name,
+    mode: listData!.mode || 'list',
+    subject: listData!.subject,
+    lang_from: listData!.lang_from || 'NL',
+    lang_to: listData!.lang_to || 'NL',
+    data: itemsWithOptions,
+    creator: listData!.creator,
     createdAt: listData.createdAt?.toISOString(),
     updatedAt: listData.updatedAt?.toISOString(),
     published: listData.published
@@ -230,6 +289,7 @@ export default async function LearningPages({ params }: { params: Promise<{ lear
       list,
       method,
       flipQuestionLang,
+      sessionId: isCustomSession && sessionId ? sessionId : undefined,
       learnListQueue,
       score: restoredScore,
       answerLog: restoredAnswerLog,

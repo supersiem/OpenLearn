@@ -72,7 +72,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
       return;
     }
 
-    // Multiple lists - collect all word pairs and create a virtual combined list
+    // Multiple lists - collect all word pairs and create a custom session
     const allWordPairs: any[] = [];
     let pairIdCounter = 0;
 
@@ -95,12 +95,52 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
     // Shuffle the word pairs for better learning experience
     const shuffledWordPairs = [...allWordPairs].sort(() => Math.random() - 0.5);
 
-    // Create a virtual list ID for the combined data
-    const combinedListId = `combined-${selectedLists.map(l => l.list_id).join('-')}`;
-
-    // Store the combined word pairs data temporarily (we'll simulate a list)
     try {
-      // Create a temporary combined list data structure
+      // Get subject and languages from first list (assuming all are similar)
+      const firstList = selectedLists[0];
+      const subject = firstList.subject || 'CUSTOM';
+      const lang_from = firstList.lang_from || 'NL';
+      const lang_to = firstList.lang_to || 'NL';
+
+      // Normalize mode name
+      const normalizedMode = mode === 'leren' ? 'learnlist' : mode;
+
+      // Generate a descriptive name for the combined session
+      const sessionName = selectedLists.length === 1
+        ? `Specifieke woorden van ${selectedLists[0].name}`
+        : `${selectedLists.length} gecombineerde lijsten`;
+
+      // Create a custom session using the API
+      const response = await fetch('/api/v1/lists/session/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          words: shuffledWordPairs,
+          subject,
+          lang_from,
+          lang_to,
+          mode: normalizedMode,
+          method: normalizedMode,
+          flipQuestionLang: false,
+          name: sessionName
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      const data = await response.json();
+
+      // Navigate to the custom session route
+      router.push(`/learn/session/${data.sessionId}`);
+    } catch (error) {
+      console.error('Error creating combined list session:', error);
+
+      // Fallback to old sessionStorage method if API fails
+      const combinedListId = `combined-${selectedLists.map(l => l.list_id).join('-')}`;
       const combinedListData = {
         list_id: combinedListId,
         name: `${selectedLists.length} gecombineerde lijsten`,
@@ -109,22 +149,13 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
         lang_to: null,
       };
 
-      // Store in sessionStorage for the custom route to access
       sessionStorage.setItem('combinedListData', JSON.stringify(combinedListData));
-
-      // Get all word pair IDs for the cookie (all pairs since we want to learn them all)
       const allPairIds = shuffledWordPairs.map(pair => pair.id);
-
-      // Set cookies exactly like the viewlist selection system
       document.cookie = `selectedPairs=${JSON.stringify(allPairIds)}; path=/;`;
       document.cookie = `fromLanguage=; path=/;`;
       document.cookie = `toLanguage=; path=/;`;
       document.cookie = `listId=${combinedListId}; path=/;`;
-
-      // Navigate to custom learning
       router.push(`/learn/custom/${mode}`);
-    } catch (error) {
-      console.error('Error creating combined list:', error);
     }
   };
 

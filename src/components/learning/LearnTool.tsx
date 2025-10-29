@@ -231,12 +231,16 @@ export default function LearnTool() {
     currentWord,
     currentMethod,
     mainMode,
+    sessionId,
     setRandomCurrentWord,
     checkAnswer,
     answerCorrect,
     answerWrong,
     learnListQueue,
     dequeueLearnItem,
+    score,
+    answerLog: _answerLog,
+    incorrectAnswerLog,
   } = storeState;
 
   const [userInput, setUserInput] = useState('');
@@ -269,7 +273,7 @@ export default function LearnTool() {
     }
 
     try {
-      await saveLearnSession(currentList.list_id, storeState as ListStoreState, isPaused, isCompleted);
+      await saveLearnSession(currentList.list_id, storeState as ListStoreState, isPaused, isCompleted, sessionId || undefined);
     } catch (error) {
       console.error('[LearnTool] Failed to save session:', error);
     }
@@ -462,6 +466,10 @@ export default function LearnTool() {
   const completedTriggeredRef = useRef(false);
   const [showCelebration, setShowCelebration] = useState(true);
   const currentStreakCount = useStreak(); // Get streak from store instead of API response
+  const [isCalculatingStats, setIsCalculatingStats] = useState(false);
+
+  // Check if this is a custom session (has sessionId)
+  const isCustomSession = !!sessionId;
 
   useEffect(() => {
     if (!isCompleted || showResult) return;
@@ -469,21 +477,36 @@ export default function LearnTool() {
     completedTriggeredRef.current = true;
 
     (async () => {
-      // First, save the session as completed
+      // For custom sessions, show calculating stats message
+      if (isCustomSession) {
+        setIsCalculatingStats(true);
+      }
+
+      // Save the session as completed
       await saveSession(false, true);
 
-      // Then update the streak
+      // Update the streak
       const result = await handleListCompletion();
       setStreakUpdate(result as any);
-    })();
-  }, [isCompleted, showResult, handleListCompletion]);
 
-  // Delete session when list is finished (after it's been saved as completed)
-  // Note: We no longer delete completed sessions - they remain in the database as completed
+      if (isCustomSession) {
+        setIsCalculatingStats(false);
+      }
+    })();
+  }, [isCompleted, showResult, handleListCompletion, isCustomSession]);
+
+  // Delete temporary sessions when user navigates away (but keep custom sessions)
   useEffect(() => {
-    // Completed sessions are kept in the database for history/analytics
-    // The isCompleted flag prevents them from showing in the "continue session" UI
-  }, [isCompleted, showResult]);
+    return () => {
+      // Only delete if it's NOT a custom session and the list is completed
+      if (!isCustomSession && isCompleted && currentList?.list_id) {
+        // Delete the temporary session
+        fetch(`/api/v1/lists/${currentList.list_id}/session`, {
+          method: 'DELETE',
+        }).catch(err => console.error('Failed to delete temporary session:', err));
+      }
+    };
+  }, [isCompleted, currentList?.list_id, isCustomSession]);
 
   // Save session when component unmounts (user navigates away)
   useEffect(() => {
@@ -496,40 +519,142 @@ export default function LearnTool() {
   }, [currentList?.list_id, isCompleted]);
 
   if (isCompleted && !showResult) {
+    // Calculate statistics for custom sessions
+    const correct = score?.correct || 0;
+    const wrong = score?.wrong || 0;
+    const total = correct + wrong;
+    const percentage = total > 0 ? (correct / total) * 100 : 0;
+    const grade = total > 0 ? ((correct / total) * 9 + 1).toFixed(1) : null;
+
+    // Analyze wrong words
+    interface WordStats {
+      word: string;
+      answer: string;
+      wrongCount: number;
+    }
+
+    const wrongWordsMap = new Map<string, WordStats>();
+
+    if (isCustomSession && Array.isArray(incorrectAnswerLog)) {
+      incorrectAnswerLog.forEach((entry: any) => {
+        const question = entry.word?.["1"] || '';
+        const correctAnswer = entry.word?.["2"] || '';
+        const key = `${question}|||${correctAnswer}`;
+        const existing = wrongWordsMap.get(key);
+
+        if (existing) {
+          existing.wrongCount++;
+        } else {
+          wrongWordsMap.set(key, {
+            word: question,
+            answer: correctAnswer,
+            wrongCount: 1
+          });
+        }
+      });
+    }
+
+    const wrongWords = Array.from(wrongWordsMap.values())
+      .sort((a, b) => b.wrongCount - a.wrongCount);
 
     return (
-      <div className="bg-neutral-800 rounded-lg p-8 w-full max-w-md mx-auto text-white text-center">
-        <>
-          <h2 className="text-2xl font-bold mb-2">Einde van de lijst!</h2>
-          {streakUpdate?.success && streakUpdate?.streakUpdated ? (
-            <>
-              {streakUpdate?.isNewStreak !== undefined && showCelebration ? (
-                <Celebration
-                  streakCount={currentStreakCount}
-                  showMessage={true}
-                  loop={false}
-                  isNewStreak={streakUpdate.isNewStreak}
-                  onDismiss={() => setShowCelebration(false)}
-                />
-              ) : null}
-            </>
-          ) : null}
-          <p className="text-lg text-neutral-300">Je hebt alle woorden geoefend. Goed gedaan!</p>
-          <div className='pt-4 flex flex-row gap-4'>
-            <Button1
-              text="Opnieuw oefenen"
-              onClick={() => {
-                window.location.reload()
-              }}
-            />
-            <Button1
-              text="Terug naar home"
-              onClick={() => {
-                router.push('/home/start')
-              }}
-            />
-          </div>
-        </>
+      <div className="w-full max-w-2xl mx-auto space-y-6">
+        <div className="bg-neutral-800 rounded-lg p-8 text-white text-center">
+          <>
+            <h2 className="text-2xl font-bold mb-2">Einde van de lijst!</h2>
+            {streakUpdate?.success && streakUpdate?.streakUpdated ? (
+              <>
+                {streakUpdate?.isNewStreak !== undefined && showCelebration ? (
+                  <Celebration
+                    streakCount={currentStreakCount}
+                    showMessage={true}
+                    loop={false}
+                    isNewStreak={streakUpdate.isNewStreak}
+                    onDismiss={() => setShowCelebration(false)}
+                  />
+                ) : null}
+              </>
+            ) : null}
+            <p className="text-lg text-neutral-300">Je hebt alle woorden geoefend. Goed gedaan!</p>
+
+            {/* Show stats calculation message for custom sessions */}
+            {isCustomSession && isCalculatingStats && (
+              <p className="text-sm text-sky-400 mt-2 animate-pulse">
+                ⏳ Sluit dit scherm niet! Statistieken worden berekend...
+              </p>
+            )}
+
+            <div className='pt-4 flex flex-row gap-4 justify-center'>
+              <Button1
+                text="Opnieuw oefenen"
+                onClick={() => {
+                  window.location.reload()
+                }}
+              />
+              <Button1
+                text="Terug naar home"
+                onClick={() => {
+                  router.push('/home/start')
+                }}
+              />
+            </div>
+          </>
+        </div>
+
+        {/* Statistics for custom sessions */}
+        {isCustomSession && !isCalculatingStats && total > 0 && (
+          <>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {grade && (
+                <div className="bg-neutral-800 rounded-lg p-4 border border-neutral-700">
+                  <div className="text-sm text-neutral-400 mb-1">Cijfer</div>
+                  <div className="text-3xl font-bold">{grade}</div>
+                </div>
+              )}
+              <div className="bg-neutral-800 rounded-lg p-4 border border-neutral-700">
+                <div className="text-sm text-neutral-400 mb-1">Score</div>
+                <div className="text-3xl font-bold">{percentage.toFixed(0)}%</div>
+                <div className="text-xs text-neutral-400 mt-1">{correct} / {total}</div>
+              </div>
+              <div className="bg-neutral-800 rounded-lg p-4 border border-neutral-700">
+                <div className="text-sm text-neutral-400 mb-1">Goed</div>
+                <div className="text-3xl font-bold text-green-500">{correct}</div>
+              </div>
+              <div className="bg-neutral-800 rounded-lg p-4 border border-neutral-700">
+                <div className="text-sm text-neutral-400 mb-1">Fout</div>
+                <div className="text-3xl font-bold text-red-500">{wrong}</div>
+              </div>
+            </div>
+
+            {/* Wrong Words Analysis */}
+            {wrongWords.length > 0 && (
+              <div className="bg-neutral-800 rounded-lg p-6 border border-neutral-700">
+                <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
+                  <span className="text-red-500">✕</span>
+                  Fout beantwoorde woorden ({wrongWords.length})
+                </h3>
+                <div className="space-y-4">
+                  {wrongWords.map((stat, idx) => (
+                    <div key={idx} className="border-b border-neutral-700 pb-3 last:border-0">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="text-xs text-neutral-400 mb-1">Vraag:</div>
+                          <div className="font-medium text-lg mb-2 text-white">{stat.word}</div>
+                          <div className="text-xs text-neutral-400 mb-1">Correct antwoord:</div>
+                          <div className="text-sm text-green-400 font-semibold">{stat.answer}</div>
+                        </div>
+                        <div className="ml-2 bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm font-medium">
+                          {stat.wrongCount}× fout
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     );
   }

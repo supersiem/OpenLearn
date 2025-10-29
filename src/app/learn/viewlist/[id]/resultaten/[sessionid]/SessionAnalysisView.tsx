@@ -134,7 +134,7 @@ export default function SessionAnalysisView({ session, listName, listId }: Sessi
 
       {/* Date */}
       <p className="text-sm text-neutral-400">
-        Voltooid op {new Date(session.createdAt).toLocaleDateString('nl-NL', {
+        Voltooid om {new Date(session.createdAt).toLocaleDateString('nl-NL', {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
