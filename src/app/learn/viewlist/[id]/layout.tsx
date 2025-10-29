@@ -3,7 +3,7 @@ import { getUserFromSession } from "@/utils/auth/auth";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import { getSubjectIcon } from "@/components/icons";
-import Tabs, { TabItem } from "@/components/Tabs";
+import { TabItem } from "@/components/Tabs";
 import { prisma } from "@/utils/prisma";
 import { Badge } from "@/components/ui/badge";
 import UserListButtons from "@/components/learning/UserListButtons";
@@ -14,6 +14,7 @@ import { getUserNameById } from '@/serverActions/getUserName';
 import { isUUID } from '@/utils/uuid';
 import { addToRecentLists } from "@/utils/actions/updateRecentLists";
 import { addToRecentSubjects } from "@/utils/actions/updateRecentSubjects";
+import ViewListHeaderTabs from "@/components/learning/ViewListHeaderTabs";
 
 import learn from '@/app/img/learn.svg';
 import test from '@/app/img/test.svg';
@@ -185,7 +186,7 @@ export default async function ViewListLayout({ children, params }: ViewListLayou
               className={"h-8 w-8 inline-block mr-2"}
             />
             <span
-              className="whitespace-normal break-words max-w-[40ch]"
+              className="whitespace-normal a- max-w-[40ch]"
             >
               {listData?.name}
             </span>
@@ -198,8 +199,6 @@ export default async function ViewListLayout({ children, params }: ViewListLayou
               </Badge>
             )}
           </h1>
-
-          {/* Creator actions - pass isCreator boolean from server-side permission check */}
           <UserListButtons listId={id} isCreator={isCreator} />
         </div>
         <div className="h-4" />
@@ -229,7 +228,12 @@ export default async function ViewListLayout({ children, params }: ViewListLayou
         </div>
       </div>
       <div className="pl-4">
-        <Tabs tabs={tabs} defaultActiveTab={defaultTab} baseRoute={`/learn/viewlist/${id}`} withRoutes={true} renderContent={false} />
+        <ViewListHeaderTabs
+          tabs={tabs}
+          defaultTab={defaultTab}
+          baseRoute={`/learn/viewlist/${id}`}
+          listId={id}
+        />
       </div>
       <div className="my-4">
         {children}

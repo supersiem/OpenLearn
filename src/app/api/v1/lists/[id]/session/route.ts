@@ -2,6 +2,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/utils/prisma';
 import { getUserFromSession } from '@/utils/auth/auth';
 
+// Calculate grade based on score
+// Returns a value between 1 and 10 (Dutch grading system)
+// Formula: [punten behaald]/[totaal punten] * 9 + 1
+function calculateGrade(score: any): number | null {
+  if (!score || typeof score !== 'object') {
+    return null;
+  }
+
+  const correct = Number(score.correct) || 0;
+  const wrong = Number(score.wrong) || 0;
+  const total = correct + wrong;
+
+  if (total === 0) {
+    return null; // No questions answered yet
+  }
+
+  // Formula: (correct / total) * 9 + 1
+  // This gives: 0% = 1.0, 50% = 5.5, 100% = 10.0
+  const grade = (correct / total) * 9 + 1;
+
+  // Round to 1 decimal place
+  return Math.round(grade * 10) / 10;
+}
+
 // Create or update a learn session
 export async function POST(
   request: NextRequest,
@@ -54,6 +78,9 @@ export async function POST(
 
     let session;
 
+    // Calculate grade from score
+    const calculatedGrade = calculateGrade(score);
+
     if (existingSession) {
       // Update existing session
       session = await prisma.learnSession.update({
@@ -76,6 +103,7 @@ export async function POST(
           lastAnswer,
           isPaused: isPaused ?? true,
           isCompleted: isCompleted ?? false,
+          grade: calculatedGrade,
           lastActiveAt: new Date()
         }
       });
@@ -103,6 +131,7 @@ export async function POST(
           lastAnswer,
           isPaused: isCompleted ? false : true,  // Auto-set isPaused based on completion
           isCompleted: isCompleted ?? false,
+          grade: calculatedGrade,
           lastActiveAt: new Date(),
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
         }
@@ -124,7 +153,8 @@ export async function POST(
   }
 }
 
-// Delete a learn session
+// Delete a learn session (only non-completed sessions can be deleted)
+// Completed sessions are kept in the database for history and analytics
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -150,13 +180,14 @@ export async function DELETE(
       return NextResponse.json({ error: 'Mode parameter required' }, { status: 400 });
     }
 
-    // Find and delete the session
+    // Find and delete the session (only non-completed sessions)
+    // Completed sessions are preserved in the database
     const deletedSession = await prisma.learnSession.deleteMany({
       where: {
         userId: user.id,
         listId: listId,
         mode: mode,
-        isCompleted: false
+        isCompleted: false  // Only allow deletion of non-completed sessions
       }
     });
 
@@ -209,11 +240,15 @@ export async function PATCH(
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
+    // Calculate grade if score is being updated
+    const calculatedGrade = updateData.score ? calculateGrade(updateData.score) : undefined;
+
     // Update the session
     const session = await prisma.learnSession.update({
       where: { id: existingSession.id },
       data: {
         ...updateData,
+        ...(calculatedGrade !== undefined && { grade: calculatedGrade }),
         lastActiveAt: new Date()
       }
     });

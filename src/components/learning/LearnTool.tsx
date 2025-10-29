@@ -259,6 +259,9 @@ export default function LearnTool() {
   // Mind mode state: show blue review overlay
   const [showBlueReview, setShowBlueReview] = useState(false);
 
+  // Ref for auto-focusing the input
+  const inputRef = useRef<HTMLInputElement>(null);
+
   // Helper function to save the session
   const saveSession = async (isPaused = true, isCompleted = false) => {
     if (!currentList?.list_id) {
@@ -272,26 +275,7 @@ export default function LearnTool() {
     }
   };
 
-  // Helper function to delete the session
-  const deleteSession = async () => {
-    if (!currentList?.list_id) {
-      return;
-    }
 
-    try {
-      const mode = storeState.mainMode || storeState.currentMethod || 'test';
-
-      const response = await fetch(`/api/v1/lists/${currentList.list_id}/session?mode=${mode}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        console.error('[LearnTool] Failed to delete session:', response.status);
-      }
-    } catch (error) {
-      console.error('[LearnTool] Failed to delete session:', error);
-    }
-  };
 
   // Timer for overlay visibility (both correct and incorrect)
   useEffect(() => {
@@ -364,6 +348,16 @@ export default function LearnTool() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [showResult, showTypfout]);
+
+  // Auto-focus input when a new word is shown
+  useEffect(() => {
+    if (!showResult && !showTypfout && !showBlueReview && inputRef.current) {
+      // Small delay to ensure the input is rendered
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [cardKey, showResult, showTypfout, showBlueReview]);
 
   const handleSubmit = () => {
     if (!currentWord || !userInput.trim()) return;
@@ -485,10 +479,10 @@ export default function LearnTool() {
   }, [isCompleted, showResult, handleListCompletion]);
 
   // Delete session when list is finished (after it's been saved as completed)
+  // Note: We no longer delete completed sessions - they remain in the database as completed
   useEffect(() => {
-    if (isCompleted && !showResult && completedTriggeredRef.current) {
-      deleteSession();
-    }
+    // Completed sessions are kept in the database for history/analytics
+    // The isCompleted flag prevents them from showing in the "continue session" UI
   }, [isCompleted, showResult]);
 
   // Save session when component unmounts (user navigates away)
@@ -567,6 +561,7 @@ export default function LearnTool() {
                 <hr className="border-neutral-600" />
                 <div className="space-y-4">
                   <Input
+                    ref={inputRef}
                     type="text"
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
@@ -617,6 +612,7 @@ export default function LearnTool() {
                   </div>
 
                   <Input
+                    ref={inputRef}
                     type="text"
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}

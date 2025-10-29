@@ -1,8 +1,9 @@
 import { prisma } from "@/utils/prisma";
 import { getSubjectName, getSubjectIcon } from "@/components/icons";
 import ListTableComponent from "../listTableComponent";
-import Image from "next/image";
-import construction from '@/app/img/construction.gif';
+import { getUserFromSession } from "@/utils/auth/auth";
+import { cookies } from "next/headers";
+import ResultsView from "./ResultsView";
 
 interface PageParams {
   params: Promise<{ id: string; tab?: string[] }>;
@@ -118,9 +119,42 @@ export default async function ViewListTabPage({ params }: PageParams) {
   }
 
   if (selectedTab === 'resultaten') {
+    // Fetch completed sessions for this list
+    const sessionCookie = (await cookies()).get('polarlearn.session-id')?.value;
+    let completedSessions: any[] = [];
+
+    if (sessionCookie) {
+      const user = await getUserFromSession(sessionCookie);
+
+      if (user) {
+        completedSessions = await prisma.learnSession.findMany({
+          where: {
+            userId: user.id,
+            listId: id,
+            isCompleted: true
+          },
+          orderBy: {
+            createdAt: 'desc'
+          },
+          select: {
+            id: true,
+            sessionId: true,
+            mode: true,
+            score: true,
+            grade: true,
+            answerLog: true,
+            incorrectAnswerLog: true,
+            originalWordCount: true,
+            createdAt: true,
+            updatedAt: true
+          }
+        });
+      }
+    }
+
     return (
       <div className="mt-4 px-4">
-        
+        <ResultsView sessions={completedSessions} listId={id} />
       </div>
     );
   }

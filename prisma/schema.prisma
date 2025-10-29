@@ -200,6 +200,8 @@ model learnSession {
   lastWord   Json? // Current word being studied
   lastAnswer Json? // Last answer details
 
+  grade       Float? // Overall grade or score
+
   // Metadata
   isPaused    Boolean @default(false)
   isCompleted Boolean @default(false)
