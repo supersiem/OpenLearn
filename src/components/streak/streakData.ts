@@ -131,8 +131,6 @@ export async function getAllStreakData() {
             updatedFreezeCount = updatedFreezeCount - 1;
             hadYesterdayActivity = true;
             freezeApplied = true;
-
-            console.log(`Auto-applied freeze for user ${user.id} on ${yesterdayStr}`);
         }
 
         // Always recalculate streak count based on consecutive days from yesterday backwards

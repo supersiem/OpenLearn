@@ -66,15 +66,6 @@ export default async function SessionPage({ params }: SessionPageParams) {
   // Use remainingWords if available, otherwise fall back to originalWords
   let parsedData: ListItem[] = [];
 
-  // Debug logging
-  console.log('Session data:', {
-    sessionId: existingSession.sessionId,
-    hasRemainingWords: !!existingSession.remainingWords,
-    remainingWordsLength: Array.isArray(existingSession.remainingWords) ? existingSession.remainingWords.length : 0,
-    hasOriginalWords: !!existingSession.originalWords,
-    originalWordsLength: Array.isArray(existingSession.originalWords) ? (existingSession.originalWords as any[]).length : 0,
-  });
-
   // Try remainingWords first (for resuming sessions)
   if (Array.isArray(existingSession.remainingWords) && existingSession.remainingWords.length > 0) {
     parsedData = (existingSession.remainingWords as any[]).filter((item: any) =>
@@ -92,8 +83,6 @@ export default async function SessionPage({ params }: SessionPageParams) {
       typeof item["2"] === 'string'
     );
   }
-
-  console.log('Parsed data length:', parsedData.length);
 
   // If still no data, this session might be from before we added originalWords
   // In that case, we should redirect to home as the session is not usable
@@ -157,9 +146,7 @@ export default async function SessionPage({ params }: SessionPageParams) {
   // Restore the queue from session if it exists AND is not empty, otherwise build a new one for learnlist
   if (existingSession.learnListQueue && Array.isArray(existingSession.learnListQueue) && existingSession.learnListQueue.length > 0) {
     learnListQueue = existingSession.learnListQueue as any[];
-    console.log('Restored learnListQueue from session, length:', learnListQueue.length);
   } else if (method === 'learnlist') {
-    console.log('Building new learnListQueue for method:', method);
     // Build learnlist queue
     for (let i = 0; i < list.data.length; i++) {
       const correctAnswer = list.data[i]["2"];
@@ -201,14 +188,6 @@ export default async function SessionPage({ params }: SessionPageParams) {
       learnListQueue[j] = tmp;
     }
   }
-
-  console.log('Final state:', {
-    listDataLength: list.data.length,
-    method,
-    learnListQueueLength: learnListQueue.length,
-    hasScore: !!restoredScore,
-    scoreValue: restoredScore
-  });
 
   // Calculate the correct originalQueueLength
   // If we rebuilt the queue, use the current queue length

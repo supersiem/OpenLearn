@@ -20,17 +20,23 @@ import mind from "@/app/img/mind.svg";
 import livequiz from "@/app/img/livequiz.svg";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
 import Button1 from "@/components/button/Button1";
+import { useRouter } from "next/navigation";
 
 // Memoized sub-components to prevent unnecessary re-renders
-const BackButton = memo(({ url }: { url: string }) => (
-    <Link
-        href={url}
-        className="flex items-center bg-neutral-700 hover:bg-neutral-600 transition-colors px-3 py-1 rounded-md"
-    >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        <span>Terug</span>
-    </Link>
-));
+const BackButton = memo(({ url }: { url: string }) => {
+    const router = useRouter();
+    return (
+        <button
+            onClick={() => {
+                router.push(url);
+            }}
+            className="flex items-center bg-neutral-700 hover:bg-neutral-600 transition-colors px-3 py-1 rounded-md"
+        >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            <span>Terug</span>
+        </button>
+    );
+});
 BackButton.displayName = "BackButton";
 
 const ProgressBar = memo(({ progress }: { progress: number }) => (

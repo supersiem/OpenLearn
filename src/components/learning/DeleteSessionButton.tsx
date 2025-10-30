@@ -37,7 +37,6 @@ export default function DeleteSessionButton({ sessionId }: DeleteSessionButtonPr
     setIsDeleting(true);
     try {
       const url = `/api/v1/session/${sessionId}`;
-      console.log('Deleting session with URL:', url);
       const response = await fetch(url, {
         method: 'DELETE',
       });

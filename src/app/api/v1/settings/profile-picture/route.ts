@@ -5,9 +5,6 @@ import { S3 } from '@/utils/s3'
 import { PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import sharp from 'sharp'
 
-// Disable body parsing for file uploads
-export const dynamic = 'force-dynamic'
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
@@ -35,9 +32,20 @@ export async function POST(req: NextRequest) {
     try {
       formData = await req.formData()
     } catch (e) {
-      console.error('Error parsing form data:', e);
+      // Log more context to help debugging client-side issues (missing/incorrect Content-Type, proxy stripping headers, etc.)
+      try {
+        const contentType = req.headers.get('content-type') || req.headers.get('Content-Type')
+        console.error('Error parsing form data:', e, 'Content-Type:', contentType)
+      } catch (hdrErr) {
+        console.error('Error parsing form data and reading headers:', e, hdrErr)
+      }
+
       return NextResponse.json(
-        { success: false, message: 'Fout bij het lezen van de upload. Probeer het opnieuw.' },
+        {
+          success: false,
+          message:
+            'Fout bij het lezen van de upload. Probeer het opnieuw.'
+        },
         { status: 400 }
       )
     }

@@ -25,16 +25,6 @@ interface RecentGeoefendProps {
   isAdmin?: boolean;
 }
 
-// Map mode names to Dutch display names
-const modeDisplayNames: Record<string, string> = {
-  'test': 'Toets',
-  'hints': 'Hints',
-  'learnlist': 'Leren',
-  'multichoice': 'Meerkeuze',
-  'mind': 'In gedachten',
-  'livequiz': 'LiveQuiz'
-};
-
 export default function RecentGeoefend({ items, sessions, currentUserName, isAdmin }: RecentGeoefendProps) {
   const [select, setSelect] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -160,7 +150,7 @@ export default function RecentGeoefend({ items, sessions, currentUserName, isAdm
       {/* Recent Sessions Section */}
       {sessions && sessions.length > 0 && (
         <>
-          <div className="flex items-center text-center mt-8">
+          <div className="flex items-center text-center">
             <h2 className="text-3xl pl-5 mb-2 font-extrabold">
               Actieve Sessies:
             </h2>
@@ -185,9 +175,6 @@ export default function RecentGeoefend({ items, sessions, currentUserName, isAdm
                       <div className="flex items-center gap-2">
                         <span className="text-lg whitespace-normal wrap-break-word max-w-[40ch]">
                           {item.name}
-                        </span>
-                        <span className="text-sm text-neutral-400">
-                          • {modeDisplayNames[item.mode] || item.mode}
                         </span>
                       </div>
                       {item.grade !== null && item.grade !== undefined && (
@@ -233,13 +220,13 @@ export default function RecentGeoefend({ items, sessions, currentUserName, isAdm
           </div>
         </>
       )}
-      <h1 className="text-4xl pl-5 mb-2 font-extrabold">
+      <h1 className="text-3xl pl-5 mb-2 font-extrabold">
         Recent Geoefend:
       </h1>
       <div className="space-y-4 relative">
         {/* Multi-selection controls */}
         {selectableItems.length >= 2 && (
-          <div className="px-3 pt-1 pb-4 flex flex-row gap-4">
+          <div className="px-3 pt-1 pb-1 flex flex-row gap-4">
             <Button1
               text={select ? "Selectie uitzetten" : "Meerdere lijsten selecteren"}
               icon={<MousePointerClick />}

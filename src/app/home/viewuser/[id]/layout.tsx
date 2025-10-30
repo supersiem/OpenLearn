@@ -41,6 +41,7 @@ export default async function ViewUserLayout({
                 user={user}
                 selectedTab={selectedTab}
                 userId={user.id}
+                forumPoints={user.forumPoints}
             />
             <div className="mt-4">
                 {children}

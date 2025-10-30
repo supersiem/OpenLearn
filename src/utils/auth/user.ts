@@ -267,8 +267,6 @@ export async function createUserCredentials(
         data: userData,
       });
 
-      console.log("User created successfully:", user.id);
-
       // Send activation email (or skip if SMTP not configured)
       let emailResult: string | undefined = undefined;
       try {

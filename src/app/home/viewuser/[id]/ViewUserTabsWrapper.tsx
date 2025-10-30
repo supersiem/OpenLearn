@@ -11,12 +11,14 @@ interface ViewUserTabsWrapperProps {
     };
     selectedTab: string;
     userId: string;
+    forumPoints?: number;
 }
 
 export default function ViewUserTabsWrapper({
     user,
     selectedTab,
-    userId
+    userId,
+    forumPoints
 }: ViewUserTabsWrapperProps) {
     const tabsForNav: TabItem[] = [
         {
@@ -60,6 +62,7 @@ export default function ViewUserTabsWrapper({
                     />
                 )}
                 <h1 className="text-2xl font-bold">{user?.name}</h1>
+                <p>{forumPoints} punten op het forum</p>
             </div>
             <div className="h-4" />
             <div className="pl-4">

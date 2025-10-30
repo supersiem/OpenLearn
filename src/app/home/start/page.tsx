@@ -343,7 +343,6 @@ export default async function Start() {
         <div className="recent-practiced mt-4">
           <div className="flex items-center text-center">
           </div>
-          <div className="h-4" />
           <div className="space-y-4 relative">
             {combinedItems.length === 0 && (
               <>
