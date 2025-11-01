@@ -144,7 +144,7 @@ export default function AdminTabs({
     const renderUserList = () => {
         if (usersData.length === 0 && !usersHasMore) {
             return (
-                <div className="p-8 text-center text-gray-400">
+                <div className="p-4 md:p-8 text-center text-gray-400 text-sm md:text-base">
                     Geen gebruikers gevonden.
                 </div>
             );
@@ -152,7 +152,7 @@ export default function AdminTabs({
 
         return (
             <>
-                <h1 className="font-extrabold text-2xl pb-4">
+                <h1 className="font-extrabold text-xl md:text-2xl pb-4">
                     {usersTotal} gebruikers in db
                 </h1>
                 <div className="rounded-md overflow-hidden">
@@ -161,39 +161,39 @@ export default function AdminTabs({
                         next={loadMoreUsers}
                         hasMore={usersHasMore}
                         loader={
-                            <div className="text-center p-4 bg-neutral-800 border border-neutral-700">
+                            <div className="text-center p-4 bg-neutral-800 border border-neutral-700 text-sm md:text-base">
                                 Laden...
                             </div>
                         }
                         scrollThreshold={0.8}
                         style={{ overflow: "visible" }}
                     >
-                        <div className="border w-33/34 border-neutral-700 rounded-md overflow-hidden bg-neutral-800">
+                        <div className="border w-full md:w-33/34 border-neutral-700 rounded-md overflow-hidden bg-neutral-800">
                             {usersData.map((user) => (
                                 <div
                                     key={user.id}
-                                    className="flex items-center border-b border-neutral-700 bg-neutral-800 last:border-b-0 p-4 hover:bg-neutral-700 transition-all"
+                                    className="flex flex-col md:flex-row md:items-center border-b border-neutral-700 bg-neutral-800 last:border-b-0 p-3 md:p-4 hover:bg-neutral-700 transition-all gap-3"
                                 >
                                     <Link
                                         href={`/home/viewuser/${user.id}`}
-                                        className="flex-1"
+                                        className="flex-1 min-w-0"
                                     >
                                         <div className="flex items-center cursor-pointer">
-                                            <div className="mr-4 flex-shrink-0">
+                                            <div className="mr-3 md:mr-4 flex-shrink-0">
                                                 {user?.image ? (
                                                     <img
                                                         src={user.image}
                                                         alt={`de profielfoto van ${user.name}`}
-                                                        width={40}
-                                                        height={40}
-                                                        className="rounded-full"
+                                                        width={32}
+                                                        height={32}
+                                                        className="w-8 h-8 md:w-10 md:h-10 rounded-full"
                                                     />
                                                 ) : (
-                                                    <Jdenticon value={user?.name} size={40} />
+                                                    <Jdenticon value={user?.name} size={32} className="w-8 h-8 md:w-10 md:h-10" />
                                                 )}
                                             </div>
-                                            <div className="flex flex-col flex-1">
-                                                <h3 className="font-medium text-lg">
+                                            <div className="flex flex-col flex-1 min-w-0">
+                                                <h3 className="font-medium text-base md:text-lg truncate">
                                                     {user.name}
                                                     {user.id === currentUserId ? " (jij)" : ""}
                                                     {user?.role === "admin" ? " (admin)" : ""}
@@ -201,20 +201,20 @@ export default function AdminTabs({
                                                     {user?.forumAllowed ? (
                                                         ""
                                                     ) : (
-                                                        <span className="text-sm font-medium me-2 px-2.5 py-0.5 rounded-sm bg-yellow-900 text-yellow-300">
+                                                        <span className="text-xs md:text-sm font-medium me-2 px-2 md:px-2.5 py-0.5 rounded-sm bg-yellow-900 text-yellow-300">
                                                             Forum banned
                                                         </span>
                                                     )}
                                                     {user?.loginAllowed ? (
                                                         ""
                                                     ) : (
-                                                        <span className="text-sm font-medium me-2 px-2.5 py-0.5 rounded-sm bg-red-900 text-red-300">
+                                                        <span className="text-xs md:text-sm font-medium me-2 px-2 md:px-2.5 py-0.5 rounded-sm bg-red-900 text-red-300">
                                                             Banned
                                                         </span>
                                                     )}
                                                 </h3>
-                                                <h3>email: {user?.email}</h3>
-                                                <span>
+                                                <h3 className="text-xs md:text-sm truncate">email: {user?.email}</h3>
+                                                <span className="text-xs md:text-sm">
                                                     {user.forumAllowed
                                                         ? ""
                                                         : ` reden: ${user.forumBanReason || "geen reden opgegeven"
@@ -227,7 +227,7 @@ export default function AdminTabs({
                                             </div>
                                         </div>
                                     </Link>
-                                    <div className="flex items-center space-x-4">
+                                    <div className="flex flex-wrap items-center gap-2 md:space-x-4 md:gap-0">
                                         {!user.forumAllowed ? (
                                             <BanButton
                                                 userId={user.id}
@@ -282,7 +282,7 @@ export default function AdminTabs({
     const renderListsList = () => {
         if (listsData.length === 0 && !listsHasMore) {
             return (
-                <div className="p-8 text-center text-gray-400">
+                <div className="p-4 md:p-8 text-center text-gray-400 text-sm md:text-base">
                     Geen lijsten gevonden.
                 </div>
             );
@@ -290,7 +290,7 @@ export default function AdminTabs({
 
         return (
             <>
-                <h1 className="font-extrabold text-2xl py-4">
+                <h1 className="font-extrabold text-xl md:text-2xl py-4">
                     {listsTotal} lijsten in db
                 </h1>
                 <div className="rounded-md overflow-hidden">
@@ -299,47 +299,47 @@ export default function AdminTabs({
                         next={loadMoreLists}
                         hasMore={listsHasMore}
                         loader={
-                            <div className="text-center p-4 bg-neutral-800 border border-neutral-700">
+                            <div className="text-center p-4 bg-neutral-800 border border-neutral-700 text-sm md:text-base">
                                 Laden...
                             </div>
                         }
                         scrollThreshold={0.8}
                         style={{ overflow: "visible" }}
                     >
-                        <div className="border w-33/34 border-neutral-700 rounded-md overflow-hidden bg-neutral-800">
+                        <div className="border w-full md:w-33/34 border-neutral-700 rounded-md overflow-hidden bg-neutral-800">
                             {listsData.map((list) => (
                                 <div
                                     key={list.list_id}
-                                    className="relative border-b border-neutral-700 bg-neutral-800 last:border-b-0 p-4 hover:bg-neutral-700 transition-all"
+                                    className="relative flex flex-col sm:flex-row border-b border-neutral-700 bg-neutral-800 last:border-b-0 p-3 md:p-4 hover:bg-neutral-700 transition-all gap-3"
                                 >
                                     <Link
                                         href={`/learn/viewlist/${list.list_id}`}
-                                        className="inline-block w-9/10"
+                                        className="flex-1 min-w-0"
                                     >
                                         <div className="flex items-center cursor-pointer">
-                                            <div className="mr-4 flex-shrink-0">
+                                            <div className="mr-3 md:mr-4 flex-shrink-0">
                                                 {list.subject && (
                                                     <Image
                                                         src={getSubjectIcon(list.subject)}
                                                         alt={getSubjectName(list.subject) || list.subject}
-                                                        width={40}
-                                                        height={40}
-                                                        className="h-10 w-10"
+                                                        width={32}
+                                                        height={32}
+                                                        className="h-8 w-8 md:h-10 md:w-10"
                                                     />
                                                 )}
                                             </div>
-                                            <div className="flex flex-col flex-1">
-                                                <h3 className="font-medium text-lg">
-                                                    {list.name}
+                                            <div className="flex flex-col flex-1 min-w-0">
+                                                <h3 className="font-medium text-base md:text-lg">
+                                                    <span className="break-words">{list.name}</span>
                                                     {list.published ? (
                                                         ""
                                                     ) : (
-                                                        <span className="ml-2 text-sm font-medium px-2.5 py-0.5 rounded-sm bg-amber-600/20 text-amber-500 border border-amber-600/50">
+                                                        <span className="ml-2 text-xs md:text-sm font-medium px-2 md:px-2.5 py-0.5 rounded-sm bg-amber-600/20 text-amber-500 border border-amber-600/50">
                                                             Concept
                                                         </span>
                                                     )}
                                                 </h3>
-                                                <p className="text-sm text-gray-400">
+                                                <p className="text-xs md:text-sm text-gray-400 truncate">
                                                     Gemaakt door:{" "}
                                                     {userMapById[list.creator]?.name || list.creator} •
                                                     {Array.isArray(list.data) && list.data.length === 1
@@ -356,7 +356,7 @@ export default function AdminTabs({
                                             </div>
                                         </div>
                                     </Link>
-                                    <div className="inline-block w-1/10">
+                                    <div className="flex-shrink-0 sm:self-center">
                                         <DeleteListButton
                                             listId={list.list_id}
                                             isCreator={true}
@@ -376,7 +376,7 @@ export default function AdminTabs({
     const renderGroupList = () => {
         if (groupsData.length === 0 && !groupsHasMore) {
             return (
-                <div className="p-8 text-center text-gray-400">
+                <div className="p-4 md:p-8 text-center text-gray-400 text-sm md:text-base">
                     Geen groepen gevonden.
                 </div>
             );
@@ -384,7 +384,7 @@ export default function AdminTabs({
 
         return (
             <>
-                <h1 className="font-extrabold text-2xl py-4">
+                <h1 className="font-extrabold text-xl md:text-2xl py-4">
                     {groupsTotal} groepen in db
                 </h1>
                 <div className="rounded-md">
@@ -393,7 +393,7 @@ export default function AdminTabs({
                         next={loadMoreGroups}
                         hasMore={groupsHasMore}
                         loader={
-                            <div className="text-center p-4 bg-neutral-800 rounded-md my-4">
+                            <div className="text-center p-4 bg-neutral-800 rounded-md my-4 text-sm md:text-base">
                                 Laden...
                             </div>
                         }
@@ -415,17 +415,19 @@ export default function AdminTabs({
                                 return (
                                     <div
                                         key={groep.groupId}
-                                        className="tile relative bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-bold py-2 px-6 rounded-lg min-h-20 h-auto flex items-center justify-between"
+                                        className="tile relative bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-bold py-3 px-3 md:py-2 md:px-6 rounded-lg min-h-20 h-auto flex items-center justify-between cursor-pointer"
                                     >
                                         <Link
                                             href={`/learn/group/${groep.groupId}`}
-                                            className="flex-1 flex items-center"
+                                            className="flex-1 flex items-center min-w-0"
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <Jdenticon value={groep.name} size={40} />
-                                                <span className="text-lg whitespace-normal break-words max-w-[40ch] flex flex-row">
-                                                    {groep.name}
-                                                    <div className="flex gap-2 mt-1 pl-2">
+                                            <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                                                <div className="flex-shrink-0">
+                                                    <Jdenticon value={groep.name} size={32} className="w-8 h-8 md:w-10 md:h-10" />
+                                                </div>
+                                                <span className="text-base md:text-lg whitespace-normal break-words max-w-[40ch] flex flex-col md:flex-row md:items-center">
+                                                    <span className="break-words">{groep.name}</span>
+                                                    <div className="flex gap-2 mt-1 md:mt-1 md:pl-2">
                                                         {groep.requiresApproval && (
                                                             <Badge className="bg-blue-600/20 text-blue-400 border border-blue-600/50 text-xs">
                                                                 Goedkeuring vereist
@@ -434,9 +436,9 @@ export default function AdminTabs({
                                                     </div>
                                                 </span>
                                             </div>
-                                            <div className="flex-grow"></div>
-                                            <div className="flex items-center pr-2">
-                                                <span className="text-sm text-neutral-400">
+                                            <div className="hidden md:flex md:flex-grow"></div>
+                                            <div className="hidden sm:flex items-center pr-2">
+                                                <span className="text-xs md:text-sm text-neutral-400 whitespace-nowrap">
                                                     {memberCount} {memberCount === 1 ? "lid" : "leden"} •
                                                     {listCount} {listCount === 1 ? "lijst" : "lijsten"}
                                                 </span>
@@ -444,14 +446,14 @@ export default function AdminTabs({
                                         </Link>
 
                                         {groep.description && (
-                                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[150px] text-center">
+                                            <div className="hidden md:block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[150px] text-center">
                                                 <p className="text-sm text-neutral-400 line-clamp-1">
                                                     {groep.description}
                                                 </p>
                                             </div>
                                         )}
 
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors">
+                                        <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors flex-shrink-0">
                                             <DeleteGroupButton groupId={groep.groupId} />
                                         </div>
                                     </div>
@@ -470,7 +472,7 @@ export default function AdminTabs({
             label: (
                 <div className="flex items-center gap-2">
                     <Settings size={16} />
-                    <span>Algemeen</span>
+                    <span className="hidden sm:inline">Algemeen</span>
                 </div>
             ),
             content: <AlgemeenTabContent />,
@@ -480,7 +482,7 @@ export default function AdminTabs({
             label: (
                 <div className="flex items-center gap-2">
                     <Users size={16} />
-                    <span>Gebruikers</span>
+                    <span className="hidden sm:inline">Gebruikers</span>
                 </div>
             ),
             content: renderUserList(),
@@ -490,7 +492,7 @@ export default function AdminTabs({
             label: (
                 <div className="flex items-center gap-2">
                     <ListTodo size={16} />
-                    <span>Lijsten</span>
+                    <span className="hidden sm:inline">Lijsten</span>
                 </div>
             ),
             content: renderListsList(),
@@ -500,14 +502,14 @@ export default function AdminTabs({
             label: (
                 <div className="flex items-center gap-2">
                     <School size={16} />
-                    <span>Groepen</span>
+                    <span className="hidden sm:inline">Groepen</span>
                 </div>
             ),
             content: renderGroupList(),
         },
         {
             id: "jwe",
-            label: "JWE decodeerder",
+            label: <span className="hidden sm:inline">JWE decodeerder</span>,
             content: (
                 <>
                     <div className="mt-6">
@@ -522,9 +524,9 @@ export default function AdminTabs({
     let baseRoute = "/admin";
 
     return (
-        <div className="py-6 pl-6">
+        <div className="py-4 md:py-6 px-3 md:pl-6">
             <div className="flex items-center">
-                <h1 className="text-4xl font-extrabold mb-4">admin</h1>
+                <h1 className="text-3xl md:text-4xl font-extrabold mb-4">admin</h1>
                 <div className="flex-grow"></div>
                 <div className="w-4" />
             </div>

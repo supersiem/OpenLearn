@@ -1,7 +1,7 @@
 "use client";
 
 import Tabs, { TabItem } from "@/components/Tabs";
-import { Users, ListTodo, School, Settings } from "lucide-react";
+import { Users, ListTodo, School, Settings, Code } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 interface AdminNavWrapperProps {
@@ -18,27 +18,27 @@ export default function AdminNavWrapper({ defaultActiveTab }: AdminNavWrapperPro
     const tabsForNav: TabItem[] = [
         {
             id: "algemeen",
-            label: <div className="flex items-center gap-2"><Settings size={16} /><span>Algemeen</span></div>,
+            label: <div className="flex items-center gap-2"><Settings size={16} /><span className="hidden sm:inline">Algemeen</span></div>,
             content: <></>, // Dummy content, as renderContent will be false in Tabs
         },
         {
             id: "gebruikers",
-            label: <div className="flex items-center gap-2"><Users size={16} /><span>Gebruikers</span></div>,
+            label: <div className="flex items-center gap-2"><Users size={16} /><span className="hidden sm:inline">Gebruikers</span></div>,
             content: <></>, // Dummy content, as renderContent will be false in Tabs
         },
         {
             id: "lijsten",
-            label: <div className="flex items-center gap-2"><ListTodo size={16} /><span>Lijsten</span></div>,
+            label: <div className="flex items-center gap-2"><ListTodo size={16} /><span className="hidden sm:inline">Lijsten</span></div>,
             content: <></>,
         },
         {
             id: "groepen",
-            label: <div className="flex items-center gap-2"><School size={16} /><span>Groepen</span></div>,
+            label: <div className="flex items-center gap-2"><School size={16} /><span className="hidden sm:inline">Groepen</span></div>,
             content: <></>,
         },
         {
             id: "jwe",
-            label: "JWE decodeerder",
+            label: <div className="flex items-center gap-2"><Code size={16} /><span className="hidden sm:inline">JWE decodeerder</span></div>,
             content: <></>,
         },
     ];
