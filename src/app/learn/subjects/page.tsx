@@ -17,15 +17,15 @@ export default async function Page() {
                         href={`/learn/subject/${subject}`}
                         className="bg-neutral-800 hover:bg-neutral-700 transition-colors rounded-lg p-4 flex flex-col items-center justify-center min-h-20"
                     >
-                        <div className="text-md font-extrabold flex flex-row items-center text-center gap-2 w-full">
+                        <div className="text-md font-extrabold flex flex-col md:flex-row items-center text-center gap-2 w-full">
                             <Image
                                 src={getSubjectIcon(subject)}
                                 alt={`${subject} icon`}
                                 width={32}
                                 height={32}
-                                className="flex-shrink-0"
+                                className="shrink-0"
                             />
-                            <span className="break-words leading-tight w-full px-1">{getSubjectName(subject)}</span>
+                            <span className="wrap-break-word leading-tight w-full px-1">{getSubjectName(subject)}</span>
                         </div>
                     </Link>
                 ))}

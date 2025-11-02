@@ -132,43 +132,43 @@ export default function Chat({
   }, [websocket, path]);
 
   return (
-    <div className="ml-2 w-full flex flex-col items-center justify-center">
-      <div className="w-130 flex flex-col">
+    <div className="ml-0 md:ml-2 w-full flex flex-col items-center justify-center px-2 md:px-0">
+      <div className="w-full md:w-130 flex flex-col">
         <div
-          className="overflow-y-auto max-h-[320px] w-full"
+          className="overflow-y-auto max-h-80 md:max-h-80 w-full"
           ref={messagesContainerRef}
         >
           {messages.length === 0 ? (
-            <div className="text-neutral-400 text-center p-6 rounded-lg">
+            <div className="text-neutral-400 text-center p-4 md:p-6 rounded-lg text-sm md:text-base">
               Er zijn nog geen berichten in deze groepschat.
             </div>
           ) : (
             messages.map((chatItem, i) => (
               <div
                 key={i}
-                className="mb-4 p-3 bg-neutral-800 rounded-lg flex justify-between items-center"
+                className="mb-3 md:mb-4 p-2 md:p-3 bg-neutral-800 rounded-lg flex justify-between items-start md:items-center gap-2"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-start md:items-center gap-2 md:gap-3 min-w-0 flex-1">
                   {chatItem.creatorImage ? (
                     <img
                       src={chatItem.creatorImage}
                       alt={chatItem.creator + "'s profielfoto"}
-                      className="w-10 h-10 rounded-full object-cover border border-neutral-700"
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border border-neutral-700 shrink-0"
                     />
                   ) : (
                     <Jdenticon
                       value={chatItem.creator}
-                      size={40}
-                      className="w-10 h-10 rounded-full object-cover"
+                      size={32}
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shrink-0"
                     />
                   )}
-                  <div>
-                    <div className="text-sm text-neutral-400 mb-1 flex items-center gap-2">
-                      <span>{chatItem.creator}</span>
-                      <span className="mx-1">-</span>
-                      <span>{formatRelativeTime(new Date(chatItem.time))}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs md:text-sm text-neutral-400 mb-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                      <span className="truncate font-medium">{chatItem.creator}</span>
+                      <span className="hidden sm:inline">-</span>
+                      <span className="text-xs">{formatRelativeTime(new Date(chatItem.time))}</span>
                     </div>
-                    <div className="text-neutral-200">{chatItem.content}</div>
+                    <div className="text-sm md:text-base text-neutral-200 wrap-break-word">{chatItem.content}</div>
                   </div>
                 </div>
                 {isAdmin && (
@@ -177,10 +177,10 @@ export default function Chat({
                       setMessageToDelete(chatItem);
                       setDeleteDialogOpen(true);
                     }}
-                    className="text-red-400 hover:text-red-300 p-2 rounded hover:bg-red-900/20 z-10 transition-all"
+                    className="text-red-400 hover:text-red-300 p-1.5 md:p-2 rounded hover:bg-red-900/20 z-10 transition-all shrink-0"
                     title="Verwijderen"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
                   </button>
                 )}
               </div>
@@ -190,14 +190,14 @@ export default function Chat({
         <div className="flex items-center gap-2 mt-2">
           <input
             type="text"
-            className="p-2 bg-neutral-800 rounded-lg w-full"
+            className="p-2 bg-neutral-800 rounded-lg w-full text-sm md:text-base"
             placeholder="Typ een nieuw bericht..."
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
           <Send
-            className={`text-neutral-200 transition-colors ${!inputValue.trim()
+            className={`text-neutral-200 transition-colors w-5 h-5 md:w-6 md:h-6 shrink-0 ${!inputValue.trim()
               ? "opacity-50 cursor-not-allowed"
               : "hover:text-neutral-400 cursor-pointer"
               }`}

@@ -22,6 +22,7 @@ import StreakNavbarThing from "../streak/streakNav";
 import NotificationNav from "../notification/notificiationNav";
 import PlusBtn from "@/components/button/plusbutton";
 import PlusBtnMb from "@/components/button/plusbuttonmobile";
+import { ChevronDown } from "lucide-react";
 
 // SearchBar component
 const SearchBar = memo(({ onExpand }: { onExpand: () => void }) => {
@@ -31,7 +32,7 @@ const SearchBar = memo(({ onExpand }: { onExpand: () => void }) => {
 
   return (
     <div
-      className="searchbar relative inline-block transition-transform rounded-4xl hover:bg-gradient-to-r from-sky-400 to-sky-100 hover:scale-101 scale-95 w-full mr-2 ml-1"
+      className="searchbar relative inline-block transition-transform rounded-4xl hover:bg-linear-to-r from-sky-400 to-sky-100 scale-95 w-full mr-2 ml-1"
       onClick={handleSearchClick}
     >
       <div className="rounded-4xl border-4 border-neutral-700 duration-300 hover:border-transparent">
@@ -82,7 +83,7 @@ const ExpandedSearchBar = memo(() => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex-grow w-full px-4 transition-all duration-200 ease-in-out flex-row flex items-center"
+      className="grow w-full px-4 transition-all duration-200 ease-in-out flex-row flex items-center"
     >
       <Link
         href="/home/start"
@@ -90,7 +91,7 @@ const ExpandedSearchBar = memo(() => {
       >
         <MoveLeft />
       </Link>
-      <div className="relative inline-block transition-transform hover:bg-gradient-to-r from-sky-400 to-sky-100 hover:scale-101 scale-95 w-full rounded-4xl">
+      <div className="relative inline-block transition-transform hover:bg-linear-to-r from-sky-400 to-sky-100 hover:scale-101 scale-95 w-full rounded-4xl">
         <div className="rounded-4xl border-4 border-neutral-700 duration-300 hover:border-transparent">
           <div className="bg-neutral-800 text-white font-bold py-2 px-4 transition-all rounded-4xl duration-300">
             <input
@@ -158,7 +159,7 @@ const MobileDropdown = memo(
 
     return (
       <div
-        className={`inline-block hover:bg-gradient-to-r from-sky-400 to-sky-100 transition-transform rounded-lg w-full mb-3`}
+        className={`inline-block hover:bg-linear-to-r from-sky-400 to-sky-100 transition-transform rounded-lg w-full mb-3`}
       >
         <div
           className={`rounded-lg border-4 border-neutral-700 duration-300 hover:border-transparent`}
@@ -177,7 +178,7 @@ const MobileDropdown = memo(
               className="transition-transform duration-300"
               style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
             >
-              ▼
+              <ChevronDown />
             </span>
           </button>
 
@@ -226,9 +227,9 @@ const MobileMenu = memo(
     if (!isOpen) return null;
 
     return (
-      <div className="fixed inset-0 bg-neutral-900 z-[90] p-4 overflow-y-auto">
+      <div className="fixed inset-0 bg-neutral-900 z-90 p-4 overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <Link href="/home/start" className="flex-shrink-0">
+          <Link href="/home/start" className="shrink-0">
             <Image src={pl500} alt="PolarLearn Logo" height={50} width={50} />
           </Link>
           {/* Modified middle container for StreakNavbarThing */}
@@ -241,7 +242,7 @@ const MobileMenu = memo(
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-neutral-800 flex-shrink-0"
+            className="p-2 rounded-full hover:bg-neutral-800 shrink-0"
           >
             <X size={24} />
           </button>
@@ -259,7 +260,7 @@ const MobileMenu = memo(
         <div className="flex flex-col space-y-4">
           <Link
             href="/home/start"
-            className={`inline-block hover:bg-gradient-to-r from-sky-400 to-sky-100 transition-transform rounded-lg w-full mb-3`}
+            className={`inline-block hover:bg-linear-to-r from-sky-400 to-sky-100 transition-transform rounded-lg w-full mb-3`}
           >
             <div className="rounded-lg border-4 border-neutral-700 duration-300 hover:border-transparent">
               <div
@@ -272,7 +273,7 @@ const MobileMenu = memo(
 
           <Link
             href="/home/forum"
-            className={`inline-block hover:bg-gradient-to-r from-sky-400 to-sky-100 transition-transform rounded-lg w-full mb-3`}
+            className={`inline-block hover:bg-linear-to-r from-sky-400 to-sky-100 transition-transform rounded-lg w-full mb-3`}
           >
             <div className="rounded-lg border-4 border-neutral-700 duration-300 hover:border-transparent">
               <div
@@ -316,7 +317,7 @@ const NavigationLinks = memo(
     isAdmin?: boolean;
   }) => (
     <>
-      <div className="hidden md:flex items-center space-x-3 flex-grow">
+      <div className="hidden md:flex items-center space-x-3 grow">
         <NavBtn
           text="Start"
           redirectTo="/home/start"
@@ -477,7 +478,7 @@ export const TopNavBar = memo(function TopNavBar({
 
   return (
     <>
-      <nav id="navbar" className="navbar fixed top-0 min-w-full shadow-md start-0 max-w-screen-xl z-[50] flex flex-wrap justify-between h-16 bg-neutral-900/70 backdrop-blur-sm items-center fade-in font-[family-name:var(--font-geist-sans)] font-bold">
+      <nav id="navbar" className="navbar fixed top-0 min-w-full shadow-md start-0 max-w-7xl z-50 flex flex-wrap justify-between h-16 bg-neutral-900/70 backdrop-blur-sm items-center fade-in font-(family-name:--font-geist-sans) font-bold">
         <div className="flex items-center space-x-4 w-full transition-all duration-300 ease-in-out pr-2">
           <a href="/home/start" className="w-12 h-12">
             <Image

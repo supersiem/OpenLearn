@@ -120,16 +120,16 @@ export default function GroupPictureManager({
   return (
     <Card className="mb-6 bg-neutral-800 text-white border-neutral-700">
       <CardHeader>
-        <CardTitle>Groepsfoto</CardTitle>
-        <CardDescription className="text-neutral-400">
+        <CardTitle className="text-lg md:text-xl">Groepsfoto</CardTitle>
+        <CardDescription className="text-neutral-400 text-sm md:text-base">
           Upload een foto om je groep te personaliseren.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 md:space-y-6">
         {/* Current Group Picture */}
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-lg bg-neutral-700 flex items-center justify-center overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          <div className="relative shrink-0">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-neutral-700 flex items-center justify-center overflow-hidden">
               {imageUrl ? (
                 <img
                   src={imageUrl}
@@ -137,14 +137,14 @@ export default function GroupPictureManager({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="text-neutral-400 text-sm text-center">
+                <div className="text-neutral-400 text-xs md:text-sm text-center px-2">
                   Geen foto
                 </div>
               )}
             </div>
           </div>
-          <div className="flex-1">
-            <p className="text-sm text-neutral-300">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs md:text-sm text-neutral-300">
               {imageUrl ? "Huidige groepsfoto" : "Geen groepsfoto ingesteld"}
             </p>
             <p className="text-xs text-neutral-500">
@@ -156,20 +156,20 @@ export default function GroupPictureManager({
         {/* File Preview */}
         {previewUrl && (
           <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 rounded-lg overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden shrink-0">
                 <img
                   src={previewUrl}
                   alt="Voorvertoning"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-neutral-300">Voorvertoning nieuwe foto</p>
-                <p className="text-xs text-neutral-500">{selectedFile?.name}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-neutral-300">Voorvertoning nieuwe foto</p>
+                <p className="text-xs text-neutral-500 break-all">{selectedFile?.name}</p>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button1
                 text={isUploading ? "Uploaden..." : "Uploaden"}
                 onClick={handleUpload}
@@ -192,7 +192,7 @@ export default function GroupPictureManager({
         )}
 
         {/* Upload Actions */}
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"

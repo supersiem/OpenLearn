@@ -226,14 +226,14 @@ export default function RecentGeoefend({ items, sessions, currentUserName, isAdm
       <div className="space-y-4 relative">
         {/* Multi-selection controls */}
         {selectableItems.length >= 2 && (
-          <div className="px-3 pt-1 pb-1 flex flex-row gap-4">
+          <div className="px-3 pt-1 pb-1 flex flex-col md:flex-row gap-3 md:gap-4">
             <Button1
               text={select ? "Selectie uitzetten" : "Meerdere lijsten selecteren"}
               icon={<MousePointerClick />}
               onClick={toggleSelect}
             />
             {select && selectedItems.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
                 <Button1
                   text="Leren"
                   icon={<Image src={learn} alt="leren" width={16} height={16} />}
