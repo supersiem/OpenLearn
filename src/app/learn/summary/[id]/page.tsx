@@ -13,6 +13,7 @@ import { PencilIcon } from "lucide-react"
 import DeleteSummaryButton from "@/components/learning/DeleteSummaryButton"
 import { getUserNameById, getUserIdByName } from '@/serverActions/getUserName'
 import { isUUID } from '@/utils/uuid';
+import { notFound, redirect } from "next/navigation"
 
 export async function generateMetadata({
     params,
@@ -75,10 +76,16 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     const { id } = await params
     const summary = await prisma.practice.findFirst({
         where: {
-            mode: "summary",
             list_id: id
         }
     })
+    if (!summary) {
+        notFound()
+    }
+
+    if (summary.mode == "list") {
+        return redirect(`/learn/viewlist/${id}`);
+    }
 
     // Get current user for permission checks
     const currentUser = await getUserFromSession(

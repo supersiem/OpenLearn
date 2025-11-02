@@ -4,6 +4,7 @@ import ListTableComponent from "../listTableComponent";
 import { getUserFromSession } from "@/utils/auth/auth";
 import { cookies } from "next/headers";
 import ResultsView from "./ResultsView";
+import { notFound, redirect } from "next/navigation";
 
 interface PageParams {
   params: Promise<{ id: string; tab?: string[] }>;
@@ -37,19 +38,15 @@ export default async function ViewListTabPage({ params }: PageParams) {
     where: {
       list_id: id
     },
-    select: {
-      list_id: true,
-      name: true,
-      createdAt: true,
-      creator: true,
-      data: true,
-      subject: true,
-      lang_from: true,
-      lang_to: true,
-      published: true,
-      updatedAt: true
-    }
   });
+
+  if (!listData) {
+    notFound()
+  }
+
+  if (listData.mode === "summary") {
+    return redirect(`/learn/summary/${id}`);
+  }
 
   // Use the top-level subject field from the practice model
   const subject = listData?.subject || 'general';
