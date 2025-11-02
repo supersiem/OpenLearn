@@ -23,9 +23,9 @@ export default async function Page() {
                                 alt={`${subject} icon`}
                                 width={32}
                                 height={32}
-                                className="flex-shrink-0"
+                                className="shrink-0"
                             />
-                            <span className="break-words leading-tight w-full px-1">{getSubjectName(subject)}</span>
+                            <span className="wrap-break-word leading-tight w-full px-1">{getSubjectName(subject)}</span>
                         </div>
                     </Link>
                 ))}

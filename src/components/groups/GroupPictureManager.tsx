@@ -128,7 +128,7 @@ export default function GroupPictureManager({
       <CardContent className="space-y-4 md:space-y-6">
         {/* Current Group Picture */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-          <div className="relative flex-shrink-0">
+          <div className="relative shrink-0">
             <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-neutral-700 flex items-center justify-center overflow-hidden">
               {imageUrl ? (
                 <img
@@ -157,7 +157,7 @@ export default function GroupPictureManager({
         {previewUrl && (
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden flex-shrink-0">
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden shrink-0">
                 <img
                   src={previewUrl}
                   alt="Voorvertoning"

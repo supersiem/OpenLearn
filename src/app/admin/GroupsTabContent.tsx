@@ -88,7 +88,7 @@ export default function GroupsTabContent({
                                 <div className="hidden md:flex items-center gap-3 p-4">
                                     <Link
                                         href={`/learn/group/${groep.groupId}`}
-                                        className="flex-shrink-0"
+                                        className="shrink-0"
                                     >
                                         {groep.image ? (
                                             <img
@@ -115,7 +115,7 @@ export default function GroupsTabContent({
                                                     {groep.name}
                                                 </h3>
                                                 {groep.requiresApproval && (
-                                                    <Badge className="bg-blue-600/20 text-blue-400 border border-blue-600/50 text-xs flex-shrink-0">
+                                                    <Badge className="bg-blue-600/20 text-blue-400 border border-blue-600/50 text-xs shrink-0">
                                                         Goedkeuring vereist
                                                     </Badge>
                                                 )}
@@ -135,7 +135,7 @@ export default function GroupsTabContent({
                                         </div>
                                     </Link>
 
-                                    <div className="flex-shrink-0">
+                                    <div className="shrink-0">
                                         <div className="flex items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors">
                                             <DeleteGroupButton groupId={groep.groupId} />
                                         </div>
@@ -147,7 +147,7 @@ export default function GroupsTabContent({
                                         href={`/learn/group/${groep.groupId}`}
                                         className="flex items-start gap-3 mb-3"
                                     >
-                                        <div className="flex-shrink-0">
+                                        <div className="shrink-0">
                                             {groep.image ? (
                                                 <img
                                                     src={groep.image}
@@ -166,18 +166,18 @@ export default function GroupsTabContent({
                                         <div className="flex-1 min-w-0">
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-2 flex-wrap">
-                                                    <h3 className="text-base font-bold text-white break-words">
+                                                    <h3 className="text-base font-bold text-white wrap-break-word">
                                                         {groep.name}
                                                     </h3>
                                                     {groep.requiresApproval && (
-                                                        <Badge className="bg-blue-600/20 text-blue-400 border border-blue-600/50 text-xs flex-shrink-0">
+                                                        <Badge className="bg-blue-600/20 text-blue-400 border border-blue-600/50 text-xs shrink-0">
                                                             Goedkeuring vereist
                                                         </Badge>
                                                     )}
                                                 </div>
 
                                                 {groep.description && (
-                                                    <p className="text-sm text-neutral-400 line-clamp-2 break-words">
+                                                    <p className="text-sm text-neutral-400 line-clamp-2 wrap-break-word">
                                                         {groep.description}
                                                     </p>
                                                 )}

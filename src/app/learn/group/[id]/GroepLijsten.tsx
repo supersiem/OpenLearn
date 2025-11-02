@@ -232,7 +232,7 @@ export default function GroepLijsten({
               <div className="tile relative bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-bold py-3 px-3 md:py-2 md:px-6 rounded-lg min-h-20 h-auto flex items-center justify-between cursor-pointer">
                 {/* Selection checkbox */}
                 {select && list.mode === "list" && (
-                  <div className="relative inline-block mr-2 md:mr-4 flex-shrink-0">
+                  <div className="relative inline-block mr-2 md:mr-4 shrink-0">
                     <input
                       type="checkbox"
                       id={`checkbox-${list.list_id}`}
@@ -291,10 +291,10 @@ export default function GroepLijsten({
                         alt={`${list.subject} icon`}
                         width={24}
                         height={24}
-                        className="mr-2 flex-shrink-0"
+                        className="mr-2 shrink-0"
                       />
                     )}
-                    <span className="text-base md:text-lg whitespace-normal break-words max-w-[40ch]">
+                    <span className="text-base md:text-lg whitespace-normal wrap-break-word max-w-[40ch]">
                       {list.name}
                       {list.published === false && (
                         <Badge
@@ -317,7 +317,7 @@ export default function GroepLijsten({
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+                <div className="flex items-center gap-1 md:gap-2 shrink-0">
                   {(isCreator || list.creator === currentUserName) && (
                     <Link
                       href={`/learn/editlist/${list.list_id}`}

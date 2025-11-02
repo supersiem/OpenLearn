@@ -363,10 +363,10 @@ export default async function Page({
           {(isCreator || currentUser?.role === "admin") && (
             <div className="mt-8 border border-red-500/20 rounded-lg p-4 md:p-6">
               <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-                <AlertTriangle className="text-red-500 h-6 w-6 flex-shrink-0" />
+                <AlertTriangle className="text-red-500 h-6 w-6 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg md:text-xl font-bold text-red-500">Gevaarlijke zone</h3>
-                  <p className="text-sm md:text-base text-neutral-400 mt-2 mb-4 break-words">
+                  <p className="text-sm md:text-base text-neutral-400 mt-2 mb-4 wrap-break-word">
                     Als je deze groep verwijdert, kunnen de leden niet langer toegang krijgen tot de gedeelde lijsten.
                     Deze actie kan niet ongedaan worden gemaakt.
                   </p>

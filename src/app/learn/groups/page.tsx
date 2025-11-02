@@ -66,15 +66,15 @@ export default async function GroupsPage() {
                                                 <img
                                                     src={group.image}
                                                     alt={`Groepsfoto van ${group.name}`}
-                                                    className="w-10 h-10 flex-shrink-0 rounded-lg object-cover"
+                                                    className="w-10 h-10 shrink-0 rounded-lg object-cover"
                                                 />
                                             ) : (
-                                                <div className="flex-shrink-0">
+                                                <div className="shrink-0">
                                                     <Jdenticon value={group.name} size={40} />
                                                 </div>
                                             )}
-                                            <span className="text-base md:text-lg whitespace-normal break-words max-w-[40ch] flex flex-col md:flex-row md:items-center">
-                                                <span className="break-words">{group.name}</span>
+                                            <span className="text-base md:text-lg whitespace-normal wrap-break-word max-w-[40ch] flex flex-col md:flex-row md:items-center">
+                                                <span className="wrap-break-word">{group.name}</span>
                                                 <div className="flex gap-2 mt-1 md:mt-1 md:pl-2">
                                                     {group.creator === user.id && (
                                                         <Badge className="bg-amber-600/20 text-amber-500 border border-amber-600/50 text-xs">
@@ -89,7 +89,7 @@ export default async function GroupsPage() {
                                                 </div>
                                             </span>
                                         </div>
-                                        <div className="flex-grow"></div>
+                                        <div className="grow"></div>
                                         <div className="flex items-center pr-2">
                                             <span className="text-xs md:text-sm text-neutral-400 whitespace-nowrap">
                                                 <span className="hidden sm:inline">

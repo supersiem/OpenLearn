@@ -261,7 +261,7 @@ export default async function Page({
       <div className="flex flex-col mb-6">
         <div className="flex flex-col sm:flex-row items-start mb-3 gap-3">
           <div className="flex items-start gap-3 w-full sm:w-auto">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               {postcreator?.image ? (
                 <img
                   src={postcreator.image}
@@ -274,7 +274,7 @@ export default async function Page({
                 <Jdenticon value={jdenticonPostValue} size={40} className="w-10 h-10 md:w-12 md:h-12" />
               )}
             </div>
-            <div className="flex-grow min-w-0">
+            <div className="grow min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <div className="flex items-center min-w-0">
                   <div className="truncate">
@@ -285,7 +285,7 @@ export default async function Page({
                     />
                   </div>
                   {postcreator?.role === "admin" && (
-                    <Badge className="bg-red-500 text-white ml-1 rounded-md text-xs flex-shrink-0">
+                    <Badge className="bg-red-500 text-white ml-1 rounded-md text-xs shrink-0">
                       <ShieldUser className="w-3 h-3 md:w-4 md:h-4" />
                       <span className="hidden sm:inline ml-1">Administrator</span>
                     </Badge>
@@ -351,7 +351,7 @@ export default async function Page({
           </div>
         </div>
 
-        <h1 className="text-2xl md:text-3xl mb-4 font-bold break-words">{post.title}</h1>
+        <h1 className="text-2xl md:text-3xl mb-4 font-bold wrap-break-word">{post.title}</h1>
         <hr className="border-neutral-600 mb-4" />
         <div className="prose prose-sm md:prose-base max-w-none">
           <MarkdownRenderer content={post.content} />

@@ -30,7 +30,7 @@ export default function ForumHeaderTabs({ tabs, defaultTab, baseRoute, banned, f
             <div className="py-4 md:py-6 px-3 md:px-6">
                 <div className="flex items-center gap-2">
                     <h1 className="text-2xl md:text-4xl font-extrabold">Forum</h1>
-                    <div className="flex-grow" />
+                    <div className="grow" />
                     <ForumDialog banned={banned} banreason={banReason} banEnd={banEnd} forumDisabled={forumDisabled} />
                 </div>
             </div>

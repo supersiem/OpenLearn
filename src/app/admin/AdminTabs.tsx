@@ -179,7 +179,7 @@ export default function AdminTabs({
                                         className="flex-1 min-w-0"
                                     >
                                         <div className="flex items-center cursor-pointer">
-                                            <div className="mr-3 md:mr-4 flex-shrink-0">
+                                            <div className="mr-3 md:mr-4 shrink-0">
                                                 {user?.image ? (
                                                     <img
                                                         src={user.image}
@@ -317,7 +317,7 @@ export default function AdminTabs({
                                         className="flex-1 min-w-0"
                                     >
                                         <div className="flex items-center cursor-pointer">
-                                            <div className="mr-3 md:mr-4 flex-shrink-0">
+                                            <div className="mr-3 md:mr-4 shrink-0">
                                                 {list.subject && (
                                                     <Image
                                                         src={getSubjectIcon(list.subject)}
@@ -330,7 +330,7 @@ export default function AdminTabs({
                                             </div>
                                             <div className="flex flex-col flex-1 min-w-0">
                                                 <h3 className="font-medium text-base md:text-lg">
-                                                    <span className="break-words">{list.name}</span>
+                                                    <span className="wrap-break-word">{list.name}</span>
                                                     {list.published ? (
                                                         ""
                                                     ) : (
@@ -356,7 +356,7 @@ export default function AdminTabs({
                                             </div>
                                         </div>
                                     </Link>
-                                    <div className="flex-shrink-0 sm:self-center">
+                                    <div className="shrink-0 sm:self-center">
                                         <DeleteListButton
                                             listId={list.list_id}
                                             isCreator={true}
@@ -422,11 +422,11 @@ export default function AdminTabs({
                                             className="flex-1 flex items-center min-w-0"
                                         >
                                             <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                                                <div className="flex-shrink-0">
+                                                <div className="shrink-0">
                                                     <Jdenticon value={groep.name} size={32} className="w-8 h-8 md:w-10 md:h-10" />
                                                 </div>
-                                                <span className="text-base md:text-lg whitespace-normal break-words max-w-[40ch] flex flex-col md:flex-row md:items-center">
-                                                    <span className="break-words">{groep.name}</span>
+                                                <span className="text-base md:text-lg whitespace-normal wrap-break-word max-w-[40ch] flex flex-col md:flex-row md:items-center">
+                                                    <span className="wrap-break-word">{groep.name}</span>
                                                     <div className="flex gap-2 mt-1 md:mt-1 md:pl-2">
                                                         {groep.requiresApproval && (
                                                             <Badge className="bg-blue-600/20 text-blue-400 border border-blue-600/50 text-xs">
@@ -436,7 +436,7 @@ export default function AdminTabs({
                                                     </div>
                                                 </span>
                                             </div>
-                                            <div className="hidden md:flex md:flex-grow"></div>
+                                            <div className="hidden md:flex md:grow"></div>
                                             <div className="hidden sm:flex items-center pr-2">
                                                 <span className="text-xs md:text-sm text-neutral-400 whitespace-nowrap">
                                                     {memberCount} {memberCount === 1 ? "lid" : "leden"} •
@@ -453,7 +453,7 @@ export default function AdminTabs({
                                             </div>
                                         )}
 
-                                        <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors flex-shrink-0">
+                                        <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors shrink-0">
                                             <DeleteGroupButton groupId={groep.groupId} />
                                         </div>
                                     </div>
@@ -527,7 +527,7 @@ export default function AdminTabs({
         <div className="py-4 md:py-6 px-3 md:pl-6">
             <div className="flex items-center">
                 <h1 className="text-3xl md:text-4xl font-extrabold mb-4">admin</h1>
-                <div className="flex-grow"></div>
+                <div className="grow"></div>
                 <div className="w-4" />
             </div>
             <Tabs

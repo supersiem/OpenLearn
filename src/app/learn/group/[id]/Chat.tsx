@@ -135,7 +135,7 @@ export default function Chat({
     <div className="ml-0 md:ml-2 w-full flex flex-col items-center justify-center px-2 md:px-0">
       <div className="w-full md:w-130 flex flex-col">
         <div
-          className="overflow-y-auto max-h-[320px] md:max-h-[320px] w-full"
+          className="overflow-y-auto max-h-80 md:max-h-80 w-full"
           ref={messagesContainerRef}
         >
           {messages.length === 0 ? (
@@ -153,13 +153,13 @@ export default function Chat({
                     <img
                       src={chatItem.creatorImage}
                       alt={chatItem.creator + "'s profielfoto"}
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border border-neutral-700 flex-shrink-0"
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border border-neutral-700 shrink-0"
                     />
                   ) : (
                     <Jdenticon
                       value={chatItem.creator}
                       size={32}
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover flex-shrink-0"
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shrink-0"
                     />
                   )}
                   <div className="min-w-0 flex-1">
@@ -168,7 +168,7 @@ export default function Chat({
                       <span className="hidden sm:inline">-</span>
                       <span className="text-xs">{formatRelativeTime(new Date(chatItem.time))}</span>
                     </div>
-                    <div className="text-sm md:text-base text-neutral-200 break-words">{chatItem.content}</div>
+                    <div className="text-sm md:text-base text-neutral-200 wrap-break-word">{chatItem.content}</div>
                   </div>
                 </div>
                 {isAdmin && (
@@ -177,7 +177,7 @@ export default function Chat({
                       setMessageToDelete(chatItem);
                       setDeleteDialogOpen(true);
                     }}
-                    className="text-red-400 hover:text-red-300 p-1.5 md:p-2 rounded hover:bg-red-900/20 z-10 transition-all flex-shrink-0"
+                    className="text-red-400 hover:text-red-300 p-1.5 md:p-2 rounded hover:bg-red-900/20 z-10 transition-all shrink-0"
                     title="Verwijderen"
                   >
                     <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
@@ -197,7 +197,7 @@ export default function Chat({
             onChange={(e) => setInputValue(e.target.value)}
           />
           <Send
-            className={`text-neutral-200 transition-colors w-5 h-5 md:w-6 md:h-6 flex-shrink-0 ${!inputValue.trim()
+            className={`text-neutral-200 transition-colors w-5 h-5 md:w-6 md:h-6 shrink-0 ${!inputValue.trim()
               ? "opacity-50 cursor-not-allowed"
               : "hover:text-neutral-400 cursor-pointer"
               }`}
