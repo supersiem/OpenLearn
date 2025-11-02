@@ -96,7 +96,7 @@ export default async function GroupsPage() {
                                                     {Array.isArray(group.members) ? group.members.length : 0} {Array.isArray(group.members) && group.members.length === 1 ? "lid" : "leden"} • {Array.isArray(group.listsAdded) ? group.listsAdded.length : 0} {Array.isArray(group.listsAdded) && group.listsAdded.length === 1 ? "lijst" : "lijsten"}
                                                 </span>
                                                 <span className="sm:hidden">
-                                                    {Array.isArray(group.members) ? group.members.length : 0} • {Array.isArray(group.listsAdded) ? group.listsAdded.length : 0}
+                                                    {Array.isArray(group.members) ? group.members.length : 0} {Array.isArray(group.members) && group.members.length === 1 ? "lid" : "leden"} • {Array.isArray(group.listsAdded) ? group.listsAdded.length : 0} {Array.isArray(group.listsAdded) && group.listsAdded.length === 1 ? "lijst" : "lijsten"}
                                                 </span>
                                             </span>
                                         </div>
