@@ -45,20 +45,23 @@ export const prestatieMap = [
 export function PrestatieSelector({ points }: { points: number }) {
   return (
     <Card className="mb-6 bg-neutral-800 text-white border-neutral-700">
-      <CardContent className="flex flex-row gap-4">
+      <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {prestatieMap.map((prestatie, i) => {
+          const disabled = points < prestatie.points;
           return (
             <div
               key={i}
-              className={`transition-all items-center justify-center flex flex-col ${
-                points < prestatie.points
+              className={`transition-all flex flex-col items-center justify-center text-center p-3 rounded-md min-h-[120px] ${
+                disabled
                   ? "opacity-50 cursor-not-allowed"
-                : "hover:text-neutral-300 cursor-pointer active:scale-95"
+                  : "hover:bg-neutral-900/50 hover:text-neutral-300 cursor-pointer active:scale-95"
               }`}
             >
-              {prestatie.image ? prestatie.image : null}
-              <h1 key={i}>{prestatie.name}</h1>
-              <p>{prestatie.description}</p>
+              <div className="mb-2 flex items-center justify-center [&>svg]:w-8 [&>svg]:h-8 sm:[&>svg]:w-12 sm:[&>svg]:h-12 md:[&>svg]:w-16 md:[&>svg]:h-16">
+                {prestatie.image}
+              </div>
+              <h1 className="text-sm sm:text-base md:text-lg font-medium">{prestatie.name}</h1>
+              <p className="text-xs sm:text-sm text-neutral-300 mt-1">{prestatie.description}</p>
             </div>
           );
         })}
