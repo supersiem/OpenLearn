@@ -140,24 +140,25 @@ export default async function SubjectTabPage({
     take: 10
   }) || [];
 
-  // Get reply counts for forum posts
   const replyCountMap: Record<string, number> = {};
 
   if (forumPosts.length > 0) {
     const postIds = forumPosts.map((post: { post_id: any; }) => post.post_id);
     const replyCounts = await prisma.forum.groupBy({
-      by: ['post_id'],
+      by: ['replyTo'],
       where: {
-        post_id: { in: postIds },
-        type: "reply"
+        replyTo: { in: postIds },
+        type: "reply",
       },
       _count: {
-        post_id: true,
-      }
+        replyTo: true,
+      },
     });
 
-    replyCounts.forEach((item: { post_id: string | number; _count: { post_id: number; }; }) => {
-      replyCountMap[item.post_id] = item._count.post_id;
+    replyCounts.forEach((item: { replyTo: string | number | null; _count: { replyTo: number; }; }) => {
+      if (item.replyTo) {
+        replyCountMap[String(item.replyTo)] = item._count.replyTo;
+      }
     });
   }
 
@@ -197,11 +198,11 @@ export default async function SubjectTabPage({
                           className="mr-2"
                         />
                       )}
-                      <span className="text-lg whitespace-normal break-words max-w-[40ch]">
+                      <span className="text-lg whitespace-normal wrap-break-word max-w-[40ch]">
                         {list.name}
                       </span>
                     </div>
-                    <div className="flex-grow"></div>
+                    <div className="grow"></div>
                     <div className="flex items-center pr-2">
                       {Array.isArray(list.data) && list.data.length === 1
                         ? "1 woord"
@@ -269,11 +270,11 @@ export default async function SubjectTabPage({
                           className="mr-2"
                         />
                       )}
-                      <span className="text-lg whitespace-normal break-words max-w-[40ch]">
+                      <span className="text-lg whitespace-normal wrap-break-word max-w-[40ch]">
                         {list.name}
                       </span>
                     </div>
-                    <div className="flex-grow"></div>
+                    <div className="grow"></div>
                     <div className="flex items-center pr-2">
                       {Array.isArray(list.data) && list.data.length === 1
                         ? "1 woord"
@@ -339,11 +340,11 @@ export default async function SubjectTabPage({
                           className="mr-2"
                         />
                       )}
-                      <span className="text-lg whitespace-normal break-words max-w-[40ch]">
+                      <span className="text-lg whitespace-normal wrap-break-word max-w-[40ch]">
                         {list.name}
                       </span>
                     </div>
-                    <div className="flex-grow"></div>
+                    <div className="grow"></div>
                     <div className="flex items-center pr-2">
                       {Array.isArray(list.data) && list.data.length === 1
                         ? "1 woord"
@@ -402,7 +403,7 @@ export default async function SubjectTabPage({
                 <div className="tile bg-neutral-800 hover:bg-neutral-700 transition-colors text-white py-3 px-6 mx-4 rounded-lg">
                   <div className="flex items-center mb-1">
                     <h3 className="text-lg font-bold">{post.title}</h3>
-                    <div className="flex-grow"></div>
+                    <div className="grow"></div>
                     <span className="text-sm text-gray-400">
                       {formatRelativeTime(new Date(post.createdAt))}
                     </span>
