@@ -62,7 +62,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "PolarLearn",
       images: [
         {
-          url: `/banner.png`,
+          url: `${process.env.NEXT_PUBLIC_URL}/banner.png`,
           width: 1200,
           height: 630,
           alt: "PolarLearn banner dingo",
