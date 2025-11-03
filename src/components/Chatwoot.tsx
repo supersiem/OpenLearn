@@ -1,49 +1,62 @@
 "use client"
 
 import { useEffect } from "react";
-
-interface ChatwootProps {
-  url?: string;
-  token?: string;
-  userIdentityValidation?: string;
-}
+import { useUserDataStore } from "@/store/user/UserDataProvider";
 
 export default function Chatwoot({
   url,
   token,
-  userIdentityValidation
-}: ChatwootProps) {
+  hmac,
+}: {
+  url?: string;
+  token?: string;
+  hmac?: string;
+}) {
+  const user = useUserDataStore().getState();
   useEffect(() => {
-    if (!url || !token) {
+    if (!url || !token || !hmac) {
       return;
     }
 
-    // Load Chatwoot widget script
+    // Set settings before loading the script
+    (window as any).chatwootSettings = {
+      locale: "nl",
+      darkMode: "auto",
+      type: "expanded_bubble"
+    };
+
     const script = document.createElement("script");
     script.src = `${url}/packs/js/sdk.js`;
     script.async = true;
-    script.defer = true;
 
     script.onload = () => {
-      // Initialize Chatwoot after script loads
       if (typeof window !== "undefined" && (window as any).chatwootSDK) {
         (window as any).chatwootSDK.run({
           websiteToken: token,
           baseUrl: url,
-          identityValidation: userIdentityValidation,
+          identifierHash: hmac,
         });
+
+        // Set user after SDK is loaded
+        if ((window as any).$chatwoot) {
+          (window as any).$chatwoot.setUser(user.id, {
+            name: user.name,
+            email: user.email,
+            avatar_url: user.image,
+            identifier_hash: hmac,
+          });
+        }
       }
     };
 
     document.body.appendChild(script);
 
     return () => {
-      // Cleanup
       if (document.body.contains(script)) {
         document.body.removeChild(script);
       }
     };
-  }, [url, token, userIdentityValidation]);
+  }, [url, token, hmac]);
 
   return null;
 }

@@ -14,6 +14,7 @@ import Providers from "@/components/providers";
 import DelWindowNext from "@/components/DelWindowNext";
 import EasterEgg from "@/components/EasterEgg";
 import Chatwoot from "@/components/Chatwoot";
+import crypto from "crypto";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -121,7 +122,7 @@ export default async function RootLayout({
   const footerContent = await Footer();
 
   // Server-side user data hydration
-  let userData: { id: string; name: string; isAdmin: boolean; impersonation: any } = { id: '', name: '', isAdmin: false, impersonation: null };
+  let userData: { id: string; name: string; email: string; image: string; isAdmin: boolean; impersonation: any } = { id: '', name: '', email: '', image: '', isAdmin: false, impersonation: null };
   try {
     const cookie = (await cookies()).get('polarlearn.session-id')?.value;
     if (cookie) {
@@ -138,6 +139,8 @@ export default async function RootLayout({
             userData = {
               id: user.id,
               name: user.name || '',
+              email: user.email || '',
+              image: user.image || '',
               isAdmin: user.role === 'admin',
               impersonation: null,
             };
@@ -200,6 +203,12 @@ export default async function RootLayout({
     sysMsgData = { ...sysMsgData, key: encodeURIComponent(`${sysMsgData.message}|${sysMsgData.color}`) } as any;
   }
 
+  let ChatwootHMAC;
+
+  if (process.env.CHATWOOT_URL && process.env.CHATWOOT_TOKEN && process.env.CHATWOOT_USER_IDENTITY_VALIDATION_TOKEN && userData.email) {
+    ChatwootHMAC = crypto.createHmac("sha256", process.env.CHATWOOT_USER_IDENTITY_VALIDATION_TOKEN as string).update(userData.email).digest("hex");
+  }
+
   return (
     <html
       lang="nl"
@@ -258,7 +267,7 @@ export default async function RootLayout({
             {children}
             <DelWindowNext />
             <EasterEgg />
-            <Chatwoot url={process.env.CHATWOOT_URL} token={process.env.CHATWOOT_TOKEN} />
+            <Chatwoot url={process.env.CHATWOOT_URL} token={process.env.CHATWOOT_TOKEN} hmac={ChatwootHMAC} />
           </Providers>
         </SessionWrapper>
       </body>

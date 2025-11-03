@@ -95,7 +95,7 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
   }
 
   const path = request.nextUrl.pathname;
-  const isUnauthenticatedAllowed = path === "/" || path === "/home/forum" || path.startsWith("/home/forum/");
+  const isUnauthenticatedAllowed = path === "/" || path === "/home/forum" || path.startsWith("/home/forum/") || path.startsWith("/auth/");
   if (isUnauthenticatedAllowed) return null;
 
   const sessionCookie = request.cookies.get("polarlearn.session-id");
