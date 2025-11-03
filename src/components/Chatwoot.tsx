@@ -22,7 +22,8 @@ export default function Chatwoot({
     (window as any).chatwootSettings = {
       locale: "nl",
       darkMode: "auto",
-      type: "expanded_bubble"
+      type: "expanded_bubble",
+      baseDomain: "polarlearn.nl"
     };
 
     const script = document.createElement("script");
