@@ -32,7 +32,6 @@ export default function ForumHeaderTabs({ tabs, defaultTab, baseRoute, banned, f
                     <h1 className="text-2xl md:text-4xl font-extrabold">Forum</h1>
                     <div className="grow" />
                     <ForumDialog
-                        
                         banned={banned}
                         banreason={banReason}
                         banEnd={banEnd}

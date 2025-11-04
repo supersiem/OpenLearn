@@ -183,6 +183,7 @@ function ForumDialog({ banned, banreason, banEnd, forumDisabled, session }: { ba
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userStore = useUserDataStore();
+  const isSignedIn = userStore.getState().id !== "";
   const isAdmin = userStore.getState().isAdmin;
   const router = useRouter();
 
@@ -314,17 +315,11 @@ function ForumDialog({ banned, banreason, banEnd, forumDisabled, session }: { ba
 
   return (
     <>
-      {session?.id ? (
-        <Button1
-          text="Nieuwe forumpost"
-          onClick={handleForumBtnClick}
-        />
-      ) : (
-          <Button1
-            text="Log in om forumposts te maken"
-            disabled={true}
-          />
-      )}
+      <Button1
+        text={isSignedIn ? "Nieuwe forumpost" : "Log om een post te maken"}
+        onClick={handleForumBtnClick}
+        disabled={forumDisabled || (!isSignedIn)}
+      />
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="z-110 max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
           <DialogHeader>

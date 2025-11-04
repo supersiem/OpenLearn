@@ -205,7 +205,7 @@ export default async function RootLayout({
 
   let ChatwootHMAC;
 
-  if (process.env.CHATWOOT_URL && process.env.CHATWOOT_TOKEN && process.env.CHATWOOT_USER_IDENTITY_VALIDATION_TOKEN && userData.email) {
+  if (process.env.CHATWOOT_URL && process.env.CHATWOOT_TOKEN && process.env.CHATWOOT_USER_IDENTITY_VALIDATION_TOKEN && userData.id) {
     ChatwootHMAC = crypto.createHmac("sha256", process.env.CHATWOOT_USER_IDENTITY_VALIDATION_TOKEN as string).update(userData.id).digest("hex");
   }
 

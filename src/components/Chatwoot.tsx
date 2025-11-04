@@ -23,41 +23,47 @@ export default function Chatwoot({
       locale: "nl",
       darkMode: "auto",
       type: "expanded_bubble",
-      baseDomain: "polarlearn.nl"
+      baseDomain: process.env.NEXT_PUBLIC_URL 
     };
 
-    const script = document.createElement("script");
-    script.src = `${url}/packs/js/sdk.js`;
-    script.async = true;
-
-    script.onload = () => {
-      if (typeof window !== "undefined" && (window as any).chatwootSDK) {
+    const initializeChatwoot = () => {
+      if ((window as any).chatwootSDK) {
         (window as any).chatwootSDK.run({
           websiteToken: token,
           baseUrl: url,
           identifierHash: hmac,
         });
 
-        // Set user after SDK is loaded
         if ((window as any).$chatwoot) {
+          console.log("Setting user with id:", user.id, "HMAC:", hmac);
           (window as any).$chatwoot.setUser(user.id, {
             name: user.name,
             email: user.email,
             avatar_url: user.image,
-            identifier_hash: hmac,
           });
         }
       }
     };
 
-    document.body.appendChild(script);
+    // Check if SDK is already loaded
+    if ((window as any).chatwootSDK) {
+      initializeChatwoot();
+      return;
+    }
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+    // Script not yet loaded, create and append it
+    const script = document.createElement("script");
+    script.src = `${url}/packs/js/sdk.js`;
+    script.async = true;
+
+    script.onload = () => {
+      if (typeof window !== "undefined") {
+        initializeChatwoot();
       }
     };
-  }, [url, token, hmac]);
+
+    document.body.appendChild(script);
+  }, [url, token, hmac, user.email, user.name, user.image]);
 
   return null;
 }
