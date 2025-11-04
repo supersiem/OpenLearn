@@ -55,6 +55,13 @@ export async function signInCredentials(
     }
 
     if (user.loginAllowed === false) {
+      // Create a session even for banned users so they can access the banned page
+      try {
+        await createSession(user.id);
+      } catch (err) {
+        console.error("Failed to create session for banned user:", err);
+      }
+
       return {
         banned: true,
         message: user.banReason || "Geen reden opgegeven"

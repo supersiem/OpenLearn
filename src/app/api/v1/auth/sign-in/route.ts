@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, captchaToken} = body;
+    const { email, password, captchaToken } = body;
     // Only require captcha if turnstileEnabled is true (default)
     if (!!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !!process.env.TURNSTILE_SECRET_KEY) {
       if (!captchaToken) {
@@ -44,6 +44,21 @@ export async function POST(request: NextRequest) {
         { error: "Je e-mailadres is nog niet geverifieerd. Controleer je e-mail en klik op de activatielink. Als je geen e-mail binnenkrijgt, join onze Discord voor hulp." },
         { status: 403 }
       );
+    }
+
+    if (typeof result === "object" && result.banned) {
+      // User is banned. We have created a session for them in signInCredentials.
+      // Redirect them to the banned page with a 307 Temporary Redirect.
+      const response = NextResponse.redirect(
+        new URL("/auth/banned", request.url),
+        { status: 307 }
+      );
+      // Clear the goto cookie since they're being sent to banned page
+      const gotoCookie = request.cookies.get("polarlearn.goto");
+      if (gotoCookie) {
+        response.cookies.delete("polarlearn.goto");
+      }
+      return response;
     }
 
     if (typeof result === "string" && result !== "invcreds") {

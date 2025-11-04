@@ -18,6 +18,11 @@ export default function Chatwoot({
       return;
     }
 
+    (window as any).chatwootSettings = {
+      type: "expanded_bubble",
+      launcherTitle: "Hulp nodig?",
+    }
+
     const element = document.createElement("script");
     element.src = `${url}/packs/js/sdk.js`;
     element.async = true;
@@ -37,8 +42,14 @@ export default function Chatwoot({
         name: user.name,
         avatar_url: user.image,
         identifier_hash: hmac,
-      })
-    })
+      });
+      (window as any).$chatwoot.setCustomAttributes({
+        id: user.id,
+        banned: user.banned,
+        forumBanned: user.forumBanned,
+        forumBannedExpiry: user.forumBannedExpiry,
+      });
+    });
   });
 
   return null;

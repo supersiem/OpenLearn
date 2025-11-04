@@ -147,6 +147,21 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
       return redirect;
     }
 
+    // Check if user is banned
+    if (session.userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { loginAllowed: true },
+      });
+
+      if (user && user.loginAllowed === false) {
+        // Allow access to banned page and auth routes, redirect all others
+        if (!path.startsWith("/auth/")) {
+          return NextResponse.redirect(new URL("/auth/banned", request.url));
+        }
+      }
+    }
+
     return null; // Auth OK
   } catch (error) {
     console.error("Authentication error in middleware:", error);

@@ -122,7 +122,7 @@ export default async function RootLayout({
   const footerContent = await Footer();
 
   // Server-side user data hydration
-  let userData: { id: string; name: string; email: string; image: string; isAdmin: boolean; impersonation: any } = { id: '', name: '', email: '', image: '', isAdmin: false, impersonation: null };
+  let userData: { id: string; name: string; email: string; image: string; isAdmin: boolean; banned: boolean; forumBanned: boolean; forumBannedExpiry: string | null; impersonation: any } = { id: '', name: '', email: '', image: '', isAdmin: false, banned: false, forumBanned: false, forumBannedExpiry: null, impersonation: null };
   try {
     const cookie = (await cookies()).get('polarlearn.session-id')?.value;
     if (cookie) {
@@ -142,6 +142,9 @@ export default async function RootLayout({
               email: user.email || '',
               image: user.image || '',
               isAdmin: user.role === 'admin',
+              banned: !user.loginAllowed,
+              forumBanned: !user.forumAllowed,
+              forumBannedExpiry: user.forumBanEnd?.toISOString() || null,
               impersonation: null,
             };
           }
