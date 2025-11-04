@@ -72,32 +72,12 @@ Geprobeerde pad: ${pathname}
   const authResponse = await middlewareAuth(request);
   if (authResponse) return authResponse;
 
-  // CSP header
-  const cspHeader = process.env.DISABLE_CSP
-    ? ""
-    : `
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.cloudflare.com https://*.sentry.io https://*.google.com;
-    worker-src 'self' blob:;
-    ${process.env.TURNSTILE_SECRET_KEY && process.env.TURNSTILE_SITE_KEY ? "frame-src 'self' https://challenges.cloudflare.com;" : ""}
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: *;
-    font-src 'self';
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-    connect-src 'self' https://*.cloudflare.com https://*.sentry.io https://*.google.com *;
-    upgrade-insecure-requests;`.replace(/\s{2,}/g, " ").trim();
-
   const resp = NextResponse.next();
 
-  resp.headers.set("Content-Security-Policy", cspHeader);
-  resp.headers.set("Content-Security-Policy-Report-Only", cspHeader);
   resp.headers.set("X-Content-Type-Options", "nosniff");
   resp.headers.set("Access-Control-Allow-Origin", "*");
   resp.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  resp.headers.set("X-Frame-Options", "DENY");
+  resp.headers.set("X-Frame-Options", "SAMEORIGIN");
   resp.headers.set("X-XSS-Protection", "1; mode=block");
   resp.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   return resp;
@@ -115,7 +95,7 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
   }
 
   const path = request.nextUrl.pathname;
-  const isUnauthenticatedAllowed = path === "/" || path === "/home/forum" || path.startsWith("/home/forum/");
+  const isUnauthenticatedAllowed = path === "/" || path === "/home/forum" || path.startsWith("/home/forum/") || path.startsWith("/auth/");
   if (isUnauthenticatedAllowed) return null;
 
   const sessionCookie = request.cookies.get("polarlearn.session-id");
@@ -165,6 +145,21 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
         });
       }
       return redirect;
+    }
+
+    // Check if user is banned
+    if (session.userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { loginAllowed: true },
+      });
+
+      if (user && user.loginAllowed === false) {
+        // Allow access to banned page and auth routes, redirect all others
+        if (!path.startsWith("/auth/")) {
+          return NextResponse.redirect(new URL("/auth/banned", request.url));
+        }
+      }
     }
 
     return null; // Auth OK

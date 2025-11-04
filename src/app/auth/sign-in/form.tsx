@@ -260,6 +260,13 @@ export default function SignInForm({ googleEnabled = true, githubEnabled = true,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password, captchaToken: tokenToSend }),
               });
+              
+              // Handle redirects (banned users get 307)
+              if (response.redirected) {
+                window.location.href = response.url;
+                return;
+              }
+              
               const data = await response.json();
               if (response.ok && data.success) {
                 toast.success("Succesvol ingelogd!");
@@ -276,6 +283,12 @@ export default function SignInForm({ googleEnabled = true, githubEnabled = true,
                   router.push(gotoPath);
                 }, 300);
               } else {
+                // Check if user is banned
+                if (data.banned) {
+                  router.push("/auth/banned");
+                  return;
+                }
+
                 if (data.error && data.error.includes("geverifieerd")) {
                   setShowResendActivation(true);
                 }
