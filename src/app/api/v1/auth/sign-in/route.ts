@@ -48,13 +48,13 @@ export async function POST(request: NextRequest) {
 
     if (typeof result === "object" && result.banned) {
       // User is banned. We have created a session for them in signInCredentials.
-      // Redirect them to the banned page with a 307 Temporary Redirect.
-      const response = NextResponse.redirect(
-        new URL("/auth/banned", request.url),
-        { status: 307 }
+      // Return JSON with banned flag so the client can redirect to /auth/banned
+      const gotoCookie = request.cookies.get("polarlearn.goto");
+      const response = NextResponse.json(
+        { banned: true, error: result.message },
+        { status: 200 }
       );
       // Clear the goto cookie since they're being sent to banned page
-      const gotoCookie = request.cookies.get("polarlearn.goto");
       if (gotoCookie) {
         response.cookies.delete("polarlearn.goto");
       }

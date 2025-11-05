@@ -96,9 +96,12 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
 
   const path = request.nextUrl.pathname;
   const isUnauthenticatedAllowed = path === "/" || path === "/home/forum" || path.startsWith("/home/forum/") || path.startsWith("/auth/");
-  if (isUnauthenticatedAllowed) return null;
 
   const sessionCookie = request.cookies.get("polarlearn.session-id");
+
+  // If no session and unauthenticated route, allow through
+  if (!sessionCookie?.value && isUnauthenticatedAllowed) return null;
+
   if (!sessionCookie?.value) {
     const redirect = NextResponse.redirect(new URL("/auth/sign-in", request.url));
     if (!request.headers.get("Next-Router-Prefetch")) {
@@ -147,7 +150,7 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
       return redirect;
     }
 
-    // Check if user is banned
+    // Check if user is banned (check this for ALL routes, even auth routes)
     if (session.userId) {
       const user = await prisma.user.findUnique({
         where: { id: session.userId },
@@ -155,12 +158,15 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
       });
 
       if (user && user.loginAllowed === false) {
-        // Allow access to banned page and auth routes, redirect all others
-        if (!path.startsWith("/auth/")) {
+        // Only allow access to the banned page itself, redirect everything else
+        if (path !== "/auth/banned") {
           return NextResponse.redirect(new URL("/auth/banned", request.url));
         }
       }
     }
+
+    // If user has valid session and is on auth route (and not banned), allow through
+    if (isUnauthenticatedAllowed) return null;
 
     return null; // Auth OK
   } catch (error) {
