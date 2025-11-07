@@ -114,6 +114,15 @@ export default async function Page({
     );
   }
 
+  const no_forum_access = await prisma.config.findFirst({
+    where: { key: 'no_forum_access' },
+  })
+
+  if (no_forum_access) {
+    return <div>De goden van deze polarlearn hebben het forum uitgezet.</div>;
+  }
+
+
   const session = await getUserFromSession(
     (await cookies()).get("polarlearn.session-id")?.value as string
   );

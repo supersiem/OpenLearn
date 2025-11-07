@@ -7,10 +7,10 @@ import { prisma } from "@/utils/prisma";
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Skip static files, API routes, and prefetch
+  // Skip static files and prefetch
   if (
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
+    // pathname.startsWith("/api") ||
     pathname === "/favicon.ico" ||
     /\.(css|js|ts|tsx|jsx|woff2?|ttf|png|jpg|jpeg|gif|svg|webmanifest)$/.test(pathname) ||
     request.headers.get("purpose") === "prefetch" ||
@@ -24,12 +24,7 @@ export async function proxy(request: NextRequest) {
   // Bot / scanner detection (before any heavier logic)
   const userAgent = request.headers.get("user-agent") || "";
   if (
-    pathname.endsWith(".php") ||
-    pathname.endsWith(".phtml") ||
-    pathname.endsWith(".phps") ||
-    pathname.endsWith(".cgi") ||
-    pathname.endsWith(".env") ||
-    pathname.includes("/wp-") ||
+    pathname.startsWith('/api/v1') &&
     ["curl", "wget", "httpie", "powershell", "go-http-client"].some((bot) =>
       userAgent.toLowerCase().includes(bot)
     )
@@ -40,15 +35,17 @@ export async function proxy(request: NextRequest) {
         ? `${request.headers.get("x-forwarded-for")} (x-forwarded-for)`
         : "Onbekend";
     const embed = new Embed()
-      .setTitle("Automatische scanrapport")
+      .setTitle("MOGELIJK API MISGEBRUIK GEDETECTEERD!!!!")
+      .setDescription("Er is een verzoek naar de API gedaan met een verdachte user-agent.")
       .addField({ name: "IP", value: ip, inline: true })
       .addField({ name: "useragent", value: userAgent, inline: true })
       .addField({ name: "Geprobeerde pad", value: pathname, inline: true })
-      .setColor("#0099ff")
+      .setColor("#ff0000ff")
       .setTimestamp();
 
     const freshWebhook = new Webhook(process.env.DISCORD_WEBHOOK || "");
-    freshWebhook.setUsername("Iemand zit gaar te doen");
+    freshWebhook.setUsername("Polarlearn security logs");
+    freshWebhook.setAvatarUrl
     freshWebhook.addEmbed(embed);
     freshWebhook
       .setContent(`@here
@@ -64,8 +61,13 @@ Geprobeerde pad: ${pathname}
       .send();
 
     return new NextResponse(
-      "Foei kutbot!! Tyf nu maar op voordat wij lekker snel een abusereport sturen naar je ISP!"
+      "you shall not pass", { status: 403 }
     );
+  }
+
+  // Nu we de bots in api/v1 hebben afgehandeld, kunnen we verder gaan met het toestaan van legitieme verzoeken.
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
   }
 
   // Auth gate for protected routes

@@ -33,6 +33,18 @@ function getFormSchema(isAdmin: boolean) {
 
 export async function POST(request: NextRequest) {
   try {
+    const no_forum_access = await prisma.config.findFirst({
+      where: { key: 'no_forum_access' },
+    })
+
+    if (no_forum_access) {
+      return NextResponse.json(
+        { error: "nee." },
+        { status: 403 }
+      );
+    }
+
+
     const body = await request.json();
 
     // Get the current user
