@@ -45,7 +45,6 @@ export async function proxy(request: NextRequest) {
 
     const freshWebhook = new Webhook(process.env.DISCORD_WEBHOOK || "");
     freshWebhook.setUsername("Polarlearn security logs");
-    freshWebhook.setAvatarUrl
     freshWebhook.addEmbed(embed);
     freshWebhook
       .setContent(`@here
