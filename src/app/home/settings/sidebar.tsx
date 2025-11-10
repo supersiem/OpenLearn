@@ -1,5 +1,3 @@
-// CLEANUP NEEDED!!!
-// de sidebar is lelijk en niet consistent met de rest van de app
 "use client"
 
 import { User, Settings, Bell, Shield, Palette } from "lucide-react"
@@ -17,8 +15,33 @@ import {
     SidebarTrigger,
     useSidebar
 } from "@/components/ui/sidebar"
-
-import { useTranslations } from "next-intl"
+const items = [
+    {
+        title: "Account",
+        url: "/home/settings/account",
+        icon: User,
+    },
+    {
+        title: "Uiterlijk",
+        url: "/home/settings/appearance",
+        icon: Palette,
+    },
+    {
+        title: "Foruminstellingen",
+        url: "/home/settings/forum",
+        icon: Settings,
+    },
+    {
+        title: "Berichten",
+        url: "/home/settings/notifications",
+        icon: Bell,
+    },
+    {
+        title: "Privacy",
+        url: "/home/settings/privacy",
+        icon: Shield,
+    }
+]
 
 export function SettingsSidebar() {
     const pathname = usePathname()
@@ -26,34 +49,7 @@ export function SettingsSidebar() {
 
     // Dynamic width based on sidebar state
     const sidebarWidth = state === "expanded" ? "w-64" : "w-12"
-    const t = useTranslations('instellingen')
-    const items = [
-        {
-            title: t("account"),
-            url: "/home/settings/account",
-            icon: User,
-        },
-        {
-            title: t("uiterlijk"),
-            url: "/home/settings/appearance",
-            icon: Palette,
-        },
-        {
-            title: t("forum_settings"),
-            url: "/home/settings/forum",
-            icon: Settings,
-        },
-        {
-            title: t("berichten"),
-            url: "/home/settings/notifications",
-            icon: Bell,
-        },
-        {
-            title: t("privacy"),
-            url: "/home/settings/privacy",
-            icon: Shield,
-        }
-    ]
+
     return (
         <Sidebar
             className={`fixed top-16 h-[calc(100vh-4rem)] ${sidebarWidth} z-30 border-r border-border bg-neutral-800 transition-all duration-200`}
@@ -69,7 +65,7 @@ export function SettingsSidebar() {
                     </div>
                 )}
                 <SidebarGroup>
-                    <SidebarGroupLabel>{t("instellingen")}</SidebarGroupLabel>
+                    <SidebarGroupLabel>Instellingen</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => {

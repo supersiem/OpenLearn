@@ -1,8 +1,5 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from "next";
-import createNextIntlPlugin from 'next-intl/plugin';
-
-const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
@@ -67,4 +64,4 @@ const config = process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_
   })
   : nextConfig;
 
-export default withNextIntl(config);
+export default config;

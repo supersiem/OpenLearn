@@ -33,7 +33,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { useTranslations } from "next-intl";
 
 interface Preferences {
   streakReminders?: boolean;
@@ -79,8 +78,6 @@ export default function ClientAccountSettings({ initialData }: Props) {
   const [createBotDialogOpen, setCreateBotDialogOpen] = useState(false);
   const [createBotLoading, setCreateBotLoading] = useState(false);
   const [botName, setBotName] = useState("");
-  const t = useTranslations('instellingen');
-  const algemene_woordenschat = useTranslations('algemene_woordenschat');
 
   const handleSaveChanges = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -110,7 +107,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
       }
     } catch (err) {
       toast.error(
-        algemene_woordenschat("error_at_update") + (err as Error).message
+        "Er is een fout opgetreden bij het opslaan van je wijzigingen: " + (err as Error).message
       );
     } finally {
       setLoading(false);
@@ -138,15 +135,15 @@ export default function ClientAccountSettings({ initialData }: Props) {
       }).then((res) => res.json());
 
       if (result.success) {
-        toast.success(t("password_update_success"));
+        toast.success("Je wachtwoord is gewijzigd.");
       } else {
         toast.error(
-          algemene_woordenschat("error_at_update").replace("{x}", algemene_woordenschat("password"))
+          "Er is een fout opgetreden bij het wijzigen van je wachtwoord."
         );
       }
     } catch (err) {
       toast.error(
-        algemene_woordenschat("error_at_update").replace("{x}", algemene_woordenschat("password")) + ": " + (err as Error).message
+        "Er is een fout opgetreden bij het wijzigen van je wachtwoord: " + (err as Error).message
       );
     } finally {
       setPasswordLoading(false);
@@ -159,13 +156,13 @@ export default function ClientAccountSettings({ initialData }: Props) {
       // Validate file type
       const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
       if (!allowedTypes.includes(file.type)) {
-        toast.error(t("file_format_error"));
+        toast.error("Alleen JPEG, PNG, WebP en GIF bestanden zijn toegestaan.");
         return;
       }
 
       // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error(t("file_size_error"));
+        toast.error("Bestand is te groot. Maximum 5MB toegestaan.");
         return;
       }
 
@@ -208,7 +205,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
     } catch (error) {
       console.error("Error uploading profile picture:", error);
       toast.error(
-        t("pfp_upload_error")
+        "Er is een fout opgetreden bij het uploaden van je profielfoto."
       );
     } finally {
       setProfilePictureLoading(false);
@@ -243,7 +240,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
     } catch (error) {
       console.error("Error deleting profile picture:", error);
       toast.error(
-        t("pfp_remove_error")
+        "Er is een fout opgetreden bij het verwijderen van je profielfoto."
       );
     } finally {
       setProfilePictureLoading(false);
@@ -272,7 +269,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
       }
     } catch (err) {
       toast.error(
-        t("account_removal_error") + (err as Error).message
+        "Er is een fout opgetreden bij het verwijderen van je account: " + (err as Error).message
       );
     } finally {
       setDeleteLoading(false);
@@ -292,42 +289,43 @@ export default function ClientAccountSettings({ initialData }: Props) {
       }
     } catch (error) {
       toast.error(
-        t("account_removal_cancel_error") + (error as Error).message
+        "Er is een fout opgetreden bij het annuleren van de verwijdering: " + (error as Error).message
       );
     }
   };
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">{t("account_settings")}</h1>
+      <h1 className="text-3xl font-bold mb-6">Accountinstellingen</h1>
 
       <form onSubmit={handleSaveChanges}>
         <Card className="mb-6 bg-neutral-800 text-white border-neutral-700">
           <CardHeader>
-            <CardTitle>{t("personal_info")}</CardTitle>
+            <CardTitle>Persoonlijke informatie</CardTitle>
             <CardDescription className="text-neutral-400">
-              {t("personal_info_description")}
+              Update je persoonlijke gegevens en hoe je account wordt
+              weergegeven.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">{t("u_name")}</Label>
+              <Label htmlFor="username">Gebruikersnaam</Label>
               <Input
                 id="username"
                 name="username"
-                placeholder={t("your_u_name")}
+                placeholder="Je gebruikersnaam"
                 defaultValue={userData.username || ""}
                 className="bg-neutral-700 border-neutral-600 text-white"
                 disabled={loading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">E-{t("email_address")}</Label>
+              <Label htmlFor="email">E-mailadres</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder={t("your_email_address")}
+                placeholder="Je e-mailadres"
                 defaultValue={userData.email || ""}
                 className="bg-neutral-700 border-neutral-600 text-white"
                 disabled={loading}
@@ -336,7 +334,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
           </CardContent>
           <CardFooter>
             <Button1
-              text={loading ? algemene_woordenschat("laden") : algemene_woordenschat("opslaan")}
+              text={loading ? "Bezig..." : "Opslaan"}
               type="submit"
               disabled={loading}
               icon={

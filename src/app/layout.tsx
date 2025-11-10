@@ -15,7 +15,6 @@ import DelWindowNext from "@/components/DelWindowNext";
 import EasterEgg from "@/components/EasterEgg";
 import Chatwoot from "@/components/Chatwoot";
 import crypto from "crypto";
-import { NextIntlClientProvider } from 'next-intl';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -266,21 +265,19 @@ export default async function RootLayout({
           style={{ display: "none" }}
           dangerouslySetInnerHTML={{ __html: art }}
         />
-        <NextIntlClientProvider>
-          <SessionWrapper session={userData}>
-            <Providers
-              userData={userData}
-              streakData={streakData}
-              footerContent={footerContent}
-              sysMsgData={sysMsgData}
-            >
-              {children}
-              <DelWindowNext />
-              <EasterEgg />
-              <Chatwoot url={process.env.CHATWOOT_URL} token={process.env.CHATWOOT_TOKEN} hmac={ChatwootHMAC} />
-            </Providers>
-          </SessionWrapper>
-        </NextIntlClientProvider>
+        <SessionWrapper session={userData}>
+          <Providers
+            userData={userData}
+            streakData={streakData}
+            footerContent={footerContent}
+            sysMsgData={sysMsgData}
+          >
+            {children}
+            <DelWindowNext />
+            <EasterEgg />
+            <Chatwoot url={process.env.CHATWOOT_URL} token={process.env.CHATWOOT_TOKEN} hmac={ChatwootHMAC} />
+          </Providers>
+        </SessionWrapper>
       </body>
     </html>
   );
