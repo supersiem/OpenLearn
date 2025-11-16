@@ -6,6 +6,17 @@ import { sendNotificationToUser } from "@/utils/notifications/sendNotification";
 
 export async function POST(request: NextRequest) {
   try {
+    const no_forum_access = await prisma.config.findFirst({
+      where: { key: 'no_forum_access' },
+    })
+
+    if (no_forum_access) {
+      return NextResponse.json(
+        { error: "nee." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { postId, content, userId } = body;
 

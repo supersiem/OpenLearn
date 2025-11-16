@@ -7,7 +7,7 @@ import ForumCreateDialog from "@/components/forum/ForumDialog";
 import { useGroupCreation } from "@/hooks/useGroupCreation";
 import { useForumCreation } from "@/hooks/useForumCreation";
 
-export default function PlusBtn() {
+export default function PlusBtn({ isForumBeschikbaar }: { isForumBeschikbaar: boolean }) {
     const {
         dialogOpen: groupDialogOpen,
         isSubmitting: groupIsSubmitting,
@@ -60,13 +60,15 @@ export default function PlusBtn() {
                         <Users />
                         Nieuwe Groep
                     </button>
-                    <button
-                        onClick={handleOpenForumDialog}
-                        className="flex flex-row rounded-lg hover:bg-neutral-700 p-2 items-center gap-2 transition-all w-full cursor-pointer"
-                    >
-                        <MessageCircle />
-                        Nieuwe Forumpost
-                    </button>
+                    {isForumBeschikbaar && (
+                        <button
+                            onClick={handleOpenForumDialog}
+                            className="flex flex-row rounded-lg hover:bg-neutral-700 p-2 items-center gap-2 transition-all w-full cursor-pointer"
+                        >
+                            <MessageCircle />
+                            Nieuwe Forumpost
+                        </button>
+                    )}
                 </PopoverContent>
             </Popover>
 
@@ -77,7 +79,6 @@ export default function PlusBtn() {
                 onSubmit={groupOnSubmit}
                 isSubmitting={groupIsSubmitting}
             />
-
             <ForumCreateDialog
                 dialogOpen={forumDialogOpen}
                 handleOpenChange={handleForumOpenChange}

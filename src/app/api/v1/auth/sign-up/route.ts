@@ -95,14 +95,23 @@ export async function POST(request: NextRequest) {
       if (result.success && result.userdata) {
         // Don't create session for unverified users
         // await createSession(result.userdata.id);
-
-        return NextResponse.json(
-          {
-            success: true,
-            message: "Account aangemaakt! Controleer je e-mail om je account te activeren."
-          },
-          { status: 201 }
-        );
+        if (result.sentEmail) {
+          return NextResponse.json(
+            {
+              success: true,
+              message: "Account aangemaakt! Controleer je e-mail om je account te activeren."
+            },
+            { status: 201 }
+          );
+        } else {
+          return NextResponse.json(
+            {
+              success: true,
+              message: "Account aangemaakt!"
+            },
+            { status: 201 }
+          );
+        }
       } else {
         return NextResponse.json(
           { error: "Fout bij aanmaken account" },

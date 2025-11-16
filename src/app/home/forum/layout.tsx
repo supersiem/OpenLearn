@@ -32,23 +32,35 @@ export default async function ForumLayout({ children, params }: ForumLayoutProps
   const forumDisabled = await prisma.config.findFirst({
     where: { key: 'forum_enabled' },
   })
-  return (
-    <>
-      {/* Header and tabs (client-side hide on non-tab routes) */}
-      <ForumHeaderTabs
-        tabs={tabs}
-        defaultTab={defaultTab}
-        baseRoute={baseRoute}
-        banned={banned}
-        forumDisabled={forumDisabled?.value === 'false'}
-        banReason={banReason}
-        banEnd={banEnd}
-      />
+  const noForumAccess = await prisma.config.findFirst({
+    where: { key: 'no_forum_access' },
+  })
 
-      {/* Content area */}
-      <div className="mt-4">
-        {children}
+  if (!noForumAccess) {
+    return (
+      <>
+        {/* Header and tabs (client-side hide on non-tab routes) */}
+        <ForumHeaderTabs
+          tabs={tabs}
+          defaultTab={defaultTab}
+          baseRoute={baseRoute}
+          banned={banned}
+          forumDisabled={forumDisabled?.value === 'false'}
+          banReason={banReason}
+          banEnd={banEnd}
+        />
+
+        {/* Content area */}
+        <div className="mt-4">
+          {children}
+        </div>
+      </>
+    );
+  } else {
+    return (
+      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h2 className="text-2xl font-semibold mb-4">Forum Niet Beschikbaar</h2>
       </div>
-    </>
-  );
+    );
+  }
 }

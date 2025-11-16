@@ -215,10 +215,12 @@ const MobileMenu = memo(
     isOpen,
     onClose,
     onExpandSearch,
+    isForumBeschikbaar
   }: {
     isOpen: boolean;
     onClose: () => void;
     pathname: string;
+    isForumBeschikbaar: boolean;
 
     onExpandSearch: () => void;
   }) => {
@@ -271,19 +273,19 @@ const MobileMenu = memo(
               </div>
             </div>
           </Link>
-
-          <Link
-            href="/home/forum"
-            className={`inline-block hover:bg-linear-to-r from-sky-400 to-sky-100 transition-transform rounded-lg w-full mb-3`}
-          >
-            <div className="rounded-lg border-4 border-neutral-700 duration-300 hover:border-transparent">
-              <div
-                className={`bg-neutral-800 text-white font-bold py-2 px-4 rounded-lg `}
-              >
-                Forum
+          {isForumBeschikbaar && (
+            <Link
+              href="/home/forum"
+              className={`inline-block hover:bg-linear-to-r from-sky-400 to-sky-100 transition-transform rounded-lg w-full mb-3`}
+            >
+              <div className="rounded-lg border-4 border-neutral-700 duration-300 hover:border-transparent">
+                <div
+                  className={`bg-neutral-800 text-white font-bold py-2 px-4 rounded-lg `}
+                >
+                  Forum
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>)}
 
           <MobileDropdown
             text="Leren"
@@ -301,7 +303,7 @@ const MobileMenu = memo(
             isOpen={accountOpen}
             onToggle={() => setAccountOpen(!accountOpen)}
           />
-          <PlusBtnMb />
+          <PlusBtnMb isForumBeschikbaar={isForumBeschikbaar} />
         </div>
       </div>
     );
@@ -313,9 +315,11 @@ const NavigationLinks = memo(
   ({
     onExpandSearch,
     isAdmin = false,
+    isForumBeschikbaar
   }: {
     onExpandSearch: () => void;
     isAdmin?: boolean;
+    isForumBeschikbaar: boolean;
   }) => (
     <>
       <div className="hidden md:flex items-center space-x-3 grow">
@@ -325,12 +329,14 @@ const NavigationLinks = memo(
           useClNav={true}
           className="startbutton"
         />
-        <NavBtn
-          text="Forum"
-          redirectTo="/home/forum"
-          useClNav={true}
-          className="forumbutton"
-        />
+        {isForumBeschikbaar && (
+          <NavBtn
+            text="Forum"
+            redirectTo="/home/forum"
+            useClNav={true}
+            className="forumbutton"
+          />
+        )}
         <div className="relative block mb-12 min-w-[152px]">
           <DropdownBtn
             selectorMode={false}
@@ -343,7 +349,7 @@ const NavigationLinks = memo(
         <SearchBar onExpand={onExpandSearch} />
         <StreakNavbarThing />
         <NotificationNav />
-        <PlusBtn />
+        <PlusBtn isForumBeschikbaar={isForumBeschikbaar} />
         <div className="relative block dropdown-right mr-40 mb-12">
           <DropdownBtn
             width={160}
@@ -402,6 +408,27 @@ export const TopNavBar = memo(function TopNavBar({
   const pathname = usePathname();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isForumBeschikbaar, setIsForumBeschikbaar] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchForumStatus = async () => {
+      try {
+        const response = await fetch('/api/forum/status');
+        const data = await response.json();
+        if (mounted) setIsForumBeschikbaar(data.isBeschikbaar);
+      } catch (error) {
+        console.error('Error fetching forum status:', error);
+        if (mounted) setIsForumBeschikbaar(true); // Fallback to true in case of error
+      }
+    };
+
+    fetchForumStatus();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Use useMemo for display conditions to prevent recalculations on every render
   const displayConditions = useMemo(() => {
@@ -516,6 +543,7 @@ export const TopNavBar = memo(function TopNavBar({
                   <NavigationLinks
                     onExpandSearch={handleExpandSearch}
                     isAdmin={isAdmin}
+                    isForumBeschikbaar={isForumBeschikbaar}
                   />
                   {displayConditions.showLoginButton && <LoginButton />}
                 </>
@@ -532,6 +560,7 @@ export const TopNavBar = memo(function TopNavBar({
         onClose={() => setIsMobileMenuOpen(false)}
         pathname={pathname}
         onExpandSearch={handleExpandSearch}
+        isForumBeschikbaar={isForumBeschikbaar}
       />
 
       <div aria-hidden className="shrink-0" style={{ height: `calc(4rem + var(--sys-banner-height, 0px))` }} />

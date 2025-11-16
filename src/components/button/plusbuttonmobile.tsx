@@ -94,90 +94,92 @@ const MobileDropdown = memo(
   }
 );
 
-export default function PlusBtnMb() {
-    const {
-        dialogOpen: groupDialogOpen,
-        isSubmitting: groupIsSubmitting,
-        form: groupForm,
-        handleOpenDialog: handleOpenGroupDialog,
-        handleOpenChange: handleGroupOpenChange,
-        onSubmit: groupOnSubmit
-    } = useGroupCreation();
+export default function PlusBtnMb({ isForumBeschikbaar }: { isForumBeschikbaar: boolean }) {
+  const {
+    dialogOpen: groupDialogOpen,
+    isSubmitting: groupIsSubmitting,
+    form: groupForm,
+    handleOpenDialog: handleOpenGroupDialog,
+    handleOpenChange: handleGroupOpenChange,
+    onSubmit: groupOnSubmit
+  } = useGroupCreation();
 
-    const {
-        dialogOpen: forumDialogOpen,
-        isSubmitting: forumIsSubmitting,
-        isAdmin,
-        banned,
-        form: forumForm,
-        content,
-        selectedCategory,
-        handleOpenDialog: handleOpenForumDialog,
-        handleOpenChange: handleForumOpenChange,
-        onSubmit: forumOnSubmit
-    } = useForumCreation();
-    const [dropdown, setdropdown] = useState(false);
-    const dropdownMatrixStart: [React.ReactNode, string][] = [
-        [
-            <div className="flex items-center">                       
-            <List />
-            Nieuwe Lijst
-            </div>,
-            "/learn/createlist",
-        ],
-        [
-            <div className="flex items-center">                       
-                        <LetterText />
-                        Nieuwe Samenvatting
-            </div>,
-            "/learn/createsummary",
-        ]
-    ];
-        const dropdownMatrixStart2: [React.ReactNode, () => void][] = [
-        [
-            <div className="flex items-center">                       
-             <Users />
-                Nieuwe Groep
-            </div>,
-            handleOpenGroupDialog,
-        ],
-        [
-            <div className="flex items-center">                       
-                <MessageCircle />
-                Nieuwe Forumpost
-            </div>,
-            handleOpenForumDialog,
-        ]
-    ];
-    return (
-        <>
-            <MobileDropdown
-            text="Nieuwe"
-            dropdownMatrix={dropdownMatrixStart}
-            dropdownMatrix2={dropdownMatrixStart2}
-            isOpen={dropdown}
-            onToggle={()=>{setdropdown(!dropdown)}}
-            />
+  const {
+    dialogOpen: forumDialogOpen,
+    isSubmitting: forumIsSubmitting,
+    isAdmin,
+    banned,
+    form: forumForm,
+    content,
+    selectedCategory,
+    handleOpenDialog: handleOpenForumDialog,
+    handleOpenChange: handleForumOpenChange,
+    onSubmit: forumOnSubmit
+  } = useForumCreation();
+  const [dropdown, setdropdown] = useState(false);
+  const dropdownMatrixStart: [React.ReactNode, string][] = [
+    [
+      <div className="flex items-center">
+        <List />
+        Nieuwe Lijst
+      </div>,
+      "/learn/createlist",
+    ],
+    [
+      <div className="flex items-center">
+        <LetterText />
+        Nieuwe Samenvatting
+      </div>,
+      "/learn/createsummary",
+    ]
+  ];
+  const dropdownMatrixStart2: [React.ReactNode, () => void][] = [
+    [
+      <div className="flex items-center">
+        <Users />
+        Nieuwe Groep
+      </div>,
+      handleOpenGroupDialog,
+    ],
+    [
+      <>
+        {isForumBeschikbaar && (
+          <div className="flex items-center">
+            <MessageCircle />
+            Nieuwe Forumpost
+          </div>)}</>,
+      handleOpenForumDialog,
+    ]
+  ];
+  return (
+    <>
+      <MobileDropdown
+        text="Nieuwe"
+        dropdownMatrix={dropdownMatrixStart}
+        dropdownMatrix2={dropdownMatrixStart2}
+        isOpen={dropdown}
+        onToggle={() => { setdropdown(!dropdown) }}
+      />
 
-            <GroupDialog
-                dialogOpen={groupDialogOpen}
-                handleOpenChange={handleGroupOpenChange}
-                form={groupForm}
-                onSubmit={groupOnSubmit}
-                isSubmitting={groupIsSubmitting}
-            />
+      <GroupDialog
+        dialogOpen={groupDialogOpen}
+        handleOpenChange={handleGroupOpenChange}
+        form={groupForm}
+        onSubmit={groupOnSubmit}
+        isSubmitting={groupIsSubmitting}
+      />
 
-            <ForumCreateDialog
-                dialogOpen={forumDialogOpen}
-                handleOpenChange={handleForumOpenChange}
-                form={forumForm}
-                onSubmit={forumOnSubmit}
-                isSubmitting={forumIsSubmitting}
-                isAdmin={isAdmin}
-                banned={banned}
-                content={content}
-                selectedCategory={selectedCategory}
-            />
-        </>
-    );
+      <ForumCreateDialog
+        dialogOpen={forumDialogOpen}
+        handleOpenChange={handleForumOpenChange}
+        form={forumForm}
+        onSubmit={forumOnSubmit}
+        isSubmitting={forumIsSubmitting}
+        isAdmin={isAdmin}
+        banned={banned}
+        content={content}
+        selectedCategory={selectedCategory}
+      />
+    </>
+  );
 }

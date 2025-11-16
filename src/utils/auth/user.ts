@@ -29,7 +29,7 @@ export async function sendSignUpEmail(email: string, username: string, token: st
     try {
       if (!transporter) {
         const msg = "SMTP not configured: missing SMTP_HOST, SMTP_PORT, SMTP_USER, or SMTP_PASSWORD env vars. Skipping email verification.";
-        console.warn(msg);
+        console.log(msg);
         // Simulate success, but warn that no email was sent
         return resolve("no-email-sent");
       }
@@ -278,11 +278,9 @@ export async function createUserCredentials(
             where: { id: user.id },
             data: { emailVerified: new Date(), loginAllowed: true, forumAllowed: true },
           });
-          console.warn("No SMTP configured: user marked as verified automatically.");
-        } else {
-          console.log("Activation email sent successfully");
+          resolve({ success: true, userdata: user, emailSent: false });
         }
-        resolve({ success: true, userdata: user });
+        resolve({ success: true, userdata: user, emailSent: true });
       } catch (emailError) {
         console.error("Email sending failed:", emailError);
         // If email sending fails for other reasons, delete the created user

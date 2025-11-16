@@ -36,6 +36,17 @@ const editReplySchema = z.object({
 
 export async function PUT(request: NextRequest) {
   try {
+    const no_forum_access = await prisma.config.findFirst({
+      where: { key: 'no_forum_access' },
+    })
+
+    if (no_forum_access) {
+      return NextResponse.json(
+        { error: "nee." },
+        { status: 403 }
+      );
+    }
+
     const url = new URL(request.url);
     const postId = url.searchParams.get('postId');
     const body = await request.json();
