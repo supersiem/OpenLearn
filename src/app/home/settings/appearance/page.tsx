@@ -2,18 +2,20 @@
 
 import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
-import { Sun, Moon } from "lucide-react"
+import { Sun, Moon, Check, X } from "lucide-react"
 
 export default function AppearancePage() {
+  const [hulp, setHulp] = useState(true)
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const saveThemeToServer = async (newTheme: string) => {
+  const saveThemeToServer = async (newTheme: string, hulp: boolean) => {
     setIsSaving(true)
     try {
       const response = await fetch('/api/v1/settings/theme', {
@@ -21,12 +23,13 @@ export default function AppearancePage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ theme: newTheme }),
+        body: JSON.stringify({ theme: newTheme, hulp: hulp }),
       })
 
       if (!response.ok) {
         throw new Error('Failed to save theme')
       }
+
     } catch (error) {
       console.error('Error saving theme:', error)
       // You could add a toast notification here
@@ -37,7 +40,11 @@ export default function AppearancePage() {
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme)
-    saveThemeToServer(newTheme)
+    saveThemeToServer(newTheme, hulp)
+  }
+  const handleHulpChange = (newState: boolean) => {
+    setHulp(newState)
+    saveThemeToServer(theme as string, newState)
   }
 
   if (!mounted) {
@@ -60,8 +67,8 @@ export default function AppearancePage() {
             {/* Light Theme */}
             <div
               className={`cursor-pointer rounded-lg border-2 p-4 transition-colors ${theme === 'light'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/50'
                 }`}
               onClick={() => handleThemeChange('light')}
             >
@@ -76,8 +83,8 @@ export default function AppearancePage() {
             {/* Dark Theme */}
             <div
               className={`cursor-pointer rounded-lg border-2 p-4 transition-colors ${theme === 'dark'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/50'
                 }`}
               onClick={() => handleThemeChange('dark')}
             >
@@ -89,7 +96,39 @@ export default function AppearancePage() {
               </div>
             </div>
           </div>
+          <h2 className="text-lg font-semibold mb-4">wil je support?</h2>
+          <div className="grid grid-cols-2 gap-4 max-w-md">
+            {/* Light Theme */}
+            <div
+              className={`cursor-pointer rounded-lg border-2 p-4 transition-colors ${hulp === true
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/50'
+                }`}
+              onClick={() => handleHulpChange(true)}
+            >
+              <div className="flex flex-col items-center space-y-2">
+                <div className="rounded-md border bg-background p-3">
+                  <Check className="h-6 w-6" />
+                </div>
+                <span className="text-sm font-medium">Ja!</span>
+              </div>
+            </div>
 
+            <div
+              className={`cursor-pointer rounded-lg border-2 p-4 transition-colors ${hulp === false
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/50'
+                }`}
+              onClick={() => handleHulpChange(false)}
+            >
+              <div className="flex flex-col items-center space-y-2">
+                <div className="rounded-md border bg-background p-3">
+                  <X className="h-6 w-6" />
+                </div>
+                <span className="text-sm font-medium">Nee!</span>
+              </div>
+            </div>
+          </div>
           {isSaving && (
             <p className="mt-2 text-sm text-muted-foreground">
               Opslaan...

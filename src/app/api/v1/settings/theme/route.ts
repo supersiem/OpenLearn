@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { theme } = await request.json()
+    const { theme, hulp } = await request.json()
 
     if (!theme || !['light', 'dark'].includes(theme)) {
       return NextResponse.json(
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     // Update the user's theme preference in the database
     await prisma.user.update({
       where: { id: user.id },
-      data: { theme: theme }
+      data: { theme: theme, hulp: hulp }
     })
 
     return NextResponse.json({ success: true })

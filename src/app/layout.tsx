@@ -122,7 +122,7 @@ export default async function RootLayout({
   const footerContent = await Footer();
 
   // Server-side user data hydration
-  let userData: { id: string; name: string; email: string; image: string; isAdmin: boolean; banned: boolean; forumBanned: boolean; forumBannedExpiry: string | null; impersonation: any } = { id: '', name: '', email: '', image: '', isAdmin: false, banned: false, forumBanned: false, forumBannedExpiry: null, impersonation: null };
+  let userData: { id: string; name: string; email: string; image: string; isAdmin: boolean; banned: boolean; forumBanned: boolean; forumBannedExpiry: string | null; impersonation: any; hulp: boolean } = { id: '', name: '', email: '', image: '', isAdmin: false, banned: false, forumBanned: false, forumBannedExpiry: null, impersonation: null, hulp: true };
   try {
     const cookie = (await cookies()).get('polarlearn.session-id')?.value;
     if (cookie) {
@@ -146,6 +146,7 @@ export default async function RootLayout({
               forumBanned: !user.forumAllowed,
               forumBannedExpiry: user.forumBanEnd?.toISOString() || null,
               impersonation: null,
+              hulp: user.hulp || true,
             };
           }
         }
@@ -208,7 +209,7 @@ export default async function RootLayout({
 
   let ChatwootHMAC;
 
-  if (process.env.CHATWOOT_URL && process.env.CHATWOOT_TOKEN && process.env.CHATWOOT_USER_IDENTITY_VALIDATION_TOKEN && userData.id) {
+  if (process.env.CHATWOOT_URL && process.env.CHATWOOT_TOKEN && process.env.CHATWOOT_USER_IDENTITY_VALIDATION_TOKEN && userData.id && userData.hulp) {
     ChatwootHMAC = crypto.createHmac(
       "sha256",
       process.env.CHATWOOT_USER_IDENTITY_VALIDATION_TOKEN as string
@@ -275,8 +276,9 @@ export default async function RootLayout({
             {children}
             <DelWindowNext />
             <EasterEgg />
-            <Chatwoot url={process.env.CHATWOOT_URL} token={process.env.CHATWOOT_TOKEN} hmac={ChatwootHMAC} />
-          </Providers>
+            {userData.hulp && (
+              <Chatwoot url={process.env.CHATWOOT_URL} token={process.env.CHATWOOT_TOKEN} hmac={ChatwootHMAC} />
+            )}</Providers>
         </SessionWrapper>
       </body>
     </html>

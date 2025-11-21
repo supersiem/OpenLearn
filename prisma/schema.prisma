@@ -28,6 +28,7 @@ model User {
 
   finishedTour Boolean? @default(false)
   theme        String?  @default("dark")
+  hulp         Boolean? @default(true)
 
   inGroups  Json?
   ownGroups Json?
