@@ -29,7 +29,7 @@ function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showP
           <motion.div
             className="absolute inset-0 bg-yellow-500    rounded-lg pointer-events-none"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.35 }}
+            animate={{ opacity: 0.8 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           />
@@ -81,7 +81,7 @@ function CorrectScreen({ show, progress, showProgress }: {
           <motion.div
             className='absolute inset-0 bg-green-500    rounded-lg pointer-events-none'
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.35 }}
+            animate={{ opacity: 0.8 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           />
@@ -128,7 +128,7 @@ function IncorrectScreen({ show, correctAnswer, progress, showProgress, setIsCor
           <motion.div
             className='absolute inset-0 bg-red-500    rounded-lg pointer-events-none'
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.35 }}
+            animate={{ opacity: 0.8 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           />
@@ -495,6 +495,8 @@ export default function LearnTool() {
     })();
   }, [isCompleted, showResult, handleListCompletion, isCustomSession]);
 
+
+  // WAT DOET DIT?????????????? @ANDREI WANNEER GEBRUIK JE DIT?????????????? HELP
   // Delete temporary sessions when user navigates away (but keep custom sessions)
   useEffect(() => {
     return () => {
@@ -592,9 +594,9 @@ export default function LearnTool() {
                 }}
               />
               <Button1
-                text="Terug naar home"
+                text="Terug naar de lijst"
                 onClick={() => {
-                  router.push('/home/start')
+                  router.push(`/learn/viewlist/${currentList?.list_id}`)
                 }}
               />
               <Button1

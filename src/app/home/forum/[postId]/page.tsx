@@ -16,6 +16,7 @@ import EditPostBtn from "./editPostBtn";
 import { icons, getSubjectName } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import {
+  Link,
   ShieldUser,
 } from "lucide-react";
 import ForumRepliesList from "../ForumRepliesList";
@@ -302,15 +303,17 @@ export default async function Page({
                 </div>
                 {post.category && <PostBadge type={post.category} />}
                 {subjectIcon && subjectName && (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-neutral-800 rounded-md">
-                    <Image
-                      src={subjectIcon}
-                      alt={subjectName}
-                      width={16}
-                      height={16}
-                    />
-                    <span className="text-xs md:text-sm">{subjectName}</span>
-                  </div>
+                  <a href={`/learn/subject/${post.subject}`} title={subjectName}>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-neutral-800 rounded-md">
+                      <Image
+                        src={subjectIcon}
+                        alt={subjectName}
+                        width={16}
+                        height={16}
+                      />
+                      <span className="text-xs md:text-sm">{subjectName}</span>
+                    </div>
+                  </a>
                 )}
               </div>
               <div className="text-xs md:text-sm text-gray-400 flex flex-wrap gap-2">
