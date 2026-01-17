@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@polarnl/polarui-react':
+        specifier: ^0.0.2
+        version: 0.0.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@react-router/fs-routes':
+        specifier: ^7.12.0
+        version: 7.12.0(@react-router/dev@7.12.0(@react-router/serve@7.12.0(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3))(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3)(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)))(typescript@5.9.3)
       '@react-router/node':
         specifier: 7.12.0
         version: 7.12.0(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3)
@@ -383,6 +389,12 @@ packages:
   '@mjackson/node-fetch-server@0.2.0':
     resolution: {integrity: sha512-EMlH1e30yzmTpGLQjlFmaDAjyOeZhng1/XCd7DExR8PNAnG/G1tyruZxEoUe11ClnwGhGrtsdnyyUx1frSzjng==}
 
+  '@polarnl/polarui-react@0.0.2':
+    resolution: {integrity: sha512-WlZU5xyMyhqsm6b5bEXMXOAfowoMOqdK4bj5pqZ1+TdFX1dz/z3y1ec6oWP2MzNCt6Dp4R+VPMbQ1wI781SuJw==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+
   '@react-router/dev@7.12.0':
     resolution: {integrity: sha512-5GpwXgq4pnOVeG7l6ADkCHA1rthJus1q/A3NRYJAIypclUQDYAzg1/fDNjvaKuTSrq+Nr3u6aj2v+oC+47MX6g==}
     engines: {node: '>=20.0.0'}
@@ -413,6 +425,16 @@ packages:
     peerDependencies:
       express: ^4.17.1 || ^5
       react-router: 7.12.0
+      typescript: ^5.1.0
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  '@react-router/fs-routes@7.12.0':
+    resolution: {integrity: sha512-otlOIrIsJsqY5ACfgMsIkHPq1rfuvdwxBGWZRSscU+HK+BcHAz8ZDq+wYDGonOLcU6wUn33+G+/1skznIV1L8A==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      '@react-router/dev': ^7.12.0
       typescript: ^5.1.0
     peerDependenciesMeta:
       typescript:
@@ -680,6 +702,9 @@ packages:
   babel-dead-code-elimination@1.0.11:
     resolution: {integrity: sha512-mwq3W3e/pKSI6TG8lXMiDWvEi1VXYlSBlJlB3l+I0bAb5u1RNUl88udos85eOPNK3m5EXK9uO7d2g08pesTySQ==}
 
+  balanced-match@1.0.2:
+    resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+
   baseline-browser-mapping@2.9.13:
     resolution: {integrity: sha512-WhtvB2NG2wjr04+h77sg3klAIwrgOqnjS49GGudnUPGFFgg7G17y7Qecqp+2Dr5kUDxNRBca0SK7cG8JwzkWDQ==}
     hasBin: true
@@ -691,6 +716,9 @@ packages:
   body-parser@1.20.4:
     resolution: {integrity: sha512-ZTgYYLMOXY9qKU/57FAo8F+HA2dGX7bqGc71txDRC1rS4frdFI5R7NhluHxH6M0YItAP0sHB4uqAOcYKxO6uGA==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
+
+  brace-expansion@2.0.2:
+    resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
 
   browserslist@4.28.1:
     resolution: {integrity: sha512-ZC5Bd0LgJXgwGqUknZY/vkUQ04r8NXnJZ3yYi4vDmSiZmC/pdSN0NbNRPxZpbtO4uAfDUAFffO8IZoM3Gj8IkA==}
@@ -722,6 +750,10 @@ packages:
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
     engines: {node: '>= 14.16.0'}
+
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
+    engines: {node: '>=6'}
 
   compressible@2.0.18:
     resolution: {integrity: sha512-AF3r7P5dWxL8MxyITRMlORQNaOA2IkAFaTr4k7BUumjPtRpGDTZpl0Pb1XCO6JeDCBdp126Cgs9sMxqSjgYyRg==}
@@ -1084,6 +1116,10 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
+  minimatch@9.0.5:
+    resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
+    engines: {node: '>=16 || 14 >=14.17'}
+
   morgan@1.10.1:
     resolution: {integrity: sha512-223dMRJtI/l25dJKWpgij2cMtywuG/WiUKXdvwfbhGKBhy1puASqXwFzmWZ7+K73vUPoR7SS2Qz2cI/g9MKw0A==}
     engines: {node: '>= 0.8.0'}
@@ -1300,6 +1336,9 @@ packages:
   statuses@2.0.2:
     resolution: {integrity: sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==}
     engines: {node: '>= 0.8'}
+
+  tailwind-merge@3.4.0:
+    resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
 
   tailwindcss@4.1.18:
     resolution: {integrity: sha512-4+Z+0yiYyEtUVCScyfHCxOYP06L5Ne+JiHhY2IjR2KWMIWhJOYZKLSGZaP5HkZ8+bY0cxfzwDE5uOmzFXyIwxw==}
@@ -1736,6 +1775,13 @@ snapshots:
 
   '@mjackson/node-fetch-server@0.2.0': {}
 
+  '@polarnl/polarui-react@0.0.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      clsx: 2.1.1
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      tailwind-merge: 3.4.0
+
   '@react-router/dev@7.12.0(@react-router/serve@7.12.0(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3))(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3)(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2))':
     dependencies:
       '@babel/core': 7.28.5
@@ -1791,6 +1837,13 @@ snapshots:
       '@react-router/node': 7.12.0(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3)
       express: 4.22.1
       react-router: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+    optionalDependencies:
+      typescript: 5.9.3
+
+  '@react-router/fs-routes@7.12.0(@react-router/dev@7.12.0(@react-router/serve@7.12.0(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3))(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3)(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)))(typescript@5.9.3)':
+    dependencies:
+      '@react-router/dev': 7.12.0(@react-router/serve@7.12.0(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3))(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3)(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2))
+      minimatch: 9.0.5
     optionalDependencies:
       typescript: 5.9.3
 
@@ -1993,6 +2046,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  balanced-match@1.0.2: {}
+
   baseline-browser-mapping@2.9.13: {}
 
   basic-auth@2.0.1:
@@ -2015,6 +2070,10 @@ snapshots:
       unpipe: 1.0.0
     transitivePeerDependencies:
       - supports-color
+
+  brace-expansion@2.0.2:
+    dependencies:
+      balanced-match: 1.0.2
 
   browserslist@4.28.1:
     dependencies:
@@ -2045,6 +2104,8 @@ snapshots:
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
+
+  clsx@2.1.1: {}
 
   compressible@2.0.18:
     dependencies:
@@ -2376,6 +2437,10 @@ snapshots:
 
   mime@1.6.0: {}
 
+  minimatch@9.0.5:
+    dependencies:
+      brace-expansion: 2.0.2
+
   morgan@1.10.1:
     dependencies:
       basic-auth: 2.0.1
@@ -2605,6 +2670,8 @@ snapshots:
   source-map@0.6.1: {}
 
   statuses@2.0.2: {}
+
+  tailwind-merge@3.4.0: {}
 
   tailwindcss@4.1.18: {}
 

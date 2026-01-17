@@ -28,7 +28,8 @@ export const links: Route.LinksFunction = () => [
 export async function loader() {
   return {
     lang: process.env.APP_LANG || "nl",
-    colorScheme: "light" // Placeholder, later zal dit bepaald worden op basis van gebruikersinstellingen :)
+    colorScheme: "dark" // Placeholder, later zal dit bepaald worden op basis van gebruikersinstellingen :)
+    // de placeholder zal niet mijn ogen branden dus ik vernander dit -siem
   };
 }
 

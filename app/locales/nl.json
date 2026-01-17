@@ -1,6 +1,16 @@
 {
   "welcome": "Welkom bij PolarLearn!",
   "description": "PolarLearn is een gratis en open-source leerplatform.",
+  "loginRelated": {
+    "login": "Inloggen",
+    "logout": "Uitloggen",
+    "signup": "Registreren",
+    "signupMarketing": "Maak een account aan om te beginnen met leren!",
+    "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
+    "email": "E-mail",
+    "forgotPassword": "Wachtwoord vergeten?"
+  },
   "errors": {
     "404": {
       "title": "Pagina niet gevonden",
