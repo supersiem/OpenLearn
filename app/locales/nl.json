@@ -1,0 +1,10 @@
+{
+  "welcome": "Welkom bij PolarLearn!",
+  "description": "PolarLearn is een gratis en open-source leerplatform.",
+  "errors": {
+    "404": {
+      "title": "Pagina niet gevonden",
+      "message": "De opgevraagde pagina bestaat niet."
+    }
+  }
+}

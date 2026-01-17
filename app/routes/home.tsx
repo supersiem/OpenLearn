@@ -1,13 +1,7 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
-
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
-}
+import i18n from "i18next";
 
 export default function Home() {
-  return <Welcome />;
+  return (
+    <>{i18n.t("welcome")}</>
+  );
 }
