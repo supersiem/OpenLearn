@@ -1,7 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import nlTranslation from "./locales/nl.json";
-import enTranslation from "./locales/en.json";
+// import enTranslation from "./locales/en.json";
 
 export function initI18n(lang: string = "nl") {
   const lng = lang || "nl";
@@ -12,7 +12,7 @@ export function initI18n(lang: string = "nl") {
       fallbackLng: "nl",
       resources: {
         nl: nlTranslation,
-        en: enTranslation,
+        // en: enTranslation,
       },
       interpolation: { escapeValue: false },
       react: { useSuspense: false },
