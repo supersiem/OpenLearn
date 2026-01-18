@@ -1,7 +1,7 @@
 {
   "welcome": "Welkom bij PolarLearn!",
   "description": "PolarLearn is een gratis en open-source leerplatform.",
-  "loginRelated": {
+  "auth": {
     "login": "Inloggen",
     "logout": "Uitloggen",
     "signup": "Registreren",

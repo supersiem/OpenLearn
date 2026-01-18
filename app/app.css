@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@polarnl/polarui-react/styles.css";
 
 html,
 body {
