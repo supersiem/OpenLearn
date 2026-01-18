@@ -1,15 +1,27 @@
-import i18n from "i18next";
+import { authClient } from '~/utils/auth/client'
 import { Button } from '@polarnl/polarui-react'
-function handleLoginClick() {
-  console.log("Login knop geklikt");
-}
 
-export default function Login() {
+export default function SignIn() {
+  const signIn = async (provider: string) => {
+    await authClient.signIn.social({
+      provider: provider,
+      callbackURL: '/user'
+    })
+  }
+
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center" >
-      <Button onClick={handleLoginClick}>
-        {i18n.t("auth:login")}
+    <div className='min-h-screen flex flex-col items-center justify-center p-4 gap-4'>
+      <Button
+        onClick={() => signIn('PolarNL')}
+      >
+        login with PolarNL
+      </Button>
+      <Button
+        onClick={() => signIn('hackclub')}
+      >
+        login with Hackclub
       </Button>
     </div>
-  );
+  )
 }

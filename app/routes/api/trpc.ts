@@ -1,3 +1,9 @@
+
+// GA WEG
+// NEE ECHT GA WEG
+// DIT IS DE TRPC ENDPOINT TENZIJ JE WEET HOE JE EEN NUCLEAREREACTOR KAN BOUWEN MAG JE ER NIET AAN ZITTEN
+
+
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
 import { appRouter } from '~/server/main'
