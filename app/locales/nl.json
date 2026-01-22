@@ -9,12 +9,18 @@
     "username": "Gebruikersnaam",
     "password": "Wachtwoord",
     "email": "E-mail",
-    "forgotPassword": "Wachtwoord vergeten?"
+    "forgotPassword": "Wachtwoord vergeten?",
+    "emailOrUsername": "E-mail of gebruikersnaam",
+    "signUpOk": "Je account is aangemaakt! Check je e-mail voor een bevestigingslink.",
+    "errors": {
+      "invcreds": "Ongeldige inloggegevens. Probeer het opnieuw."
+    }
   },
   "errors": {
     "404": {
       "title": "Pagina niet gevonden",
       "message": "De opgevraagde pagina bestaat niet."
-    }
+    },
+    "unknown": "Er is een onbekende fout opgetreden. Probeer het later opnieuw."
   }
 }

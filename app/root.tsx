@@ -65,7 +65,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <TRPCReactProvider><Outlet /></TRPCReactProvider>;
+  return (
+    <TRPCReactProvider>
+      <Outlet />
+    </TRPCReactProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

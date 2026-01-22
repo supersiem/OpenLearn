@@ -9,6 +9,7 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@better-auth/oauth-provider": "^1.4.15",
     "@polarnl/polarui-react": "^0.0.8",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
@@ -26,6 +27,7 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-fetch-backend": "^7.0.0",
     "isbot": "^5.1.32",
+    "lucide-react": "^0.562.0",
     "pg": "^8.17.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
