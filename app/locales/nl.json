@@ -28,6 +28,10 @@
       "title": "Pagina niet gevonden",
       "message": "De opgevraagde pagina bestaat niet."
     },
+    "500": {
+      "title": "Interne serverfout",
+      "message": "Er is een fout opgetreden aan onze kant. Probeer het later opnieuw."
+    },
     "unknown": "Er is een onbekende fout opgetreden. Probeer het later opnieuw."
   }
 }

@@ -3,8 +3,19 @@ import { Button, Input } from '@polarnl/polarui-react'
 import { KeyRound, LogIn, User } from 'lucide-react'
 import i18next from 'i18next'
 import zod from 'zod'
-import { useNavigate, useSearchParams } from 'react-router'
+import { redirect, useNavigate, useSearchParams } from 'react-router'
 import { useEffect } from 'react'
+import { auth } from '~/utils/auth/server'
+import type { Route } from './+types/signup'
+
+export async function loader(loaderArgs: Route.LoaderArgs) {
+  const headers = new Headers(loaderArgs.request.headers)
+  const result = await auth.api.getSession({ headers })
+  const user = result?.user
+  if (user) {
+    return redirect('/user')
+  }
+}
 
 export function geti18nAuthMessageByCode(code: string) {
   switch (code) {
@@ -51,29 +62,38 @@ export default function SignIn() {
   }, [])
 
   return (
-    <div className='min-h-screen flex flex-col items-center justify-center p-4 gap-4'>
-      <Button
-        onClick={async () => {
-          await authClient.signIn.social({
-            provider: 'PolarNL-StaffAuth',
-            callbackURL: '/user',
-            errorCallbackURL: '/auth/login',
-          })
-        }}
-      >
-        Medewerkers inlog
-      </Button>
-      <form onSubmit={async (event) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const emailOrUsername = formData.get('emailOrUsername') as string;
-        const password = formData.get('password') as string;
+  <div className="min-h-screen flex flex-col items-center justify-center p-4 gap-4 relative">
+    <img
+      src="https://polarlearn.nl/_next/static/media/pl-500.2015881e.svg"
+      alt="PolarLearn Logo"
+      className="absolute top-6 w-30"
+    />
+
+    <Button
+      onClick={async () => {
+        await authClient.signIn.social({
+          provider: 'PolarNL-StaffAuth',
+          callbackURL: '/user',
+          errorCallbackURL: '/auth/login',
+        })
+      }}
+    >
+      Medewerkers inlog
+    </Button>
+
+    <form
+      onSubmit={async (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+        const emailOrUsername = formData.get('emailOrUsername') as string
+        const password = formData.get('password') as string
 
         if (zod.email().safeParse(emailOrUsername).success) {
-          await authClient.signIn.email({
-            email: emailOrUsername,
-            password,
-          },
+          await authClient.signIn.email(
+            {
+              email: emailOrUsername,
+              password,
+            },
             {
               onError(context) {
                 alert(geti18nAuthMessageByCode(context.error.code))
@@ -84,26 +104,43 @@ export default function SignIn() {
             }
           )
         } else {
-          await authClient.signIn.username({
-            username: emailOrUsername,
-            password,
-          },
+          await authClient.signIn.username(
+            {
+              username: emailOrUsername,
+              password,
+            },
             {
               onError(context) {
                 alert(geti18nAuthMessageByCode(context.error.code))
               },
               onSuccess(context) {
                 navigate('/user')
-              }
-            })
+              },
+            }
+          )
         }
-      }}>
-        <Input placeholder={i18next.t('auth:emailOrUsername')} name="emailOrUsername" className="mb-2" icon={<User />} scheme='dark' />
-        <Input type="password" placeholder={i18next.t('auth:password')} name="password" className="mb-4" scheme='dark' icon={<KeyRound />} />
-        <Button type="submit" icon={<LogIn />}>
-          {i18next.t('auth:login')}
-        </Button>
-      </form>
-    </div>
-  )
+      }}
+    >
+      <Input
+        placeholder={i18next.t('auth:emailOrUsername')}
+        name="emailOrUsername"
+        className="mb-2"
+        icon={<User />}
+        scheme="dark"
+      />
+      <Input
+        type="password"
+        placeholder={i18next.t('auth:password')}
+        name="password"
+        className="mb-4"
+        scheme="dark"
+        icon={<KeyRound />}
+      />
+      <Button type="submit" icon={<LogIn />}>
+        {i18next.t('auth:login')}
+      </Button>
+    </form>
+  </div>
+)
+
 }
