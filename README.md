@@ -1,11 +1,8 @@
-# PolarLearn rewrite poging 2
+# Openlearn
 
-nu gebruiken we rrv7 + tRPC en nog wat spullen
+Een 2de poging om iets geweldigs te maken.
+Kinda een fork van Polarlearn maar niet echt.
 
-## Setup
+## Helpen?
 
-als je het niet lukt vraag in de discord
-
-## runnen
-
-waarom probeer je te helpen als je dit zelf niet weet?
+Hulp is momenteel alleen welkom in de form van issues, prs of helpen met hosting van de server.
