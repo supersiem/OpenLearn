@@ -1,5 +1,5 @@
 import React from 'react';
-
+import './button.css';
 interface ButtonProps {
     onClick?: () => void;
     disabled?: boolean;
@@ -17,7 +17,7 @@ export const Button: React.FC<ButtonProps> = ({
         <button
             onClick={onClick}
             disabled={disabled}
-            className='bg-openlearn-700'
+            className='button1'
         >
             {children}
         </button>

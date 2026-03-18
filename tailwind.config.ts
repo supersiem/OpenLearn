@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
 
 export default {
   content: [
@@ -34,10 +35,22 @@ export default {
           50: '#E6FCF3',
         }
       },
-      boxShadow: {
-        'elevated': '0 10px 20px rgba(37, 99, 235, 0.25), 0 6px 6px rgba(37, 99, 235, 0.20)'
-      },
+      // boxShadow: {
+      //   'elevated': '0 10px 20px rgba(37, 99, 235, 0.25), 0 6px 6px rgba(37, 99, 235, 0.20)'
+      // },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ addBase, theme }) => {
+      const openlearn = theme('colors.openlearn') as Record<string, string>
+      addBase({
+        ':root': Object.fromEntries(
+          Object.entries(openlearn).map(([key, value]) => [
+            `--color-openlearn-${key}`,
+            value,
+          ])
+        ),
+      })
+    }),
+  ],
 } satisfies Config
