@@ -3,6 +3,7 @@ import { caller } from '~/utils/trpc/server'
 import { redirect, Form } from 'react-router'
 import { useNavigate } from "react-router";
 import { useState } from "react";
+import { Button } from "~/components/button/button"
 // prisma types importen is zo lelijk
 import type { ForumVoteModel } from "~/../generated/prisma/models"
 
@@ -54,37 +55,48 @@ export default function Home({ loaderData: forumpost }: Route.ComponentProps) {
     const [replyview, setReplyview] = useState(false);
     const [votes, setVotes] = useState(countVotes(forumpost?.votes || []));
     return (
-        <div className='flex flex-col items-center justify-center min-h-screen min-w-screen'>
-            <div className={replyview ? 'visible' : 'hidden'}>
-                <Form method="post" className="flex flex-col space-y-4" onSubmit={() => { setReplyview(false) }}>
-                    <input type="hidden" name="intent" value="reply" />
-                    <label>
-                        Reply:
-                        <textarea name="content" className="border p-2 w-96 h-32" required />
-                    </label>
-                    <p>Current Votes: {votes}</p>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <div className='flex flex-col items-center justify-center w-150 gap-3 bg-openlearn-800 rounded-2xl p-6'>
+                <div className={replyview ? 'visible' : 'hidden'}>
+                    <Form method="post" className="flex flex-col space-y-4" onSubmit={() => { setReplyview(false) }}>
+                        <input type="hidden" name="intent" value="reply" />
+                        <label>
+                            Reply:
+                            <textarea name="content" className="border p-2 w-96 h-32" required />
+                        </label>
+                        <p>Current Votes: {votes}</p>
 
-                    <a onClick={() => { setReplyview(false) }}>nope</a>
-                </Form>
-            </div>
-            <h1 className="text-2xl font-bold">{forumpost?.title}</h1>
-            <p className="text-gray-600">By {forumpost?.author.name} on {new Date(forumpost?.createdAt).toLocaleDateString()}</p>
-            <p className="mt-4">{forumpost?.content}</p>
-            <Form method="post" className="inline visible">
-                <input type="hidden" name="intent" value="upvote" />
-
-            </Form>
-            <Form method="post" className="inline visible">
-                <input type="hidden" name="intent" value="downvote" />
-
-            </Form>
-            <h2>replies</h2>
-            {forumpost?.replies.map((reply) => (
-                <div key={reply.id} className="border p-4 m-2 w-96">
-                    <p className="text-gray-600">By {reply.author.name} on {new Date(reply.createdAt).toLocaleDateString()}</p>
-                    <p className="mt-2">{reply.content}</p>
+                        <Button onClick={() => setReplyview(false)}>Cancel</Button>
+                    </Form>
                 </div>
-            ))}
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-neutral-200">{forumpost?.title}</h1>
+                    <p className="text-neutral-300">By {forumpost?.author.name} on {new Date(forumpost?.createdAt).toLocaleDateString()}</p>
+                </div>
+                
+                <p className="mt-4">{forumpost?.content}</p>
+                <div className="flex flex-row gap-1 items-center">
+                    <Form method="post" className="inline visible">
+                        <input type="hidden" name="intent" value="upvote" />
+                        <Button type="submit">Upvote</Button>
+
+                    </Form>
+                    <Form method="post" className="inline visible">
+                        <input type="hidden" name="intent" value="downvote" />
+                        <Button type="submit">Downvote</Button>
+                    </Form>
+                    <Button onClick={() => setReplyview(!replyview)}>
+                        {replyview ? 'Cancel' : 'Reply'}
+                    </Button>
+                </div>
+                {forumpost?.replies.map((reply) => (
+                    <div key={reply.id} className="bg-openlearn-700 rounded-xl p-4 cursor-pointer w-100">
+                        <h1 className="font-semibold text-lg text-gray-100">{reply.author.name}</h1>
+                        <p className="text-gray-200 text-sm">{new Date(reply.createdAt).toLocaleDateString()}</p>
+                        <p className="text-gray-100 mt-2">{reply.content}</p>
+                    </div>
+                ))}
+            </div>
         </div>
     )
 }
