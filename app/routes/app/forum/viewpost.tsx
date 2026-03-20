@@ -4,7 +4,7 @@ import { redirect, Form } from 'react-router'
 import { useNavigate } from "react-router";
 import { useState } from "react";
 // prisma types importen is zo lelijk
-import type { ForumVoteModel } from "~/../generated/prisma/models/ForumVote"
+import type { ForumVoteModel } from "~/../generated/prisma/models"
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const api = await caller(loaderArgs)
