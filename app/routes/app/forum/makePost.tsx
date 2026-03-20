@@ -35,22 +35,24 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
 
 export default function ForumHome() {
   return (
-    <Form method='post' className='flex flex-col gap-4 w-full max-w-md'>
-      <input
-        type='text'
-        name='title'
-        placeholder='Post title'
-        className='border rounded px-4 py-2'
-      />
-      <textarea
-        name='content'
-        placeholder='Write your post content...'
-        rows={6}
-        className='border rounded px-4 py-2'
-      />
-      <Button type='submit'>
-        Create Post
-      </Button>
-    </Form>
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <Form method='post' className='flex flex-col gap-4 w-full max-w-md'>
+        <input
+          type='text'
+          name='title'
+          placeholder='Post title'
+          className='border rounded px-4 py-2 border-gray-700 bg-gray-800'
+        />
+        <textarea
+          name='content'
+          placeholder='Write your post content...'
+          rows={6}
+          className='border rounded px-4 py-2 border-gray-700 bg-gray-800'
+        />
+        <Button type='submit'>
+          Create Post
+        </Button>
+      </Form>
+    </div>
   )
 }
