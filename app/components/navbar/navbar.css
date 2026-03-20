@@ -1,18 +1,20 @@
 .navbar {
-    background-color: var(--color-openlearn-800);
-    margin: 0.25rem;
-    border-radius: 9999px;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    color: white;
-    transition-duration: 150ms;
-    box-shadow: var(--color-openlearn-800) 0px 0px 24px;
+  background-color: var(--color-openlearn-800);
+  margin: 0.25rem;
+  border-radius: 9999px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  color: white;
+  transition-duration: 150ms;
+  box-shadow: var(--color-openlearn-800) 0px 0px 24px;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
 }
 
 .logo {
-  margin-left: 1rem;
-  width: 100px;
+  width: 3rem;
   cursor: pointer;
 }

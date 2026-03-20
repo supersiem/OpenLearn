@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router"
-export const ListContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ListContainer: React.FC<{ children: React.ReactNode, className: string }> = ({ children, className }) => {
     return (
-        <div className="flex flex-col gap-2 bg-openlearn-800 rounded-2xl p-6 w-full max-w-lg">
+        <div className={"flex flex-col gap-2 rounded-2xl p-6 w-full max-w-lg bg-openlearn-800 " + className} >
             {children}
         </div>
     )
@@ -12,7 +12,6 @@ export const ListItem: React.FC<{
     linkTo: string,
     title: string,
     subtitle?: string
-
 }> = ({ children, linkTo, title, subtitle }) => {
     const navigate = useNavigate()
     return (

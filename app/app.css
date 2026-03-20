@@ -5,6 +5,8 @@ html,
 body {
   font-family: "Geist", sans-serif;
   @apply bg-openlearn-900 text-neutral-100;
+  margin: 0;
+  padding: 0;
 }
 
 .light body {

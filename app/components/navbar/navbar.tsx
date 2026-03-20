@@ -9,13 +9,13 @@ export const Navbar = () => {
     return <nav>
         {/* oh ja ik vind animations leuk. */}
         <motion.div
-            className="flex flex-row justify-left items-center gap-3 translate-x-6 translate-y-6"
+            className="flex flex-row justify-left items-center gap-3  translate-y-3"
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
         >
-            <img src={logo} alt="Logo" className="logo" onClick={() => navigate('/app')}/>
             <div className={'navbar'}>
+                <img src={logo} alt="Logo" className="logo" onClick={() => navigate('/app')} />
                 <Button variant='secondary' onClick={() => { navigate('/app') }}>Home</Button>
                 <Button variant='secondary' onClick={() => { navigate('/app/forum') }}>Forum</Button>
             </div>
