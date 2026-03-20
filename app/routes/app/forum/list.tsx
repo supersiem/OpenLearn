@@ -3,6 +3,7 @@ import { caller } from '~/utils/trpc/server'
 import { useNavigate } from "react-router";
 import { auth } from '~/utils/auth/server'
 import { Button } from "~/components/button/button";
+import { ListContainer, ListItem } from "~/components/list/list";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
   const api = await caller(loaderArgs);
@@ -21,17 +22,19 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
       <Button onClick={() => navigate('/app/forum/make')}>
         Create New Post
       </Button>
-      <div>
+      <ListContainer>
         {forumPosts?.map((post) => (
-          <a key={post.id} href={`/app/forum/${post.id}`}>
-            <div className="border p-4 m-2 w-96">
-              <h2 className="text-xl font-bold">{post.title}</h2>
-              <p className="text-gray-600">By {post.author.name} on {new Date(post.createdAt).toLocaleDateString()}</p>
-              <p className="mt-2">{post.content}</p>
-            </div>
-          </a>
+          <ListItem key={post.id}>
+            <a key={post.id} href={`/app/forum/${post.id}`}>
+              <div className="border p-4 m-2 w-96">
+                <h2 className="text-xl font-bold">{post.title}</h2>
+                <p className="text-gray-600">By {post.author.name} on {new Date(post.createdAt).toLocaleDateString()}</p>
+                <p className="mt-2">{post.content}</p>
+              </div>
+            </a>
+          </ListItem>
         ))}
-      </div>
+      </ListContainer>
     </div>
   )
 }
