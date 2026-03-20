@@ -20,6 +20,7 @@ export default function Home({ loaderData: user }: Route.ComponentProps) {
                 <div className="flex flex-col items-center gap-1">
                     <strong>Hallo, {user?.name}!</strong>
                     <p>Welkom bij Openlearn</p>
+                    <p>Het beste alternatief voor PolarLearn & WRTS die er bestaat.</p>
                 </div>
 
                 <div className="mt-6">

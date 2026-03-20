@@ -16,6 +16,7 @@ export async function action(actionArgs: Route.ActionArgs) {
   } catch (e) {
     // we redirecten de gebruiker naar de login pagina omdat 99% van de gevalen is de error een niet geauthed error
     // en ik heb geen zin om het te checken voor een tijdenlijken check
+    // - valid, unbravechimp
     return redirect('/auth/login');
   }
   return redirect('/app/forum');

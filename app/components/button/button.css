@@ -41,6 +41,8 @@
 
 .button2:hover {
     background-color: var(--color-openlearn-600);
+    /* glow hover :eyes: */
+    box-shadow: var(--color-openlearn-700) 0px 0px 24px;
     /* we maken de knop groter */
     transform: scale(1.1)
 }
