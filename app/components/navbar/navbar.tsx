@@ -8,7 +8,7 @@ export const Navbar = () => {
     return <nav>
         {/* oh ja ik vind animations leuk. */}
         <motion.div
-            className="flex flex-row justify-center items-center gap-3 pt-5"
+            className="flex flex-row justify-left items-center gap-3"
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
