@@ -10,3 +10,9 @@
     transition-duration: 150ms;
     box-shadow: var(--color-openlearn-800) 0px 0px 24px;
 }
+
+.logo {
+  margin-left: 1rem;
+  width: 100px;
+  cursor: pointer;
+}
